@@ -9,6 +9,7 @@ type formDataType = {
   password: string;
 };
 
+//this creates the user in the database 
 export const registerNewUser = async (formData: formDataType) => {
   const { name, email, password } = formData;
 
@@ -46,3 +47,5 @@ export const registerNewUser = async (formData: formDataType) => {
   //
   return { success: true, userId: user.id };
 };
+
+

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterFormValues } from "@/lib/validations/auth";
-import { registerNewUser } from "@/app/action/auth"; 
+import { registerNewUser } from "@/app/action/auth";
 
 export default function RegisterForm() {
   const router = useRouter();
