@@ -208,6 +208,7 @@ export default function RegisterForm() {
             </p>
           )}
 
+
           {/* Submit button */}
           <button
             type="submit"
@@ -216,6 +217,7 @@ export default function RegisterForm() {
           >
             {isSubmitting ? "Creating account..." : "Create account"}
           </button>
+
 
           {/* Sign in link */}
           <p className="text-center text-xs text-[#6B7280] mt-4">
