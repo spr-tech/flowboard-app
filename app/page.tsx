@@ -1,65 +1,208 @@
-import Image from "next/image";
+import Link from "next/link";
+import { LayoutDashboard } from "lucide-react";
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="flex flex-col min-h-screen pt-14">
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 h-14 bg-[#1E1B2E] flex items-center justify-between px-6">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-[#7C3AED] rounded-lg flex items-center justify-center flex-shrink-0">
+            <LayoutDashboard className="text-white w-4 h-4" />
+          </div>
+          <span className="text-white font-medium text-base">FlowBoard</span>
+        </div>
+        <div className="flex items-center gap-6">
+          <Link
+            href="#features"
+            className="text-sm text-white/60 hover:text-white transition-colors"
+          >
+            Features
+          </Link>
+          <Link
+            href="#pricing"
+            className="text-sm text-white/60 hover:text-white transition-colors"
+          >
+            Pricing
+          </Link>
+          <Link
+            href="#docs"
+            className="text-sm text-white/60 hover:text-white transition-colors"
+          >
+            Docs
+          </Link>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/login"
+            className="border border-white/20 text-white/80 rounded-lg px-4 py-1.5 text-sm hover:bg-white/10 transition-colors"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/register"
+            className="bg-white text-[#1E1B2E] rounded-lg px-4 py-1.5 text-sm font-medium hover:bg-white/90 transition-colors"
+          >
+            Get started
+          </Link>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="bg-[#1E1B2E] px-6 py-24 flex flex-col items-center text-center">
+        <div className="inline-flex items-center gap-2 bg-[#7C3AED]/20 text-[#A78BFA] text-xs px-3 py-1.5 rounded-full mb-6">
+          <LayoutDashboard className="w-3 h-3" />
+          Built for modern teams
+        </div>
+        <h1 className="text-4xl font-medium text-white max-w-xl leading-tight mb-4">
+          Manage projects. Track tasks. Ship faster.
+        </h1>
+        <p className="text-white/50 text-sm max-w-md leading-relaxed mb-8">
+          FlowBoard gives your team a clean, focused workspace to plan work, hit
+          deadlines, and stay in sync — without the clutter.
+        </p>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/register"
+            className="bg-white text-[#1E1B2E] rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-white/90 transition-colors"
+          >
+            Get started free
+          </Link>
+          <Link
+            href="#features"
+            className="border border-white/20 text-white/80 rounded-lg px-5 py-2.5 text-sm hover:bg-white/10 transition-colors"
+          >
+            See how it works
+          </Link>
+        </div>
+      </section>
+
+      {/* Stats strip */}
+      <section className="bg-white border-b border-[#E5E7EB] grid grid-cols-3">
+        <div className="py-8 text-center border-r border-[#E5E7EB]">
+          <div className="text-2xl font-medium text-[#7C3AED]">12k+</div>
+          <div className="text-xs text-[#6B7280] mt-1">
+            Teams using FlowBoard
+          </div>
+        </div>
+        <div className="py-8 text-center border-r border-[#E5E7EB]">
+          <div className="text-2xl font-medium text-[#7C3AED]">98%</div>
+          <div className="text-xs text-[#6B7280] mt-1">
+            Customer satisfaction
+          </div>
+        </div>
+        <div className="py-8 text-center">
+          <div className="text-2xl font-medium text-[#7C3AED]">3x</div>
+          <div className="text-xs text-[#6B7280] mt-1">
+            Faster project delivery
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="bg-[#F9FAFB] px-6 py-20">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-medium text-[#111827] text-center mb-2">
+            Everything your team needs
+          </h2>
+          <p className="text-sm text-[#6B7280] text-center mb-12">
+            All the tools to plan, track, and deliver work in one place.
           </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              {
+                title: "Kanban boards",
+                desc: "Visualise your workflow with drag-and-drop task cards across customisable columns.",
+                bg: "#EDE9FE",
+                color: "#7C3AED",
+              },
+              {
+                title: "Team collaboration",
+                desc: "Assign tasks, set roles, and keep your whole team on the same page in real time.",
+                bg: "#D1FAE5",
+                color: "#10B981",
+              },
+              {
+                title: "Progress tracking",
+                desc: "At-a-glance progress bars and stat cards so you always know where things stand.",
+                bg: "#FEF3C7",
+                color: "#F59E0B",
+              },
+              {
+                title: "Smart alerts",
+                desc: "Get notified when tasks are assigned to you or deadlines are approaching.",
+                bg: "#FEE2E2",
+                color: "#EF4444",
+              },
+              {
+                title: "Role-based access",
+                desc: "Owners, members, and viewers — control exactly who can see and edit what.",
+                bg: "#EDE9FE",
+                color: "#7C3AED",
+              },
+              {
+                title: "One-click deploy",
+                desc: "Built on Next.js and Vercel — deploy updates instantly with zero downtime.",
+                bg: "#D1FAE5",
+                color: "#10B981",
+              },
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className="bg-white border border-[#E5E7EB] rounded-xl p-5"
+              >
+                <div
+                  className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
+                  style={{ background: feature.bg }}
+                >
+                  <LayoutDashboard
+                    style={{ color: feature.color }}
+                    className="w-4 h-4"
+                  />
+                </div>
+                <div className="text-sm font-medium text-[#111827] mb-1">
+                  {feature.title}
+                </div>
+                <div className="text-xs text-[#6B7280] leading-relaxed">
+                  {feature.desc}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* CTA Banner */}
+      <section className="bg-[#7C3AED] px-6 py-16 text-center">
+        <h2 className="text-2xl font-medium text-white mb-2">
+          Ready to get your team organised?
+        </h2>
+        <p className="text-white/70 text-sm mb-6">
+          Join thousands of teams already shipping faster with FlowBoard.
+        </p>
+        <Link
+          href="/register"
+          className="bg-white text-[#7C3AED] rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-white/90 transition-colors inline-block"
+        >
+          Start for free — no card needed
+        </Link>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#1E1B2E] px-6 py-5 flex items-center justify-between">
+        <span className="text-white/40 text-xs">© 2026 FlowBoard</span>
+        <div className="flex items-center gap-5">
+          <span className="text-white/40 text-xs cursor-pointer hover:text-white/60 transition-colors">
+            Privacy
+          </span>
+          <span className="text-white/40 text-xs cursor-pointer hover:text-white/60 transition-colors">
+            Terms
+          </span>
+          <span className="text-white/40 text-xs cursor-pointer hover:text-white/60 transition-colors">
+            Contact
+          </span>
         </div>
-      </main>
+      </footer>
     </div>
   );
 }

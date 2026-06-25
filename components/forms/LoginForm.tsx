@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormValues } from "@/lib/validations/auth";
 import { signIn } from "next-auth/react";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Eye, EyeOff } from "lucide-react";
 
 // Defined OUTSIDE the component — created once, not re-created on every render
 const GoogleIcon = () => (
@@ -33,7 +33,7 @@ const GoogleIcon = () => (
 export default function LoginForm() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
-
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -59,6 +59,10 @@ export default function LoginForm() {
     }
 
     router.push("/dashboard");
+  };
+
+  const handleShowPassword = () => {
+    setShowPassword((prev) => !prev);
   };
 
   return (
@@ -111,7 +115,7 @@ export default function LoginForm() {
           <div className="mb-3">
             <label
               htmlFor="email"
-              className="block text-xs text-[#6B7280] mb-1.5"
+              className="block text-sm text-slate-800 mb-1.5"
             >
               Email address
             </label>
@@ -134,18 +138,32 @@ export default function LoginForm() {
             <div className="flex items-center justify-between mb-1.5">
               <label
                 htmlFor="password"
-                className="block text-xs text-[#6B7280]"
+                className="block text-sm text-slate-800"
               >
                 Password
               </label>
             </div>
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              {...register("password")}
-              className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder-[#9CA3AF] outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/10 transition-colors"
-            />
+
+            <div className="flex justify-between w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg  focus-within:border-[#7C3AED] focus-within:ring-2 focus-within:ring-[#7C3AED]/10 transition-colors">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                {...register("password")}
+                className=" flex-1 text-sm text-[#111827] placeholder-[#9CA3AF] outline-none"
+              />
+
+              <button
+                onClick={handleShowPassword}
+                className="hover:cursor-pointer"
+              >
+                {showPassword ? (
+                  <EyeOff className="text-slate-700" size={15} />
+                ) : (
+                  <Eye className="text-slate-700" size={15} />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-xs text-[#EF4444] mt-1">
                 {errors.password.message}
@@ -156,7 +174,7 @@ export default function LoginForm() {
           <span className="text-xs text-[#7C3AED] cursor-pointer hover:underline mb-4">
             Forgot password?
           </span>
-          
+
           {/* Server error */}
           {serverError && (
             <p className="text-xs text-[#EF4444] mb-3 text-center">
