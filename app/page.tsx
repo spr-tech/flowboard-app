@@ -7,6 +7,7 @@ import {
   TrendingUp,
   ShieldAlert,
   Zap,
+  Menu,
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -20,7 +21,7 @@ export default function LandingPage() {
           </div>
           <span className="text-white font-medium text-base">FlowBoard</span>
         </div>
-        <div className="flex items-center gap-6">
+        <div className=" hidden md:flex items-center gap-6">
           <Link
             href="#features"
             className="text-sm text-white/60 hover:text-white transition-colors"
@@ -40,7 +41,7 @@ export default function LandingPage() {
             Docs
           </Link>
         </div>
-        <div className="flex items-center gap-2">
+        <div className=" hidden md:flex items-center gap-2">
           <Link
             href="/login"
             className="border border-white/20 text-white/80 rounded-lg px-4 py-1.5 text-sm hover:bg-white/10 transition-colors"
@@ -86,14 +87,14 @@ export default function LandingPage() {
       </section>
 
       {/* Stats strip */}
-      <section className="bg-white border-b border-[#E5E7EB] grid grid-cols-3">
-        <div className="py-8 text-center border-r border-[#E5E7EB]">
+      <section className="bg-white border-b border-[#E5E7EB] grid grid-cols-1 md:grid-cols-3">
+        <div className="py-8 text-center border-b md:border-r border-[#E5E7EB]">
           <div className="text-2xl font-medium text-[#7C3AED]">12k+</div>
           <div className="text-xs text-[#6B7280] mt-1">
             Teams using FlowBoard
           </div>
         </div>
-        <div className="py-8 text-center border-r border-[#E5E7EB]">
+        <div className="py-8 text-center border-b md:border-r border-[#E5E7EB]">
           <div className="text-2xl font-medium text-[#7C3AED]">98%</div>
           <div className="text-xs text-[#6B7280] mt-1">
             Customer satisfaction
