@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { LayoutDashboard } from "lucide-react";
+import {
+  LayoutDashboard,
+  Kanban,
+  Handshake,
+  BellRing,
+  TrendingUp,
+  ShieldAlert,
+  Zap,
+} from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -59,7 +67,7 @@ export default function LandingPage() {
         </h1>
         <p className="text-white/50 text-sm max-w-md leading-relaxed mb-8">
           FlowBoard gives your team a clean, focused workspace to plan work, hit
-          deadlines, and stay in sync — without the clutter.
+          deadlines, and stay in sync without the clutter.
         </p>
         <div className="flex items-center gap-3">
           <Link
@@ -111,54 +119,57 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               {
+                icon: <Kanban />,
                 title: "Kanban boards",
                 desc: "Visualise your workflow with drag-and-drop task cards across customisable columns.",
                 bg: "#EDE9FE",
                 color: "#7C3AED",
               },
               {
+                icon: <Handshake />,
                 title: "Team collaboration",
                 desc: "Assign tasks, set roles, and keep your whole team on the same page in real time.",
                 bg: "#D1FAE5",
                 color: "#10B981",
               },
               {
+                icon: <TrendingUp />,
                 title: "Progress tracking",
                 desc: "At-a-glance progress bars and stat cards so you always know where things stand.",
                 bg: "#FEF3C7",
                 color: "#F59E0B",
               },
               {
+                icon: <BellRing />,
                 title: "Smart alerts",
                 desc: "Get notified when tasks are assigned to you or deadlines are approaching.",
                 bg: "#FEE2E2",
                 color: "#EF4444",
               },
               {
+                icon: <ShieldAlert />,
                 title: "Role-based access",
-                desc: "Owners, members, and viewers — control exactly who can see and edit what.",
+                desc: "Owners, members, and viewers control exactly who can see and edit what.",
                 bg: "#EDE9FE",
                 color: "#7C3AED",
               },
               {
+                icon: <Zap />,
                 title: "One-click deploy",
-                desc: "Built on Next.js and Vercel — deploy updates instantly with zero downtime.",
+                desc: "Built on Next.js and Vercel  deploy updates instantly with zero downtime.",
                 bg: "#D1FAE5",
                 color: "#10B981",
               },
             ].map((feature, i) => (
               <div
                 key={i}
-                className="bg-white border border-[#E5E7EB] rounded-xl p-5"
+                className="bg-white border border-[#E5E7EB] rounded-xl p-5 transition-all duration-300 hover:border-b-[#7C3AED] hover:shadow-sm cursor-pointer"
               >
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
-                  style={{ background: feature.bg }}
+                  style={{ background: feature.bg, color: feature.color }}
                 >
-                  <LayoutDashboard
-                    style={{ color: feature.color }}
-                    className="w-4 h-4"
-                  />
+                  {feature.icon}
                 </div>
                 <div className="text-sm font-medium text-[#111827] mb-1">
                   {feature.title}
@@ -184,7 +195,7 @@ export default function LandingPage() {
           href="/register"
           className="bg-white text-[#7C3AED] rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-white/90 transition-colors inline-block"
         >
-          Start for free — no card needed
+          Start for free &rarr; No card needed
         </Link>
       </section>
 
