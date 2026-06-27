@@ -1,4 +1,6 @@
 import Link from "next/link";
+import DesktopNav from "@/components/landing/DesktopNav";
+import MobileNav from "@/components/landing/MobileNav";
 import {
   LayoutDashboard,
   Kanban,
@@ -7,56 +9,17 @@ import {
   TrendingUp,
   ShieldAlert,
   Zap,
-  Menu,
+  // Menu,
 } from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen pt-14">
+    <div className="flex flex-col min-h-screen ">
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 h-14 bg-[#1E1B2E] flex items-center justify-between px-6">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#7C3AED] rounded-lg flex items-center justify-center flex-shrink-0">
-            <LayoutDashboard className="text-white w-4 h-4" />
-          </div>
-          <span className="text-white font-medium text-base">FlowBoard</span>
-        </div>
-        <div className=" hidden md:flex items-center gap-6">
-          <Link
-            href="#features"
-            className="text-sm text-white/60 hover:text-white transition-colors"
-          >
-            Features
-          </Link>
-          <Link
-            href="#pricing"
-            className="text-sm text-white/60 hover:text-white transition-colors"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="#docs"
-            className="text-sm text-white/60 hover:text-white transition-colors"
-          >
-            Docs
-          </Link>
-        </div>
-        <div className=" hidden md:flex items-center gap-2">
-          <Link
-            href="/login"
-            className="border border-white/20 text-white/80 rounded-lg px-4 py-1.5 text-sm hover:bg-white/10 transition-colors"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/register"
-            className="bg-white text-[#1E1B2E] rounded-lg px-4 py-1.5 text-sm font-medium hover:bg-white/90 transition-colors"
-          >
-            Get started
-          </Link>
-        </div>
-      </nav>
-
+      <div className="bg-[#2a1699] ">
+        <DesktopNav />
+        <MobileNav />
+      </div>
       {/* Hero */}
       <section className="bg-[#1E1B2E] px-6 py-24 flex flex-col items-center text-center">
         <div className="inline-flex items-center gap-2 bg-[#7C3AED]/20 text-[#A78BFA] text-xs px-3 py-1.5 rounded-full mb-6">
