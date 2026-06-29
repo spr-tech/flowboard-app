@@ -31,7 +31,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      <Sidebar isOpen={sidebarOpen} isMobile={isMobile} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        isMobile={isMobile}
+        onClose={() => isMobile && setSidebarOpen(false)}
+      />
       <div className="flex flex-col flex-1 min-w-0">
         <TopNav onToggle={() => setSidebarOpen((prev) => !prev)} />
         <main className="flex-1 bg-[#F9FAFB] p-5 overflow-y-auto">

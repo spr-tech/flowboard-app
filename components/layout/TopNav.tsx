@@ -20,18 +20,21 @@ const TopNav = ({ onToggle }: { onToggle: () => void }) => {
         <button onClick={onToggle}>
           <PanelLeft size={20} />
         </button>
+        {/* Page title */}
         <h1 className="text-[#111827] font-medium text-base">{title}</h1>
       </div>
 
-      {/* Page title */}
+      <div className=" w-90 h-10 flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 ">
+        <Search size={20} className="text-slate-400 " />
+        <input
+          type="text"
+          placeholder="search tasks.."
+          className=" flex-1 w-50 outline-0 text-slate-800 placeholder:text-slate-400"
+        />
+      </div>
 
       {/* right side  */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 w-48">
-          <Search className="w-3.5 h-3.5 text-[#9CA3AF]" />
-          <span className="text-xs text-[#9CA3AF]">Search tasks...</span>
-        </div>
-
         {/* Notification bell */}
         <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F9FAFB] border border-[#E5E7EB] transition-colors">
           <Bell className="w-4 h-4 text-[#6B7280]" />

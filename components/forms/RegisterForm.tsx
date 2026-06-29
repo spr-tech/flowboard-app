@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterFormValues } from "@/lib/validations/auth";
 import { registerNewUser } from "@/app/action/auth";
-import { LayoutDashboard } from "lucide-react";
+import Image from "next/image";
 
 // Defined OUTSIDE the component — created once, not re-created on every render
 const GoogleIcon = () => (
@@ -64,14 +64,18 @@ export default function RegisterForm() {
       {/* Logo and subtext */}
       <div className="text-center mb-5">
         <div className="inline-flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 bg-[#7C3AED] rounded-lg flex items-center justify-center flex-shrink-0">
-            <LayoutDashboard className="text-white w-4 h-4" />
+          <div className="flex flex-col items-center gap-2 mb-3">
+            <Image
+              src="/flowboard logo.svg"
+              alt="FlowBoard"
+              width={50}
+              height={50}
+            />
           </div>
-          <span className="text-[#111827] font-medium text-base">
-            FlowBoard
-          </span>
         </div>
-        <p className="text-[#6B7280] text-sm">Create your free account</p>
+        <p className="text-slate-600 text-2xl font-semibold">
+          Create your free account
+        </p>
       </div>
 
       {/* Card */}
@@ -107,12 +111,6 @@ export default function RegisterForm() {
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           {/* Full name */}
           <div className="mb-3">
-            <label
-              htmlFor="name"
-              className="block text-sm text-slate-800  mb-1.5"
-            >
-              Full name
-            </label>
             <input
               id="name"
               type="text"
@@ -129,12 +127,6 @@ export default function RegisterForm() {
 
           {/* Email */}
           <div className="mb-3">
-            <label
-              htmlFor="email"
-              className="block text-sm text-slate-800  mb-1.5"
-            >
-              Email address
-            </label>
             <input
               id="email"
               type="email"
@@ -151,12 +143,6 @@ export default function RegisterForm() {
 
           {/* Password */}
           <div className="mb-3">
-            <label
-              htmlFor="password"
-              className="block text-sm text-slate-800  mb-1.5"
-            >
-              Password
-            </label>
             <input
               id="password"
               type="password"
@@ -173,12 +159,6 @@ export default function RegisterForm() {
 
           {/* Confirm password */}
           <div className="mb-4">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm text-slate-800  mb-1.5"
-            >
-              Confirm password
-            </label>
             <input
               id="confirmPassword"
               type="password"
@@ -226,7 +206,7 @@ export default function RegisterForm() {
           <p className="text-center text-xs text-[#6B7280] mt-4">
             Already have an account?{" "}
             <span
-              className="text-[#7C3AED] cursor-pointer hover:underline"
+              className="text-[#7C3AED] font-semibold cursor-pointer hover:underline"
               onClick={() => router.push("/login")}
             >
               Sign in

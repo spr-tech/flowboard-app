@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormValues } from "@/lib/validations/auth";
 import { signIn } from "next-auth/react";
 import { LayoutDashboard, Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
 
 // Defined OUTSIDE the component — created once, not re-created on every render
 const GoogleIcon = () => (
@@ -69,15 +70,20 @@ export default function LoginForm() {
     <main className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center px-4 py-10">
       {/* Logo and subtext */}
       <div className="text-center mb-5">
-        <div className="inline-flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 bg-[#7C3AED] rounded-lg flex items-center justify-center flex-shrink-0">
-            <LayoutDashboard className="text-white w-4 h-4" />
-          </div>
-          <span className="text-[#111827] font-medium text-base">
-            FlowBoard
-          </span>
+        <div className="flex flex-col items-center gap-2 mb-3">
+          <Image
+            src="/flowboard logo.svg"
+            alt="FlowBoard"
+            width={50}
+            height={50}
+          />
         </div>
-        <p className="text-[#6B7280] text-sm">Welcome back</p>
+        <p className="text-slate-600 text-2xl font-semibold">
+          Welcome to FlowBoard
+        </p>
+        <span className="text-sm text-slate-600">
+          Log in to acess your account
+        </span>
       </div>
 
       {/* Card */}
@@ -114,12 +120,6 @@ export default function LoginForm() {
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           {/* Email */}
           <div className="mb-3">
-            <label
-              htmlFor="email"
-              className="block text-sm text-slate-800 mb-1.5"
-            >
-              Email address
-            </label>
             <input
               id="email"
               type="email"
@@ -136,14 +136,7 @@ export default function LoginForm() {
 
           {/* Password */}
           <div className="mb-4">
-            <div className="flex items-center justify-between mb-1.5">
-              <label
-                htmlFor="password"
-                className="block text-sm text-slate-800"
-              >
-                Password
-              </label>
-            </div>
+            <div className="flex items-center justify-between mb-1.5"></div>
 
             <div className="flex justify-between w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg  focus-within:border-[#7C3AED] focus-within:ring-2 focus-within:ring-[#7C3AED]/10 transition-colors">
               <input
@@ -172,22 +165,22 @@ export default function LoginForm() {
             )}
           </div>
 
-          <span className="text-xs text-[#7C3AED] cursor-pointer hover:underline mb-4">
-            Forgot password?
-          </span>
-
           {/* Server error */}
           {serverError && (
-            <p className="text-xs text-[#EF4444] mb-3 text-center">
+            <p className="text-xs text-[#EF4444] mb-2 text-center">
               {serverError}
             </p>
           )}
+
+          <span className="text-xs  text-[#7C3AED] cursor-pointer hover:underline font-semibold ">
+            Forgot password?
+          </span>
 
           {/* Submit button */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-lg py-2.5 text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className=" mt-4 w-full bg-[#9754ff] hover:bg-[#6D28D9] text-white rounded-lg py-2.5 text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 "
           >
             {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
@@ -196,7 +189,7 @@ export default function LoginForm() {
           <p className="text-center text-xs text-[#6B7280] mt-4">
             Don&apos;t have an account?{" "}
             <span
-              className="text-[#7C3AED] cursor-pointer hover:underline"
+              className=" text-[#7C3AED] font-bold cursor-pointer hover:underline"
               onClick={() => router.push("/register")}
             >
               Sign up

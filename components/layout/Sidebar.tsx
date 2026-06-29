@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Folder, Users, Settings } from "lucide-react";
+import Image from "next/image";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -14,9 +15,10 @@ const navItems = [
 type sideBarProps = {
   isOpen: boolean;
   isMobile: boolean;
+  onClose: () => void;
 };
 
-export default function Sidebar({ isOpen, isMobile }: sideBarProps) {
+export default function Sidebar({ isOpen, isMobile, onClose }: sideBarProps) {
   const pathname = usePathname();
 
   return (
@@ -32,9 +34,12 @@ export default function Sidebar({ isOpen, isMobile }: sideBarProps) {
     >
       {/* Logo */}
       <div className="h-14 flex items-center gap-2 px-4 border-b border-white/8">
-        <div className="w-8 h-8 bg-[#7C3AED] rounded-lg flex items-center justify-center shrink-0 ">
-          <LayoutDashboard className="text-white w-4 h-4" />
-        </div>
+        <Image
+          src="/flowboard logo.svg"
+          alt="FlowBoard"
+          width={30}
+          height={30}
+        />
         {isOpen && (
           <span className="text-white font-medium text-base">FlowBoard</span>
         )}
@@ -50,11 +55,12 @@ export default function Sidebar({ isOpen, isMobile }: sideBarProps) {
 
           return (
             <Link
+              onClick={onClose}
               key={item.href}
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
                 isActive
-                  ? "bg-[#7C3AED]/30 text-white"
+                  ? "bg-[#9754ff]/80 text-white"
                   : "text-white/60 hover:text-white hover:bg-white/8"
               }`}
             >
