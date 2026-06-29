@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, PanelLeft } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const pageTitles: Record<string, string> = {
@@ -10,14 +10,20 @@ const pageTitles: Record<string, string> = {
   "/settings": "Settings",
 };
 
-const TopNav = () => {
+const TopNav = ({ onToggle }: { onToggle: () => void }) => {
   const pathname = usePathname();
   const title = pageTitles[pathname] ?? "FlowBoard";
 
   return (
     <header className="bg-[#ffffff] p-3 border border-b-[#E5E7EB] flex justify-between items-center">
+      <div className="flex gap-4 items-center text-[#111827] ">
+        <button onClick={onToggle}>
+          <PanelLeft size={20} />
+        </button>
+        <h1 className="text-[#111827] font-medium text-base">{title}</h1>
+      </div>
+
       {/* Page title */}
-      <h1 className="text-[#111827] font-medium text-base">{title}</h1>
 
       {/* right side  */}
       <div className="flex items-center gap-3">

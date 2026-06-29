@@ -82,3 +82,44 @@ const DesktopNav = () => {
 };
 
 export default DesktopNav;
+
+
+
+//const DesktopNav = () => {
+ // const [scrolled, setScrolled] = useState(false);
+
+  // scrolled — a piece of state that starts as false
+  // meaning "the user has not scrolled yet"
+  // when it becomes true, the navbar will shrink
+  // when it becomes false again, the navbar will expand back
+
+ // useEffect(() => {
+    // useEffect runs this code once when the component
+    // first appears on screen, then never again
+    // the empty [] at the end is what causes that "run once" behavior
+
+ //   const handleScroll = () => {
+      // this function runs every single time the user scrolls
+      // window.scrollY is a number that tells you how many pixels
+      // the user has scrolled down from the very top of the page
+      // window.scrollY > 30 returns true if they scrolled more than 30px
+      // and false if they scrolled less than 30px
+      // that true or false goes straight into setScrolled
+      // which updates the scrolled state above
+  //    setScrolled(window.scrollY > 30);
+   // };
+
+    // this tells the browser to call handleScroll
+    // every single time the user scrolls anywhere on the page
+    // think of it like hiring a guard whose only job
+    // is to watch for scrolling and report it
+
+//    window.addEventListener("scroll", handleScroll);
+
+    // this is the cleanup function
+    // when the user navigates away and this component disappears
+    // React calls this function automatically
+    // it fires the guard and removes the scroll listener
+    // so it doesnt keep running in the background wasting memory
+   // return () => window.removeEventListener("scroll", handleScroll);
+  //}, []);
