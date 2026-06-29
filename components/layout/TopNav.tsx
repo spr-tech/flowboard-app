@@ -17,7 +17,7 @@ const TopNav = ({ onToggle }: { onToggle: () => void }) => {
   return (
     <header className="bg-[#ffffff] p-3 border border-b-[#E5E7EB] flex justify-between items-center">
       <div className="flex gap-4 items-center text-[#111827] ">
-        <button onClick={onToggle}>
+        <button onClick={onToggle}> 
           <PanelLeft size={20} />
         </button>
         {/* Page title */}
