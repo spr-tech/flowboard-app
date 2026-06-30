@@ -11,6 +11,7 @@ import {
   Zap,
   // Menu,
 } from "lucide-react";
+import Image from "next/image";
 
 export default function LandingPage() {
   return (
@@ -23,7 +24,12 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="bg-[#1E1B2E] px-6 py-24 flex flex-col items-center text-center">
         <div className="inline-flex items-center gap-2 bg-[#7C3AED]/20 text-[#A78BFA] text-xs px-3 py-1.5 rounded-full mb-6">
-          <LayoutDashboard className="w-3 h-3" />
+          <Image
+            src="/flowboard logo.svg"
+            alt="FlowBoard"
+            width={20}
+            height={20}
+          />
           Built for modern teams
         </div>
         <h1 className="text-4xl font-medium text-white max-w-xl leading-tight mb-4">

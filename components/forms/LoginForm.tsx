@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormValues } from "@/lib/validations/auth";
 import { signIn } from "next-auth/react";
-import { LayoutDashboard, Eye, EyeOff } from "lucide-react";
+import {  Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 
 // Defined OUTSIDE the component — created once, not re-created on every render

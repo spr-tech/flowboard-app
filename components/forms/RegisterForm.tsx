@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterFormValues } from "@/lib/validations/auth";
-import { registerNewUser } from "@/app/action/auth";
+import { registerNewUser } from "@/app/actions/auth";
 import Image from "next/image";
 
 // Defined OUTSIDE the component — created once, not re-created on every render

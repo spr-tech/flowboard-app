@@ -34,7 +34,9 @@ export async function createProject(data: createProjectProps) {
       description: data.description ?? null,
       color: data.color ?? "#7C3AED",
       dueDate: data.dueDate,
-      ownerId: user.id!,
+      owner: {
+        connect: { id: user.id! },
+      },
       columns: {
         create: [
           { name: "To Do", order: 1 },

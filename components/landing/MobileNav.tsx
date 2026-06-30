@@ -1,8 +1,9 @@
 "use client";
 
-import { LayoutDashboard, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 const MobileNav = () => {
   const [open, setOpen] = useState(false);
@@ -22,7 +23,12 @@ const MobileNav = () => {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-[#7C3AED] rounded-lg flex items-center justify-center shrink-0">
-            <LayoutDashboard className="text-white w-4 h-4" />
+            <Image
+              src="/flowboard logo.svg"
+              alt="FlowBoard"
+              width={50}
+              height={50}
+            />{" "}
           </div>
           <span className="text-white font-medium text-base">FlowBoard</span>
         </div>
