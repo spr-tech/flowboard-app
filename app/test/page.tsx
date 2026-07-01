@@ -1,16 +1,13 @@
-import { createProject } from "@/app/actions/createProjects";
+// import { createProject } from "@/app/actions/createProjects";
+import { getProjects } from "../actions/getProjects";
 
-export default function TestPage() {
-  async function handleCreate() {
-    "use server";
-    const result = await createProject({ name: "My First Test Project" });
-    console.log(result);
-  }
+export default async function TestPage() {
+  const result = await getProjects();
 
   return (
-    <form action={handleCreate}>
-      <button type="submit">Create Test Project</button>
-    </form>
+    <pre style={{ padding: "20px", fontSize: "12px" }}>
+      {JSON.stringify(result, null, 2)}
+    </pre>
   );
 }
 
