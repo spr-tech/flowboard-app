@@ -2,7 +2,6 @@ import Link from "next/link";
 import DesktopNav from "@/components/landing/DesktopNav";
 import MobileNav from "@/components/landing/MobileNav";
 import {
-  LayoutDashboard,
   Kanban,
   Handshake,
   BellRing,
@@ -24,12 +23,7 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="bg-[#1E1B2E] px-6 py-24 flex flex-col items-center text-center">
         <div className="inline-flex items-center gap-2 bg-[#7C3AED]/20 text-[#A78BFA] text-xs px-3 py-1.5 rounded-full mb-6">
-          <Image
-            src="/flowboard logo.svg"
-            alt="FlowBoard"
-            width={20}
-            height={20}
-          />
+          <Image src="/white.svg" alt="FlowBoard" width={20} height={20} />
           Built for modern teams
         </div>
         <h1 className="text-4xl font-medium text-white max-w-xl leading-tight mb-4">
