@@ -26,11 +26,13 @@ const TopNav = ({ onToggle, modalSwitch }: TopNavProps) => {
           <PanelLeft size={20} />
         </button>
         {/* Page title */}
-        <h1 className="text-[#111827] font-medium text-base">{title}</h1>
+        <h1 className="text-[#111827] font-medium text-base hidden md:block">
+          {title}
+        </h1>
       </div>
 
       <div className="flex flex-1 justify-center items-center gap-3">
-        <div className=" w-90 h-10 flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 ">
+        <div className=" w-70 md:w-90 h-10 flex items-center gap-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 ">
           <Search size={20} className="text-slate-400 " />
           <input
             type="text"

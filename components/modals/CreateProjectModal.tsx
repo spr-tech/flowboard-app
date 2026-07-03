@@ -1,18 +1,6 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-// import { Pipette } from "lucide-react";
-
-// const PRESET_COLORS = [
-//   "#FF6B6B",
-//   "#4D96FF",
-//   "#6BCB77",
-//   "#FFD93D",
-//   "#005F73",
-//   "#FF007F",
-//   "#7B2CBF",
-//   "#264653",
-// ];
 
 interface CreateProjectModalProps {
   onClose: () => void;
@@ -23,38 +11,13 @@ export default function CreateProjectModal({
 }: CreateProjectModalProps) {
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
-  //   const [projectColor, setProjectColor] = useState("#7B2CBF");
+  const [projectColor, setProjectColor] = useState("#7C3AED");
 
-  //   const colorInputRef = useRef<HTMLInputElement>(null);
-
-  //   const handleColorTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //     let val = e.target.value;
-
-  //     if (!val.startsWith("#") && val.length > 0) {
-  //       val = "#" + val;
-  //     }
-
-  //     setProjectColor(val);
-  //   };
-
-  //   const handleSubmit = (e: React.FormEvent) => {
-  //     e.preventDefault();
-
-  //     console.log({
-  //       projectName,
-  //       description,
-  //       projectColor,
-  //     });
-
-  //     // We'll connect this to the Server Action later.
-  //   };
+  const colorInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <form
-        // onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white rounded-xl shadow-xl p-6 space-y-5"
-      >
+      <form className="w-full max-w-md bg-white rounded-xl shadow-xl p-6 space-y-5">
         <h2 className="text-xl font-semibold text-gray-900">Create Project</h2>
 
         {/* Project Name */}
@@ -69,7 +32,7 @@ export default function CreateProjectModal({
             placeholder="e.g. Website Redesign"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
-            className="text-slate-800 w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#7C3AED]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#7C3AED] text-gray-800 placeholder:text-gray-400"
           />
         </div>
 
@@ -87,23 +50,47 @@ export default function CreateProjectModal({
             placeholder="What is this project about?"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full min-h-[90px] px-3 py-2 border border-gray-300 rounded-lg resize-none outline-none focus:ring-2 focus:ring-[#7C3AED]"
+            className="w-full min-h-[90px] px-3 py-2 border border-gray-300 rounded-lg resize-none outline-none focus:ring-1 focus:ring-[#7C3AED] text-gray-800 placeholder:text-gray-400"
           />
         </div>
 
-        {/* Due date */}
-        <div className="w-full flex flex-col gap-1.5">
-          <label htmlFor="name" className="text-sm font-medium text-gray-700">
-            Due date
+        {/* color */}
+
+        <div className="flex flex-col gap-1 ">
+          <label htmlFor="color" className="text-sm font-medium text-gray-700">
+            Color
           </label>
 
+          <div className="flex items-center gap-2 w-full  px-3 py-2 border border-gray-300 rounded-lg resize-none outline-none focus-within:ring-1 focus-within:ring-[#7C3AED]">
+            <div
+              style={{ backgroundColor: projectColor }}
+              className="w-8 h-8 rounded-md border"
+              onClick={() => colorInputRef.current?.click()}
+            />
+            <input
+              type="color"
+              value={projectColor}
+              ref={colorInputRef}
+              onChange={(e) => setProjectColor(e.target.value)}
+              className=" hidden  w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#7C3AED]"
+            />
+
+            <input
+              type="text"
+              className=" border-none outline-none text-gray-600"
+              value={projectColor}
+              onChange={(e) => setProjectColor(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="due_date " className="text-gray-800 text-sm">
+            Due date
+          </label>
           <input
-            id="name"
             type="date"
-            placeholder="e.g. Website Redesign"
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-            className="text-slate-800 w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#7C3AED]"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#7C3AED] text-gray-800 placeholder:text-gray-400"
           />
         </div>
 
@@ -112,7 +99,7 @@ export default function CreateProjectModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
+            className="px-4 py-2 text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
           >
             Cancel
           </button>
