@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { createProject } from "@/app/actions/projects";
 
 interface CreateProjectModalProps {
   onClose: () => void;
@@ -11,13 +12,37 @@ export default function CreateProjectModal({
 }: CreateProjectModalProps) {
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
+
   const [projectColor, setProjectColor] = useState("#7C3AED");
+  const [dueDate, setDueDate] = useState("");
 
   const colorInputRef = useRef<HTMLInputElement>(null);
 
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+
+    const result = await createProject({
+      name: projectName,
+      description,
+      color: projectColor,
+      dueDate: dueDate ? new Date(dueDate) : undefined,
+    });
+
+    if (result.success) {
+      onClose();
+    } else {
+      setError(result?.error ?? "Unable to create project");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <form className="w-full max-w-md bg-white rounded-xl shadow-xl p-6 space-y-5">
+      <form
+        className="w-full max-w-md bg-white rounded-xl shadow-xl p-6 space-y-5"
+        onSubmit={handleSubmit}
+      >
         <h2 className="text-xl font-semibold text-gray-900">Create Project</h2>
 
         {/* Project Name */}
@@ -91,8 +116,16 @@ export default function CreateProjectModal({
           <input
             type="date"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#7C3AED] text-gray-800 placeholder:text-gray-400"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
           />
         </div>
+
+        {error && (
+          <p className="text-red-600 text-base justify-center items-center mt-2 mb-2">
+            {error}
+          </p>
+        )}
 
         {/* Footer Buttons */}
         <div className="flex justify-end gap-3 pt-2">
