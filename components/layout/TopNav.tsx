@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, PanelLeft } from "lucide-react";
+import { Bell, Search, PanelLeft, Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const pageTitles: Record<string, string> = {
@@ -10,27 +10,43 @@ const pageTitles: Record<string, string> = {
   "/settings": "Settings",
 };
 
-const TopNav = ({ onToggle }: { onToggle: () => void }) => {
+type TopNavProps = {
+  onToggle: () => void;
+  modalSwitch: () => void;
+};
+
+const TopNav = ({ onToggle, modalSwitch }: TopNavProps) => {
   const pathname = usePathname();
   const title = pageTitles[pathname] ?? "FlowBoard";
 
   return (
     <header className="bg-[#ffffff] p-3 border border-b-[#E5E7EB] flex justify-between items-center">
       <div className="flex gap-4 items-center text-[#111827] ">
-        <button onClick={onToggle}> 
+        <button onClick={onToggle}>
           <PanelLeft size={20} />
         </button>
         {/* Page title */}
         <h1 className="text-[#111827] font-medium text-base">{title}</h1>
       </div>
 
-      <div className=" w-90 h-10 flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 ">
-        <Search size={20} className="text-slate-400 " />
-        <input
-          type="text"
-          placeholder="search tasks.."
-          className=" flex-1 w-50 outline-0 text-slate-800 placeholder:text-slate-400"
-        />
+      <div className="flex flex-1 justify-center items-center gap-3">
+        <div className=" w-90 h-10 flex items-center gap-2 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 ">
+          <Search size={20} className="text-slate-400 " />
+          <input
+            type="text"
+            placeholder="search tasks.."
+            className=" flex-1 w-50 outline-0 text-slate-800 placeholder:text-slate-400"
+          />
+        </div>
+        <div>
+          <button
+            className=" flex items-center gap-1 bg-[#7C3AED] p-1 rounded-lg cursor-pointer hover:bg-[#6C3AEa] "
+            onClick={modalSwitch}
+          >
+            <Plus size={20} />
+            Create
+          </button>
+        </div>
       </div>
 
       {/* right side  */}

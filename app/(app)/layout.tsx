@@ -3,9 +3,12 @@
 import Sidebar from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { useState, useEffect } from "react";
+import CreateProjectModal from "@/components/modals/CreateProjectModal";
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -37,9 +40,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         onClose={() => isMobile && setSidebarOpen(false)}
       />
       <div className="flex flex-col flex-1 min-w-0">
-        <TopNav onToggle={() => setSidebarOpen((prev) => !prev)} />
+        <TopNav
+          onToggle={() => setSidebarOpen((prev) => !prev)}
+          modalSwitch={() => setModalOpen((prev) => !prev)}
+        />
         <main className="flex-1 bg-[#F9FAFB] p-5 overflow-y-auto">
           {children}
+
+          {modalOpen && (
+            <CreateProjectModal onClose={() => setModalOpen(false)} />
+          )}
         </main>
       </div>
     </div>

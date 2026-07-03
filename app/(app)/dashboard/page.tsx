@@ -23,15 +23,69 @@ export default async function DashboardPage() {
     <>
       <div>
         {/* cards */}
-        <section className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
-          {/* Total projects*/}
-          <div className="flex flex-col gap-2">
-            <ListTodo size={20} />
-            <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
-              <p className="text-2xl font-medium text-[#111827] mt-1">
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* Total projects card*/}
+          <div className="bg-white shadow-md rounded-lg p-5 flex justify-between items-start">
+            <span className="bg-[#EDE9FE] p-2 rounded-lg">
+              <ListTodo size={20} className="text-[#7C3AED]" />
+            </span>
+
+            <div className="flex flex-col gap-2 items-center">
+              <span className="text-slate-500 text-sm font-medium">
+                Total projects
+              </span>
+              <span className="text-2xl font-bold text-slate-600">
                 {totalProjects}
-              </p>
-              <p className="text-xs text-[#6B7280]">Total projects</p>
+              </span>
+            </div>
+          </div>
+
+          {/* Inprogress  */}
+          <div className="bg-white shadow-md rounded-lg p-5 flex justify-between items-start">
+            <span className="bg-[#FEF3C7] p-2 rounded-lg">
+              <CircleDot size={20} className="text-[#F59E0B]" />
+            </span>
+
+            <div className="flex flex-col gap-2 items-center">
+              <span className="text-slate-500 text-sm font-medium">
+                In Progress
+              </span>
+              <span className="text-2xl font-bold text-slate-600">
+                {inProgress}
+              </span>
+            </div>
+          </div>
+
+          {/* completed */}
+          <div className="bg-white shadow-md rounded-lg p-5 flex justify-between items-start">
+            <span className="bg-[#D1FAE5] p-2 rounded-lg">
+              <CheckCircle size={20} className="text-[#10B981]" />
+            </span>
+
+            <div className="flex flex-col gap-2 items-center">
+              <span className="text-slate-500 text-sm font-medium">
+                Completed
+              </span>
+              <span className="text-2xl font-bold text-slate-600">
+                {completed}
+              </span>
+            </div>
+          </div>
+
+          {/* Overdue */}
+
+          <div className="bg-white shadow-md rounded-lg p-5 flex justify-between items-start">
+            <span className="bg-[#FEE2E2] p-2 rounded-lg">
+              <AlertCircle size={20} className="text-[#EF4444]" />
+            </span>
+
+            <div className="flex flex-col gap-2 items-center">
+              <span className="text-slate-500 text-sm font-medium">
+                Overdue
+              </span>
+              <span className="text-2xl font-bold text-slate-600">
+                {overDue}
+              </span>
             </div>
           </div>
         </section>
