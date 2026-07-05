@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { createProject } from "@/app/actions/projects";
+import { toast } from "sonner";
 
 interface CreateProjectModalProps {
   onClose: () => void;
@@ -13,6 +14,7 @@ export default function CreateProjectModal({
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const [projectColor, setProjectColor] = useState("#7C3AED");
   const [dueDate, setDueDate] = useState("");
@@ -22,6 +24,7 @@ export default function CreateProjectModal({
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     const result = await createProject({
       name: projectName,
@@ -30,7 +33,11 @@ export default function CreateProjectModal({
       dueDate: dueDate ? new Date(dueDate) : undefined,
     });
 
+    setIsLoading(false);
+
     if (result.success) {
+      toast.success("Project created successfully");
+
       onClose();
     } else {
       setError(result?.error ?? "Unable to create project");
@@ -75,7 +82,7 @@ export default function CreateProjectModal({
             placeholder="What is this project about?"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full min-h-[90px] px-3 py-2 border border-gray-300 rounded-lg resize-none outline-none focus:ring-1 focus:ring-[#7C3AED] text-gray-800 placeholder:text-gray-400"
+            className="w-full min-h-22.5 px-3 py-2 border border-gray-300 rounded-lg resize-none outline-none focus:ring-1 focus:ring-[#7C3AED] text-gray-800 placeholder:text-gray-400"
           />
         </div>
 
@@ -139,9 +146,10 @@ export default function CreateProjectModal({
 
           <button
             type="submit"
-            className="px-4 py-2 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition"
+            disabled={isLoading}
+            className="px-4 py-2 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-gray-500"
           >
-            Create Project
+            {isLoading ? "creating project..." : "create project"}
           </button>
         </div>
       </form>
