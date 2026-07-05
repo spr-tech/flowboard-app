@@ -1,3 +1,6 @@
+import { getProjects } from "@/app/actions/projects";
+
+
 export default function ProjectPage() {
   return (
     <div>

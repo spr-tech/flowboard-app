@@ -1,8 +1,11 @@
 import { getProjects } from "@/app/actions/projects";
+import { getCurrentUser } from "@/lib/get-current-user";
 import { ListTodo, CircleDot, CheckCircle, AlertCircle } from "lucide-react";
 
 export default async function DashboardPage() {
   const result = await getProjects();
+  const user = await getCurrentUser();
+  const userName = user?.name;
 
   const projects = result?.projects;
 
@@ -22,6 +25,14 @@ export default async function DashboardPage() {
   return (
     <>
       <div>
+        {/* greetings */}
+        <div className="mb-6">
+          <p className="text-gray-800 font-semibold ">Welcome {userName},</p>
+          <span className="text-[12px] text-gray-700">
+            Here&apos;s what&apos;s happening across your projects today.
+          </span>
+        </div>
+
         {/* cards */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {/* Total projects card*/}
