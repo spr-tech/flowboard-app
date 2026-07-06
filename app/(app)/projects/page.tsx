@@ -17,7 +17,7 @@ export default async function ProjectPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {projects.map((project) => (
           <Link key={project.id} href={`/projects/${project.id}`}>
-            <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+            <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 transition-all hover:shadow-md hover:-translate-y-1">
               <span
                 className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-medium mb-3"
                 style={{ backgroundColor: project.color }}
@@ -26,7 +26,7 @@ export default async function ProjectPage() {
               </span>
               <p className="text-[#111827] font-medium">{project.name}</p>
               <p className="text-[#6B7280] text-sm mt-1">
-                {project.description}
+                {project.description || "No description"}
               </p>
             </div>
           </Link>

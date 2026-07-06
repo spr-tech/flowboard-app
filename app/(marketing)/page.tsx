@@ -127,14 +127,14 @@ export default function LandingPage() {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="bg-white border border-[#E5E7EB] rounded-xl p-5 transition-all duration-300 hover:border-b-[#7C3AED] hover:shadow-sm cursor-pointer"
+                className="bg-white border border-[#E5E7EB] rounded-xl p-5 transition-all duration-300 hover:border-b-[#7C3AED] hover:shadow-sm cursor-pointer  hover:-translate-y-1"
               >
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
                   style={{ background: feature.bg, color: feature.color }}
                 >
                   {feature.icon}
-                </div>
+                </
                 <div className="text-sm font-medium text-[#111827] mb-1">
                   {feature.title}
                 </div>
