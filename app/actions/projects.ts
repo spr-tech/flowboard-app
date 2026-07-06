@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/get-current-user";
 import { revalidatePath } from "next/cache";
+import { success } from "zod";
 
 type createProjectProps = {
   name: string;
@@ -87,5 +88,61 @@ export async function getProjects() {
   return {
     success: true,
     projects,
+  };
+}
+
+export async function getSingleProject(projectId: string) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return {
+      success: false,
+      error: "You must be logged in to access this feature",
+      project: null,
+    };
+  }
+
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      OR: [
+        {
+          ownerId: user.id,
+        },
+        {
+          members: { some: { userId: user.id } },
+        },
+      ],
+    },
+
+    include: {
+      columns: {
+        include: {
+          tasks: {
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
+        },
+      },
+
+      members: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+  if (!project) {
+    return {
+      success: false,
+      error: "Project not found",
+      project: null,
+    };
+  }
+
+  return {
+    success: true,
+    project,
   };
 }
