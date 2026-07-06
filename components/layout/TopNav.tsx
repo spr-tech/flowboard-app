@@ -20,7 +20,7 @@ const TopNav = ({ onToggle, modalSwitch }: TopNavProps) => {
   const title = pageTitles[pathname] ?? "FlowBoard";
 
   return (
-    <header className="bg-[#ffffff] p-3 border border-b-[#E5E7EB] flex justify-between items-center">
+    <header className="bg-[#ffffff] p-3 border border-b-[#E5E7EB] flex justify-between items-center overflow-hidden">
       <div className="flex gap-4 items-center text-[#111827] ">
         <button onClick={onToggle}>
           <PanelLeft size={20} />
@@ -31,13 +31,13 @@ const TopNav = ({ onToggle, modalSwitch }: TopNavProps) => {
         </h1>
       </div>
 
-      <div className="flex flex-1 justify-center items-center gap-3">
-        <div className=" w-3 md:w-90 h-10 flex items-center gap-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 ">
+      <div className="flex flex-1 justify-bet md:justify-center items-center gap-3 mx-2">
+        <div className=" w-30 md:w-90 h-10 flex items-center gap-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 ">
           <Search size={20} className="text-slate-400 " />
           <input
             type="text"
             placeholder="search tasks.."
-            className=" flex-1 w-50 outline-0 text-slate-800 placeholder:text-slate-400"
+            className=" flex-1 w-50 outline-0 text-slate-800 placeholder:text-slate-400 placeholder:hidden"
           />
         </div>
         <div>

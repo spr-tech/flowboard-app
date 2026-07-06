@@ -26,21 +26,27 @@ export default function CreateProjectModal({
     setError("");
     setIsLoading(true);
 
-    const result = await createProject({
-      name: projectName,
-      description,
-      color: projectColor,
-      dueDate: dueDate ? new Date(dueDate) : undefined,
-    });
+    try {
+      const result = await createProject({
+        name: projectName,
+        description,
+        color: projectColor,
+        dueDate: dueDate ? new Date(dueDate) : undefined,
+      });
 
-    setIsLoading(false);
+      if (result.success) {
+        toast.success("Project created successfully");
 
-    if (result.success) {
-      toast.success("Project created successfully");
-
-      onClose();
-    } else {
-      setError(result?.error ?? "Unable to create project");
+        onClose();
+      } else {
+        setError(result?.error ?? "Unable to create project");
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
