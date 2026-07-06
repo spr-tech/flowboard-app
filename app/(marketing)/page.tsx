@@ -134,7 +134,7 @@ export default function LandingPage() {
                   style={{ background: feature.bg, color: feature.color }}
                 >
                   {feature.icon}
-                </
+                </div>
                 <div className="text-sm font-medium text-[#111827] mb-1">
                   {feature.title}
                 </div>

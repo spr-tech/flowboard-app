@@ -22,7 +22,7 @@ export default async function ProjectPage() {
                 className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-medium mb-3"
                 style={{ backgroundColor: project.color }}
               >
-                {project.name[0]}
+                {project.name[0].toUpperCase()}
               </span>
               <p className="text-[#111827] font-medium">{project.name}</p>
               <p className="text-[#6B7280] text-sm mt-1">
