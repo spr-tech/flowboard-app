@@ -35,14 +35,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       <Sidebar
-        isOpen={sidebarOpen}
+        sidebarOpen={sidebarOpen}
         isMobile={isMobile}
         onClose={() => isMobile && setSidebarOpen(false)}
       />
       <div className="flex flex-col flex-1 min-w-0">
         <TopNav
-          onToggle={() => setSidebarOpen((prev) => !prev)}
-          modalSwitch={() => setModalOpen((prev) => !prev)}
+          sidebarToggle={() => setSidebarOpen((prev) => !prev)}
+          modalToggle={() => setModalOpen((prev) => !prev)}
         />
         <main className="flex-1 bg-[#F9FAFB] p-5 overflow-y-auto">
           {children}

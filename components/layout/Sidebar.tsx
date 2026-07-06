@@ -13,12 +13,16 @@ const navItems = [
 ];
 
 type sideBarProps = {
-  isOpen: boolean;
+  sidebarOpen: boolean;
   isMobile: boolean;
   onClose: () => void;
 };
 
-export default function Sidebar({ isOpen, isMobile, onClose }: sideBarProps) {
+export default function Sidebar({
+  sidebarOpen,
+  isMobile,
+  onClose,
+}: sideBarProps) {
   const pathname = usePathname();
 
   return (
@@ -26,8 +30,8 @@ export default function Sidebar({ isOpen, isMobile, onClose }: sideBarProps) {
       className={`min-h-screen bg-[#1E1B2E] flex flex-col shrink-0 transition-all duration-300 z-40
     ${
       isMobile
-        ? `fixed inset-y-0 left-0 w-60 ${isOpen ? "translate-x-0" : "-translate-x-full"}`
-        : `relative ${isOpen ? "w-60" : "w-14 "}`
+        ? `fixed inset-y-0 left-0 w-60 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`
+        : `relative ${sidebarOpen ? "w-60" : "w-14 "}`
     }
     
   `}
@@ -39,14 +43,14 @@ export default function Sidebar({ isOpen, isMobile, onClose }: sideBarProps) {
           alt="FlowBoard"
           width={30}
           height={30}
-        />
-        {isOpen && (
+        />{" "}
+        {sidebarOpen && (
           <span className="text-white font-medium text-base">FlowBoard</span>
         )}
       </div>
       {/* Nav items */}
       <nav
-        className={`flex-1 py-4 flex flex-col gap-1 ${isOpen ? "px-3" : "px-2"}`}
+        className={`flex-1 py-4 flex flex-col gap-1 ${sidebarOpen ? "px-3" : "px-2"}`}
       >
         {" "}
         {navItems.map((item) => {
@@ -65,7 +69,7 @@ export default function Sidebar({ isOpen, isMobile, onClose }: sideBarProps) {
               }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
-              {isOpen && (
+              {sidebarOpen && (
                 <span className="whitespace-nowrap">{item.label}</span>
               )}
             </Link>

@@ -11,18 +11,18 @@ const pageTitles: Record<string, string> = {
 };
 
 type TopNavProps = {
-  onToggle: () => void;
-  modalSwitch: () => void;
+  sidebarToggle: () => void;
+  modalToggle: () => void;
 };
 
-const TopNav = ({ onToggle, modalSwitch }: TopNavProps) => {
+const TopNav = ({ sidebarToggle, modalToggle }: TopNavProps) => {
   const pathname = usePathname();
   const title = pageTitles[pathname] ?? "FlowBoard";
 
   return (
     <header className="bg-[#ffffff] p-3 border border-b-[#E5E7EB] flex justify-between items-center overflow-hidden">
       <div className="flex gap-4 items-center text-[#111827] ">
-        <button onClick={onToggle}>
+        <button onClick={sidebarToggle}>
           <PanelLeft size={20} />
         </button>
         {/* Page title */}
@@ -46,7 +46,7 @@ const TopNav = ({ onToggle, modalSwitch }: TopNavProps) => {
         <div className="shrink-0">
           <button
             className="flex items-center gap-1 bg-[#7C3AED] text-white text-sm font-medium px-3 h-10 rounded-lg cursor-pointer hover:bg-[#6D28D9] transition-colors"
-            onClick={modalSwitch}
+            onClick={modalToggle}
           >
             <Plus size={20} />
             <span>Create</span>
