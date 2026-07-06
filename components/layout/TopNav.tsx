@@ -31,22 +31,25 @@ const TopNav = ({ onToggle, modalSwitch }: TopNavProps) => {
         </h1>
       </div>
 
-      <div className="flex flex-1 justify-bet md:justify-center items-center gap-3 mx-2">
-        <div className=" w-30 md:w-90 h-10 flex items-center gap-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-1.5 ">
-          <Search size={20} className="text-slate-400 " />
+      <div className="flex justify-between md:justify-center items-center gap-3 mx-2 w-full">
+        {/* The Search Bar Wrapper */}
+        <div className="w-36  sm:w-44 sm:focus-within:w-64 md:w-80 md:focus-within:w-96 transition-all duration-300 h-10 flex items-center gap-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-2.5 focus-within:border-[#7C3AED] focus-within:ring-1 focus-within:ring-[#7C3AED]">
+          <Search size={20} className="text-slate-400 shrink-0" />
           <input
             type="text"
             placeholder="search tasks.."
-            className=" flex-1 w-50 outline-0 text-slate-800 placeholder:text-slate-400 placeholder:hidden"
+            className="w-full bg-transparent outline-none border-none text-slate-800 placeholder:text-slate-400 text-sm"
           />
         </div>
-        <div>
+
+        {/* The Create Button Wrapper */}
+        <div className="shrink-0">
           <button
-            className=" flex items-center gap-1 bg-[#7C3AED] p-1 rounded-lg cursor-pointer hover:bg-[#6C3AEa] "
+            className="flex items-center gap-1 bg-[#7C3AED] text-white text-sm font-medium px-3 h-10 rounded-lg cursor-pointer hover:bg-[#6D28D9] transition-colors"
             onClick={modalSwitch}
           >
             <Plus size={20} />
-            Create
+            <span>Create</span>
           </button>
         </div>
       </div>

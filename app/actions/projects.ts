@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/get-current-user";
 import { revalidatePath } from "next/cache";
-import { success } from "zod";
 
 type createProjectProps = {
   name: string;
@@ -132,6 +131,7 @@ export async function getSingleProject(projectId: string) {
         },
       },
     },
+    orderBy: { updatedAt: "desc" },
   });
   if (!project) {
     return {
