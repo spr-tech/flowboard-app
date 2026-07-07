@@ -1,4 +1,6 @@
 "use client";
+import { useState } from "react";
+import CreateTaskModal from "../modals/createTaskModal";
 
 type Column = {
   id: string;
@@ -27,12 +29,13 @@ type ProjectBoardProps = {
   project: Project;
 };
 export default function ProjectBoard({ project }: ProjectBoardProps) {
-  console.log(project.columns);
+  const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
 
   return (
     <div>
       {/* Header */}
       <div className="mb-6">
+        <p className="text-gray-800 font-semibold ">{project?.name} Board</p>
         <span className="text-[12px] text-gray-700">
           Drag tasks between columns to update their status
         </span>
@@ -61,7 +64,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
                     className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-3 hover:border-[#7C3AED] transition-colors cursor-pointer"
                   >
                     <p className="text-sm font-medium text-[#111827]">
-                      {task.title[0].toUpperCase()}
+                      {task.title.toUpperCase()}
                     </p>
 
                     {task.description && (
@@ -77,10 +80,20 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
                 </div>
               )}
 
-              <button className="w-full py-2 rounded-lg border border-dashed border-[#D1D5DB] text-[#7C3AED] hover:bg-[#F5F3FF] transition">
+              <button
+                onClick={() => setSelectedColumnId(column.id)}
+                className="w-full py-2 rounded-lg border border-dashed border-[#D1D5DB] text-[#7C3AED] hover:bg-[#F5F3FF] transition"
+              >
                 + Add Task
               </button>
             </div>
+
+            {selectedColumnId && (
+              <CreateTaskModal
+                columnId={selectedColumnId}
+                onClose={() => setSelectedColumnId(null)}
+              />
+            )}
           </div>
         ))}
       </div>

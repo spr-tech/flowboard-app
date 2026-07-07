@@ -1,3 +1,5 @@
 "use client";
 
-export default function CreateTaskModal() {}
+export default function CreateTaskModal() {
+  return <div>{/* your modal content */}</div>;
+}

@@ -1,5 +1,5 @@
 import { getSingleProject } from "@/app/actions/projects";
-import ProjectBoard from "@/components/projects/projectBoard";
+import ProjectBoard from "@/components/projects/ProjectBoard";
 
 type Props = {
   params: Promise<{
