@@ -1,11 +1,31 @@
 "use client";
 
-import { getSingleProject } from "@/app/actions/projects";
-
-type ProjectBoardProps = {
-  project: NonNullable<Awaited<ReturnType<typeof getSingleProject>>["project"]>;
+type Column = {
+  id: string;
+  name: string;
+  order: number;
+  tasks: {
+    id: string;
+    title: string;
+    description: string | null;
+    status: string;
+    priority: string;
+    dueDate: Date | null;
+  }[];
 };
 
+type Project = {
+  id: string;
+  name: string;
+  color: string;
+  description: string | null;
+  status: string;
+  columns: Column[];
+};
+
+type ProjectBoardProps = {
+  project: Project;
+};
 export default function ProjectBoard({ project }: ProjectBoardProps) {
   console.log(project.columns);
 
@@ -13,7 +33,6 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
     <div>
       {/* Header */}
       <div className="mb-6">
-        {/* <p className="text-gray-800 font-semibold ">{project?.name} Board</p> */}
         <span className="text-[12px] text-gray-700">
           Drag tasks between columns to update their status
         </span>

@@ -2,13 +2,13 @@ import { getSingleProject } from "@/app/actions/projects";
 import ProjectBoard from "@/components/projects/projectBoard";
 
 type Props = {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
+  }>;
 };
 
 export default async function ProjectBoardPage({ params }: Props) {
-  const { projectId } = params;
+  const { projectId } = await params;
 
   const result = await getSingleProject(projectId);
   if (!result.success) {
@@ -19,7 +19,6 @@ export default async function ProjectBoardPage({ params }: Props) {
   if (!project) {
     return <div>Project not found</div>;
   }
-
 
   return <ProjectBoard project={project} />;
 }
