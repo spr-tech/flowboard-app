@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createTask } from "@/app/actions/tasks";
+// import { createTask } from "@/app/actions/tasks";
 
 interface CreateTaskModalProps {
   columnId: string;
@@ -71,7 +71,10 @@ export default function CreateTaskModal({
 
         {/* Description */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="description" className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor="description"
+            className="text-sm font-medium text-gray-700"
+          >
             Description
           </label>
           <textarea
@@ -85,7 +88,10 @@ export default function CreateTaskModal({
 
         {/* Priority */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="priority" className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor="priority"
+            className="text-sm font-medium text-gray-700"
+          >
             Priority
           </label>
           <select
@@ -117,7 +123,10 @@ export default function CreateTaskModal({
 
         {/* Due Date */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="due_date" className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor="due_date"
+            className="text-sm font-medium text-gray-700"
+          >
             Due date
           </label>
           <input
@@ -129,9 +138,7 @@ export default function CreateTaskModal({
           />
         </div>
 
-        {error && (
-          <p className="text-red-600 text-sm">{error}</p>
-        )}
+        {error && <p className="text-red-600 text-sm">{error}</p>}
 
         {/* Buttons */}
         <div className="flex justify-end gap-3 pt-2">

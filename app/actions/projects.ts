@@ -146,3 +146,13 @@ export async function getSingleProject(projectId: string) {
     project,
   };
 }
+
+export function createTask() {
+  const user = getCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      error: "You must be logged in to create task",
+    };
+  }
+}
