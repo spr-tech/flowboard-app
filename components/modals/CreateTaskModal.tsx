@@ -1,24 +1,25 @@
 "use client";
 
 import { useState } from "react";
-// import { createTask } from "@/app/actions/tasks";
+import { createTask } from "@/app/actions/projects";
 
-interface CreateTaskModalProps {
+type CreateTaskModalProps = {
   columnId: string;
-  projectId: string;
+  // projectId: string;
   onClose: () => void;
-}
+};
 
 export default function CreateTaskModal({
   columnId,
-  projectId,
+  // projectId,
   onClose,
 }: CreateTaskModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("Medium");
+  const [priority, setPriority] = useState<
+    "Low" | "Medium" | "High" | undefined
+  >("Medium");
   const [dueDate, setDueDate] = useState("");
-  const [label, setLabel] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,9 +33,8 @@ export default function CreateTaskModal({
       description,
       priority,
       dueDate: dueDate ? new Date(dueDate) : undefined,
-      label,
       columnId,
-      projectId,
+      // projectId,
     });
 
     setIsLoading(false);
@@ -97,28 +97,15 @@ export default function CreateTaskModal({
           <select
             id="priority"
             value={priority}
-            onChange={(e) => setPriority(e.target.value)}
+            onChange={(e) =>
+              setPriority(e.target.value as "Low" | "Medium" | "High")
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#7C3AED] text-gray-800"
           >
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
             <option value="High">High</option>
           </select>
-        </div>
-
-        {/* Label */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="label" className="text-sm font-medium text-gray-700">
-            Label
-          </label>
-          <input
-            id="label"
-            type="text"
-            placeholder="e.g. Frontend, Bug, Feature"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#7C3AED] text-gray-800 placeholder:text-gray-400"
-          />
         </div>
 
         {/* Due Date */}

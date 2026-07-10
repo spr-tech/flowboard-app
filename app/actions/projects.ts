@@ -3,13 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/get-current-user";
 import { revalidatePath } from "next/cache";
-
-type createProjectProps = {
-  name: string;
-  description?: string;
-  color?: string;
-  dueDate?: Date;
-};
+import type { createProjectProps } from "@/types/project";
+import type { CreateTaskProps } from "@/types/project";
 
 export async function createProject(data: createProjectProps) {
   const user = await getCurrentUser();
@@ -147,12 +142,55 @@ export async function getSingleProject(projectId: string) {
   };
 }
 
-export function createTask() {
-  const user = getCurrentUser();
+export async function createTask(data: CreateTaskProps) {
+  const user = await getCurrentUser();
   if (!user) {
     return {
       success: false,
       error: "You must be logged in to create task",
     };
   }
+
+  if (!data.title.trim()) {
+    return {
+      success: false,
+      error: "Task must have a name",
+    };
+  }
+
+  const column = await prisma.column.findFirst({
+    where: {
+      id: data.columnId,
+
+      project: {
+        OR: [{ ownerId: user.id }, { members: { some: { userId: user.id } } }],
+      },
+    },
+  });
+  if (!column) {
+    return {
+      success: false,
+      error: "Column not found",
+    };
+  }
+
+  const newTask = await prisma.task.create({
+    data: {
+      title: data.title,
+      description: data.description ?? "No description",
+      priority: data.priority,
+      dueDate: data.dueDate,
+      column: {
+        connect: {
+          id: column.id,
+        },
+      },
+    },
+  });
+
+  revalidatePath("/projects");
+  return {
+    success: true,
+    newTask,
+  };
 }
