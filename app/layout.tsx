@@ -21,19 +21,19 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
         {children}
-        <div className="absolute right-4 bg-[#7C3AED] text-white">
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              classNames: {
-                toast:
-                  "bg-[#7C3AED] text-white border-none shadow-xl rounded-xl w-fit min-w-0",
-                title: "text-white font-medium",
-                description: "text-white/80",
-              },
-            }}
-          />
-        </div>
+        <Toaster
+          position="top-right"
+          duration={1800}
+          expand={false}
+          visibleToasts={3}
+          toastOptions={{
+            style: {
+              background: "#7C3AED",
+              color: "#FFFFFF",
+              border: "1px solid #6D28D9",
+            },
+          }}
+        />
       </body>
     </html>
   );

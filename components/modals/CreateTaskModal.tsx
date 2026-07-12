@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createTask } from "@/app/actions/projects";
+import { toast } from "sonner";
 
 type CreateTaskModalProps = {
   columnId: string;
@@ -38,6 +39,7 @@ export default function CreateTaskModal({
       });
 
       if (result.success) {
+        toast.success("Task created successfully");
         onClose();
       } else {
         setError(result?.error ?? "Unable to create task");
@@ -52,7 +54,7 @@ export default function CreateTaskModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm p-4">
       <form
         className="w-full max-w-md bg-white rounded-xl shadow-xl p-6 space-y-4"
         onSubmit={handleSubmit}

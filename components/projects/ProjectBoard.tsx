@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import CreateTaskModal from "../modals/CreateTaskModal";
+import { toast } from "sonner";
 
 type Column = {
   id: string;
@@ -30,7 +31,7 @@ type ProjectBoardProps = {
 };
 export default function ProjectBoard({ project }: ProjectBoardProps) {
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
-  
+
   return (
     <div>
       {/* Header */}
