@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import CreateTaskModal from "../modals/CreateTaskModal";
-import { toast } from "sonner";
+import { Delete, Edit } from "lucide-react";
+import DeleteTaskModal from "../modals/DeleteTaskModal";
 
 type Column = {
   id: string;
@@ -31,7 +32,9 @@ type ProjectBoardProps = {
 };
 export default function ProjectBoard({ project }: ProjectBoardProps) {
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
-
+  const [deleteTaskConfirmation, setDeleteTaskConfirmation] = useState<
+    string | null
+  >(null);
   return (
     <div>
       {/* Header */}
@@ -64,9 +67,22 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
                     key={task.id}
                     className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-3 hover:border-[#7C3AED] transition-colors cursor-pointer"
                   >
-                    <p className="text-sm font-medium text-[#111827]">
-                      {task.title.toUpperCase()}
-                    </p>
+                    <div className="flex justify-between">
+                      <p className="text-sm font-medium text-[#111827]">
+                        {task.title.toUpperCase()}
+                      </p>
+                      <div className="flex gap-2">
+                        <Edit
+                          size={20}
+                          className="text-slate-600 hover:text-slate-400"
+                        />
+                        <Delete
+                          size={20}
+                          className="text-red-600 hover:text-red-300"
+                          onClick={() => setDeleteTaskConfirmation(task.id)}
+                        />
+                      </div>
+                    </div>
 
                     {task.description && (
                       <p className="text-sm text-[#6B7280] mt-1 ">
@@ -93,6 +109,13 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
               <CreateTaskModal
                 columnId={selectedColumnId}
                 onClose={() => setSelectedColumnId(null)}
+              />
+            )}
+
+            {deleteTaskConfirmation && (
+              <DeleteTaskModal
+                taskId={deleteTaskConfirmation}
+                onClose={() => setDeleteTaskConfirmation(null)}
               />
             )}
           </div>

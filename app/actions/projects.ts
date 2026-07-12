@@ -194,3 +194,53 @@ export async function createTask(data: CreateTaskProps) {
     newTask,
   };
 }
+
+export async function deleteTask(taskId: string) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      error: "You must be logged to delete task",
+    };
+  }
+
+  const task = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+
+      column: {
+        project: {
+          OR: [
+            { ownerId: user.id },
+            { members: { some: { userId: user.id } } },
+          ],
+        },
+      },
+    },
+
+    include: {
+      column: {
+        include: {
+          project: true,
+        },
+      },
+    },
+  });
+
+  if (!task) {
+    return {
+      success: false,
+      error: "Task not found",
+    };
+  }
+
+  const removedTask = await prisma.task.delete({
+    where: { id: task.id },
+  });
+
+  revalidatePath(`/projects/${task.column.projectId}`);
+  return {
+    success: true,
+    removedTask,
+  };
+}

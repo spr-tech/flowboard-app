@@ -1,4 +1,5 @@
 import { getSingleProject } from "@/app/actions/projects";
+
 import ProjectBoard from "@/components/projects/ProjectBoard";
 
 type Props = {
@@ -15,7 +16,8 @@ export default async function ProjectBoardPage({ params }: Props) {
     return <div>{result.error}</div>;
   }
 
-  const project = result?.project ?? null;
+  const project = result?.project;
+
   if (!project) {
     return <div>Project not found</div>;
   }

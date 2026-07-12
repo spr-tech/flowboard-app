@@ -12,7 +12,6 @@ type CreateTaskModalProps = {
 
 export default function CreateTaskModal({
   columnId,
-  // projectId,
   onClose,
 }: CreateTaskModalProps) {
   const [title, setTitle] = useState("");
