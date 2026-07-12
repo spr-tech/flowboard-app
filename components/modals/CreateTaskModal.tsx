@@ -23,26 +23,31 @@ export default function CreateTaskModal({
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
+    try {
+      const result = await createTask({
+        title,
+        description,
+        priority,
+        dueDate: dueDate ? new Date(dueDate) : undefined,
+        columnId,
+        // projectId,
+      });
 
-    const result = await createTask({
-      title,
-      description,
-      priority,
-      dueDate: dueDate ? new Date(dueDate) : undefined,
-      columnId,
-      // projectId,
-    });
-
-    setIsLoading(false);
-
-    if (result.success) {
-      onClose();
-    } else {
-      setError(result.error ?? "Unable to create task");
+      if (result.success) {
+        onClose();
+      } else {
+        setError(result?.error ?? "Unable to create task");
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -139,7 +144,7 @@ export default function CreateTaskModal({
           <button
             type="submit"
             disabled={isLoading}
-            className="px-4 py-2 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition disabled:opacity-60"
+            className="px-4 py-2 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isLoading ? "Creating..." : "Create Task"}
           </button>

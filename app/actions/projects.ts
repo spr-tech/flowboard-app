@@ -154,7 +154,7 @@ export async function createTask(data: CreateTaskProps) {
   if (!data.title.trim()) {
     return {
       success: false,
-      error: "Task must have a name",
+      error: "Task name is required",
     };
   }
 
@@ -188,7 +188,7 @@ export async function createTask(data: CreateTaskProps) {
     },
   });
 
-  revalidatePath("/projects");
+  revalidatePath(`/projects/${column.projectId}`);
   return {
     success: true,
     newTask,

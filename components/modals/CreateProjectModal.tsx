@@ -32,7 +32,7 @@ export default function CreateProjectModal({
         description,
         color: projectColor,
         dueDate: dueDate ? new Date(dueDate) : undefined,
-      });
+      }); 
 
       if (result.success) {
         toast.success("Project created successfully");
