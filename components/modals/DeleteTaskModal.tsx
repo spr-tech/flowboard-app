@@ -41,12 +41,12 @@ export default function DeleteTaskModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
       <div className="bg-white p-6 rounded-xl w-full max-w-sm mx-4">
-        <h1 className="text-xl font-semibold">Delete Task?</h1>
+        <h1 className="text-xl font-semibold text-slate-700">Delete Task?</h1>
         <p className="mt-2 text-slate-500">
           Are you sure you want to delete this task?
         </p>
         <div className="flex justify-end gap-3 mt-5">
-          <button className="hover:underline" onClick={onClose}>
+          <button className="hover:underline text-slate-400" onClick={onClose}>
             Cancel
           </button>
           <button

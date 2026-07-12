@@ -38,8 +38,8 @@ export default function CreateTaskModal({
       });
 
       if (result.success) {
-        toast.success("Task created successfully");
         onClose();
+        toast.success("Task created successfully");
       } else {
         setError(result?.error ?? "Unable to create task");
       }
