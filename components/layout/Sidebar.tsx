@@ -27,7 +27,7 @@ export default function Sidebar({
   return (
     <aside
       className={`
-         bg-[#1E152A]
+         bg-[#1E1B2E]
         border-r
         border-slate-900
         overflow-hidden
@@ -63,7 +63,7 @@ export default function Sidebar({
               onClick={onClose}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all group ${
                 isActive
-                  ? "bg-[#7C3AED] text-white shadow-lg shadow-[#7C3AED]/15"
+                  ? "bg-purple-600 text-white shadow-lg shadow-[#7C3AED]/15"
                   : "text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
               }`}
             >

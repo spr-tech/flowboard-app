@@ -50,7 +50,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           onClose={() => isMobile && setSidebarOpen(false)}
         />
 
-        <main className="flex-1 min-w-0 bg-[#F3F4F6] p-5 overflow-y-auto">
+        <main className="flex-1 min-w-0 bg-[#F9FAFB] p-5 overflow-y-auto">
           {children}
           {modalOpen && (
             <CreateProjectModal onClose={() => setModalOpen(false)} />

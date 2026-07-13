@@ -11,7 +11,7 @@ type TopNavProps = {
 
 const TopNav = ({ sidebarToggle, modalToggle, isOpen }: TopNavProps) => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-13 bg-white backdrop-blur-md border-b border-slate-700 flex items-center justify-between px-6 transition-all">
+    <header className="fixed top-0 left-0 right-0 z-50 h-13 bg-white backdrop-blur-md border-b border-slate-500 flex items-center justify-between px-6 transition-all">
       {/* Left */}
       <div className="flex gap-4 items-center min-w-0">
         <button
@@ -39,7 +39,7 @@ const TopNav = ({ sidebarToggle, modalToggle, isOpen }: TopNavProps) => {
       {/* Center: Search and Quick Action */}
       <div className="flex-1 max-w-xl mx-4 flex items-center justify-center gap-3">
         {/* Search Bar Wrapper */}
-        <div className="flex-1 min-w-30 max-w-md h-10 flex items-center gap-2 bg-gray-50/80 border border-gray-200/80 rounded-xl px-3 transition-all duration-300 focus-within:bg-white focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/10 focus-within:shadow-sm">
+        <div className="flex-1 min-w-30 max-w-md h-10 flex items-center gap-2 bg-gray-50/80 border border-gray-200/80 rounded-xl px-3 transition-all duration-300 focus-within:bg-white  focus-within:ring-1 focus-within:ring-purple-400 ">
           <Search size={18} className="text-gray-400 shrink-0" />
           <input
             type="text"
