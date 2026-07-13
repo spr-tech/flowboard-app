@@ -1,24 +1,17 @@
 "use client";
 
-import { Bell, Search, PanelLeft, Plus } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { Bell, Search, PanelLeft, PanelRight, Plus } from "lucide-react";
 import Image from "next/image";
-
-const pageTitles: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/projects": "Projects",
-  "/members": "Members",
-  "/settings": "Settings",
-};
 
 type TopNavProps = {
   sidebarToggle: () => void;
   modalToggle: () => void;
+  isOpen: boolean;
 };
 
-const TopNav = ({ sidebarToggle, modalToggle }: TopNavProps) => {
+const TopNav = ({ sidebarToggle, modalToggle, isOpen }: TopNavProps) => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-12 bg-white backdrop-blur-md border-b border-[#E5E7EB] flex items-center justify-between px-6 transition-all">
+    <header className="fixed top-0 left-0 right-0 z-50 h-13 bg-white backdrop-blur-md border-b border-slate-700 flex items-center justify-between px-6 transition-all">
       {/* Left */}
       <div className="flex gap-4 items-center min-w-0">
         <button
@@ -26,7 +19,7 @@ const TopNav = ({ sidebarToggle, modalToggle }: TopNavProps) => {
           className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-900 transition-colors"
           aria-label="Toggle sidebar"
         >
-          <PanelLeft size={20} />
+          {isOpen ? <PanelRight size={20} /> : <PanelLeft size={20} />}
         </button>
         <h1 className="text-gray-900 font-semibold text-base hidden md:block truncate">
           <div className="h-14 flex items-center gap-2 px-4 border-b border-white/10">
@@ -36,7 +29,7 @@ const TopNav = ({ sidebarToggle, modalToggle }: TopNavProps) => {
               width={30}
               height={30}
             />
-            <span className="text-white font-medium whitespace-nowrap">
+            <span className="text-slate-800 font-medium whitespace-nowrap">
               FlowBoard
             </span>
           </div>

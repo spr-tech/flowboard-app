@@ -1,6 +1,7 @@
 import { getProjects } from "@/app/actions/projects";
 import { getCurrentUser } from "@/lib/get-current-user";
 import { ListTodo, CircleDot, CheckCircle, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const result = await getProjects();
@@ -35,8 +36,11 @@ export default async function DashboardPage() {
 
         {/* cards */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {/* Total projects card*/}
-          <div className="bg-white shadow-md rounded-lg p-5 flex justify-between items-start">
+          {/* Total pro/jects card*/}
+          <Link
+            href="/projects"
+            className="bg-white shadow-md rounded-lg p-5 flex justify-between items-start"
+          >
             <span className="bg-[#EDE9FE] p-2 rounded-lg">
               <ListTodo size={20} className="text-[#7C3AED]" />
             </span>
@@ -49,7 +53,7 @@ export default async function DashboardPage() {
                 {totalProjects}
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* Inprogress  */}
           <div className="bg-white shadow-md rounded-lg p-5 flex justify-between items-start">

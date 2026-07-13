@@ -34,12 +34,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         />
       )}
       <TopNav
+        isOpen={sidebarOpen}
         sidebarToggle={() => setSidebarOpen((prev) => !prev)}
         modalToggle={() => setModalOpen((prev) => !prev)}
       />
 
       <div
-        className={`flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out mt-12 ${
+        className={`flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out mt-13 ${
           isMobile ? "" : sidebarOpen ? "pl-60" : "pl-14"
         }`}
       >
@@ -49,7 +50,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           onClose={() => isMobile && setSidebarOpen(false)}
         />
 
-        <main className="flex-1 min-w-0 bg-white p-5 overflow-y-auto">
+        <main className="flex-1 min-w-0 bg-[#F3F4F6] p-5 overflow-y-auto">
           {children}
           {modalOpen && (
             <CreateProjectModal onClose={() => setModalOpen(false)} />

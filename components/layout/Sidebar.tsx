@@ -27,22 +27,22 @@ export default function Sidebar({
   return (
     <aside
       className={`
-         bg-[#0B0914]
+         bg-[#1E152A]
         border-r
-        border-white/4
+        border-slate-900
         overflow-hidden
         flex
         flex-col
         z-40
-        transition-[width,transform]
+        transition-all
         duration-300
         ease-in-out
         ${
           isMobile
-            ? `fixed top-12 bottom-0 left-0 w-60 ${
+            ? `fixed top-12 bottom-0 left-0 w-60  ${
                 sidebarOpen ? "translate-x-0" : "-translate-x-full"
               }`
-            : `fixed top-12 bottom-0 left-0 ${sidebarOpen ? "w-60" : "w-14"}`
+            : `fixed top-11 bottom-0 left-0 ${sidebarOpen ? "w-60" : "w-14"}`
         }
       `}
     >
@@ -76,7 +76,7 @@ export default function Sidebar({
               />
 
               {sidebarOpen && (
-                <span className="whitespace-nowrap tracking-wide">
+                <span className="whitespace-nowrap tracking-wide ">
                   {item.label}
                 </span>
               )}
