@@ -13,27 +13,26 @@ type TaskModalProps = {
 };
 
 export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState(task?.title ?? "");
+  const [description, setDescription] = useState(task?.description ?? "");
   const [priority, setPriority] = useState<
     "Low" | "Medium" | "High" | undefined
-  >("Medium");
-  const [dueDate, setDueDate] = useState("");
+  >(task?.priority ?? "Medium");
+  const existingDueDate = task?.dueDate
+    ? new Date(task.dueDate).toISOString().split("T")[0]
+    : "";
+  const [dueDate, setDueDate] = useState(existingDueDate);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
+  const createNewTask = async () => {
     try {
       const result = await createTask({
         title,
         description,
         priority,
         dueDate: dueDate ? new Date(dueDate) : undefined,
-        columnId: columnId || "",
+        columnId: columnId!,
         // projectId,
       });
 
@@ -49,6 +48,49 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const editExistingTask = async () => {
+    if (!task?.id) {
+      setError("Task ID is missing");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const result = await editTask({
+        id: task.id,
+        title,
+        description,
+        priority,
+        dueDate: dueDate ? new Date(dueDate) : undefined,
+      });
+
+      if (result.success) {
+        onClose();
+        toast.success("Task updated successfully");
+      } else {
+        setError(result?.error ?? "Unable to update task");
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    if (task) {
+      await editExistingTask();
+    } else {
+      await createNewTask();
     }
   };
 
