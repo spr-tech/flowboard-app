@@ -2,6 +2,7 @@
 
 import { Bell, Search, PanelLeft, Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -16,54 +17,64 @@ type TopNavProps = {
 };
 
 const TopNav = ({ sidebarToggle, modalToggle }: TopNavProps) => {
-  const pathname = usePathname();
-  const title = pageTitles[pathname] ?? "FlowBoard";
-
   return (
-    <header className="bg-[#ffffff] p-3 border border-b-[#E5E7EB] flex justify-between items-center overflow-hidden">
-      <div className="flex gap-4 items-center text-[#111827] ">
-        <button onClick={sidebarToggle}>
+    <header className="fixed top-0 left-0 right-0 z-50 h-12 bg-white backdrop-blur-md border-b border-[#E5E7EB] flex items-center justify-between px-6 transition-all">
+      {/* Left */}
+      <div className="flex gap-4 items-center min-w-0">
+        <button
+          onClick={sidebarToggle}
+          className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-900 transition-colors"
+          aria-label="Toggle sidebar"
+        >
           <PanelLeft size={20} />
         </button>
-        {/* Page title */}
-        <h1 className="text-[#111827] font-medium text-base hidden md:block">
-          {title}
+        <h1 className="text-gray-900 font-semibold text-base hidden md:block truncate">
+          <div className="h-14 flex items-center gap-2 px-4 border-b border-white/10">
+            <Image
+              src="/flowboard logo.svg"
+              alt="FlowBoard"
+              width={30}
+              height={30}
+            />
+            <span className="text-white font-medium whitespace-nowrap">
+              FlowBoard
+            </span>
+          </div>
         </h1>
       </div>
 
-      <div className="flex justify-between md:justify-center items-center gap-3 mx-2 w-full">
-        {/* The Search Bar Wrapper */}
-        <div className="w-36  sm:w-44 sm:focus-within:w-64 md:w-80 md:focus-within:w-96 transition-all duration-300 h-10 flex items-center gap-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-2.5 focus-within:border-[#7C3AED] focus-within:ring-1 focus-within:ring-[#7C3AED]">
-          <Search size={20} className="text-slate-400 shrink-0" />
+      {/* Center: Search and Quick Action */}
+      <div className="flex-1 max-w-xl mx-4 flex items-center justify-center gap-3">
+        {/* Search Bar Wrapper */}
+        <div className="flex-1 min-w-30 max-w-md h-10 flex items-center gap-2 bg-gray-50/80 border border-gray-200/80 rounded-xl px-3 transition-all duration-300 focus-within:bg-white focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/10 focus-within:shadow-sm">
+          <Search size={18} className="text-gray-400 shrink-0" />
           <input
             type="text"
-            placeholder="search tasks.."
-            className="w-full bg-transparent outline-none border-none text-slate-800 placeholder:text-slate-400 text-sm"
+            placeholder="Search tasks..."
+            className="w-full bg-transparent outline-none text-gray-800 placeholder:text-gray-400 text-sm"
           />
         </div>
 
-        {/* The Create Button Wrapper */}
-        <div className="shrink-0">
-          <button
-            className="flex items-center gap-1 bg-[#7C3AED] text-white text-sm font-medium px-3 h-10 rounded-lg cursor-pointer hover:bg-[#6D28D9] transition-colors"
-            onClick={modalToggle}
-          >
-            <Plus size={20} />
-            <span>Create</span>
-          </button>
-        </div>
+        {/* Create Button Wrapper */}
+        <button
+          className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 h-10 rounded-xl shadow-sm shadow-purple-600/10 hover:shadow-purple-700/20 active:scale-[0.98] transition-all shrink-0"
+          onClick={modalToggle}
+        >
+          <Plus size={18} />
+          <span className="hidden sm:inline">Create</span>
+        </button>
       </div>
 
-      {/* right side  */}
-      <div className="flex items-center gap-3">
+      {/* Right side: Actions & Profile */}
+      <div className="flex items-center gap-3 shrink-0">
         {/* Notification bell */}
-        <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F9FAFB] border border-[#E5E7EB] transition-colors">
-          <Bell className="w-4 h-4 text-[#6B7280]" />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#EF4444] rounded-full"></span>
+        <button className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-50 border border-gray-100 transition-colors group">
+          <Bell className="w-4.5 h-4.5 text-gray-500 group-hover:text-gray-800 transition-colors" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 ring-2 ring-white rounded-full"></span>
         </button>
 
         {/* User avatar */}
-        <div className="w-8 h-8 rounded-full bg-[#7C3AED] flex items-center justify-center text-white text-xs font-medium cursor-pointer">
+        <div className="w-9 h-9 rounded-xl bg-purple-600 hover:bg-purple-700 shadow-sm shadow-purple-600/10 flex items-center justify-center text-white text-xs font-semibold cursor-pointer active:scale-95 transition-all">
           AO
         </div>
       </div>

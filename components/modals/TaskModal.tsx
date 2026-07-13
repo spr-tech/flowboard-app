@@ -13,6 +13,8 @@ type TaskModalProps = {
 };
 
 export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
+  const isEditing = !!task;
+
   const [title, setTitle] = useState(task?.title ?? "");
   const [description, setDescription] = useState(task?.description ?? "");
   const [priority, setPriority] = useState<
@@ -51,13 +53,7 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
     }
   };
 
-  const editExistingTask = async () => {
-    if (!task?.id) {
-      setError("Task ID is missing");
-      setIsLoading(false);
-      return;
-    }
-
+  const editExistingTask = async (task: Task) => {
     try {
       const result = await editTask({
         id: task.id,
@@ -87,8 +83,8 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
     setError("");
     setIsLoading(true);
 
-    if (task) {
-      await editExistingTask();
+    if (isEditing) {
+      await editExistingTask(task);
     } else {
       await createNewTask();
     }
@@ -100,7 +96,9 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
         className="w-full max-w-md bg-white rounded-xl shadow-xl p-6 space-y-4"
         onSubmit={handleSubmit}
       >
-        <h2 className="text-xl font-semibold text-gray-900">Create Task</h2>
+        <h2 className="text-xl font-semibold text-gray-900">
+          {isEditing ? "Edit Task" : "Create Task"}
+        </h2>
 
         {/* Title */}
         <div className="flex flex-col gap-1.5">
@@ -189,7 +187,13 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
             disabled={isLoading}
             className="px-4 py-2 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Creating..." : "Create Task"}
+            {isLoading
+              ? isEditing
+                ? "saving"
+                : "creating"
+              : isEditing
+                ? "Save"
+                : "Create Task"}
           </button>
         </div>
       </form>
