@@ -5,7 +5,9 @@ import { getCurrentUser } from "@/lib/get-current-user";
 import { revalidatePath } from "next/cache";
 import type { createProjectProps } from "@/types/project";
 import type { CreateTaskProps } from "@/types/project";
+import { EditTaskProps } from "@/types/project";
 
+//create project
 export async function createProject(data: createProjectProps) {
   const user = await getCurrentUser();
 
@@ -47,6 +49,7 @@ export async function createProject(data: createProjectProps) {
   return { success: true, newProject };
 }
 
+//get all project
 export async function getProjects() {
   const user = await getCurrentUser();
   if (!user) {
@@ -85,6 +88,7 @@ export async function getProjects() {
   };
 }
 
+//get project
 export async function getSingleProject(projectId: string) {
   const user = await getCurrentUser();
 
@@ -142,6 +146,7 @@ export async function getSingleProject(projectId: string) {
   };
 }
 
+//create task
 export async function createTask(data: CreateTaskProps) {
   const user = await getCurrentUser();
   if (!user) {
@@ -195,6 +200,7 @@ export async function createTask(data: CreateTaskProps) {
   };
 }
 
+//delete task
 export async function deleteTask(taskId: string) {
   const user = await getCurrentUser();
   if (!user) {
@@ -242,5 +248,83 @@ export async function deleteTask(taskId: string) {
   return {
     success: true,
     removedTask,
+  };
+}
+
+
+//edit task
+export async function editTask(data: EditTaskProps) {
+  const user = await getCurrentUser();
+  if (!user)
+    return {
+      success: false,
+      error: "You must be logged in to edit task",
+    };
+
+  if (!data.title.trim()) {
+    return {
+      success: false,
+      error: "Task name required",
+    };
+  }
+
+  // Edit task
+  const task = await prisma.task.findFirst({
+    where: {
+      id: data.id,
+
+      column: {
+        project: {
+          OR: [
+            {
+              ownerId: user.id,
+            },
+            {
+              members: { some: { userId: user.id } },
+            },
+          ],
+        },
+      },
+    },
+
+    include: {
+      column: {
+        include: {
+          project: true,
+        },
+      },
+    },
+  });
+
+  if (!task)
+    return {
+      success: false,
+      error: "Task not found",
+    };
+
+  const editedTask = await prisma.task.update({
+    where: {
+      id: task.id,
+    },
+    data: {
+      title: data.title.trim(),
+      description: data.description,
+      priority: data.priority,
+      dueDate: data.dueDate,
+    },
+
+    include: {
+      column: {
+        include: {
+          project: true,
+        },
+      },
+    },
+  });
+
+  revalidatePath(`/projects/${task.column.projectId}`);
+  return {
+    success: true,
+    editedTask,
   };
 }

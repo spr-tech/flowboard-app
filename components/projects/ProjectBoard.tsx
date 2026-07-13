@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
-import CreateTaskModal from "../modals/CreateTaskModal";
+import TaskModal from "../modals/TaskModal";
 import { Delete, Edit } from "lucide-react";
 import DeleteTaskModal from "../modals/DeleteTaskModal";
+import type { Task } from "@/types/project";
 
 type Column = {
   id: string;
@@ -35,6 +36,8 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
   const [deleteTaskConfirmation, setDeleteTaskConfirmation] = useState<
     string | null
   >(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
   return (
     <div>
       {/* Header */}
@@ -75,6 +78,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
                         <Edit
                           size={20}
                           className="text-slate-600 hover:text-slate-400"
+                          onClick={() => setSelectedTask(task as Task)}
                         />
                         <Delete
                           size={20}
@@ -104,22 +108,28 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
                 + Add Task
               </button>
             </div>
-
-            {selectedColumnId && (
-              <CreateTaskModal
-                columnId={selectedColumnId}
-                onClose={() => setSelectedColumnId(null)}
-              />
-            )}
-
-            {deleteTaskConfirmation && (
-              <DeleteTaskModal
-                taskId={deleteTaskConfirmation}
-                onClose={() => setDeleteTaskConfirmation(null)}
-              />
-            )}
           </div>
         ))}
+        {selectedColumnId && (
+          <TaskModal
+            columnId={selectedColumnId}
+            onClose={() => setSelectedColumnId(null)}
+          />
+        )}
+
+        {selectedTask && (
+          <TaskModal
+            task={selectedTask}
+            onClose={() => setSelectedTask(null)}
+          />
+        )}
+
+        {deleteTaskConfirmation && (
+          <DeleteTaskModal
+            taskId={deleteTaskConfirmation}
+            onClose={() => setDeleteTaskConfirmation(null)}
+          />
+        )}
       </div>
     </div>
   );

@@ -3,17 +3,16 @@
 import { useState } from "react";
 import { createTask } from "@/app/actions/projects";
 import { toast } from "sonner";
+import { editTask } from "@/app/actions/projects";
+import type { Task } from "@/types/project";
 
-type CreateTaskModalProps = {
-  columnId: string;
-  // projectId: string;
+type TaskModalProps = {
+  columnId?: string;
+  task?: Task;
   onClose: () => void;
 };
 
-export default function CreateTaskModal({
-  columnId,
-  onClose,
-}: CreateTaskModalProps) {
+export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<
@@ -27,13 +26,14 @@ export default function CreateTaskModal({
     e.preventDefault();
     setError("");
     setIsLoading(true);
+
     try {
       const result = await createTask({
         title,
         description,
         priority,
         dueDate: dueDate ? new Date(dueDate) : undefined,
-        columnId,
+        columnId: columnId || "",
         // projectId,
       });
 
