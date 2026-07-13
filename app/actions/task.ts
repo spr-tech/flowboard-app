@@ -171,7 +171,43 @@ export async function editTask(data: EditTaskProps) {
       priority: data.priority,
       dueDate: data.dueDate,
     },
+  });
 
+  revalidatePath(`/projects/${task.column.projectId}`);
+  return {
+    success: true,
+    editedTask,
+  };
+}
+
+//moving a task
+export async function moveTask(taskId: string, destinationColumnId: string) {
+  const user = await getCurrentUser();
+  if (!user)
+    return {
+      success: false,
+      error: "You must be logged in to move task",
+    };
+
+  const task = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+
+      column: {
+        project: {
+          OR: [
+            { ownerId: user.id },
+            {
+              members: {
+                some: {
+                  userId: user.id,
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
     include: {
       column: {
         include: {
@@ -181,9 +217,39 @@ export async function editTask(data: EditTaskProps) {
     },
   });
 
+  if (!task) {
+    return {
+      success: false,
+      error: "Task not found",
+    };
+  }
+
+  const destinationColumn = await prisma.column.findFirst({
+    where: {
+      id: destinationColumnId,
+      project: {
+        OR: [{ ownerId: user.id }, { members: { some: { userId: user.id } } }],
+      },
+    },
+  });
+
+  if (!destinationColumn) {
+    return {
+      success: false,
+      error: "Column not found",
+    };
+  }
+
+  const movedTask = await prisma.task.update({
+    where: { id: task.id },
+    data: {
+      columnId: destinationColumn.id,
+    },
+  });
+
   revalidatePath(`/projects/${task.column.projectId}`);
   return {
     success: true,
-    editedTask,
+    movedTask,
   };
 }
