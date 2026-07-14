@@ -34,7 +34,7 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
         title,
         description,
         priority,
-        dueDate: dueDate ? new Date(dueDate) : undefined,
+        dueDate: dueDate ? new Date(dueDate) : null,
         columnId: columnId!,
         // projectId,
       });
@@ -61,7 +61,7 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
         title,
         description,
         priority,
-        dueDate: dueDate ? new Date(dueDate) : undefined,
+        dueDate: dueDate ? new Date(dueDate) : null,
       });
 
       if (result.success) {

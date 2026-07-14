@@ -5,7 +5,6 @@ import { Delete, Edit, ArrowLeft } from "lucide-react";
 import DeleteModal from "../modals/DeleteModal";
 import type { Task } from "@/types/task";
 import Link from "next/link";
-import { Priority } from "@/lib/generated/prisma";
 
 type Project = {
   id: string;
@@ -20,14 +19,7 @@ type Column = {
   id: string;
   name: string;
   order: number;
-  tasks: {
-    id: string;
-    title: string;
-    description: string | null;
-    status: string;
-    priority: Priority;
-    dueDate: Date | null;
-  }[];
+  tasks: Task[];
 };
 
 type ProjectBoardProps = {
@@ -98,7 +90,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
                         <Edit
                           size={20}
                           className="text-slate-600 hover:text-slate-400"
-                          onClick={() => setSelectedTask(task as Task)}
+                          onClick={() => setSelectedTask(task)}
                         />
                         <Delete
                           size={20}

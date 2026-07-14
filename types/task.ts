@@ -6,20 +6,15 @@ export type Task = {
   description: string | null;
   priority: Priority;
   dueDate: Date | null;
-};
-
-export type CreateTaskProps = {
-  title: string;
-  description?: string;
-  priority: Priority;
-  dueDate?: Date;
   columnId: string;
 };
 
-export type EditTaskProps = {
-  id: string;
-  title: string;
-  description?: string;
-  priority: Priority;
-  dueDate?: Date;
+export type CreateTaskProps = Omit<Task, "id"> & {
+  description?: string | null;
+  dueDate?: Date | null;
+};
+
+export type EditTaskProps = Omit<Task, "columnId"> & {
+  description?: string | null;
+  dueDate?: Date | null;
 };
