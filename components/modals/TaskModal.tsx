@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createTask } from "@/app/actions/task";
 import { toast } from "sonner";
 import { editTask } from "@/app/actions/task";
-import type { Task } from "@/types/project";
+import type { Task } from "@/types/task";
 
 type TaskModalProps = {
   columnId?: string;

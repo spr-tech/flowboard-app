@@ -3,8 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/get-current-user";
 import { revalidatePath } from "next/cache";
-import type { CreateTaskProps } from "@/types/project";
-import { EditTaskProps } from "@/types/project";
+import type { CreateTaskProps } from "@/types/task";
+import { EditTaskProps } from "@/types/task";
 
 //create task
 export async function createTask(data: CreateTaskProps) {

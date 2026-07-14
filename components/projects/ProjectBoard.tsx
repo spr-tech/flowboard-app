@@ -2,9 +2,8 @@
 import { useState } from "react";
 import TaskModal from "../modals/TaskModal";
 import { Delete, Edit, ArrowLeft } from "lucide-react";
-import DeleteTaskModal from "../modals/DeleteTaskModal";
-import { deleteProject } from "@/app/actions/projects";
-import type { Task } from "@/types/project";
+import DeleteModal from "../modals/DeleteModal";
+import type { Task } from "@/types/task";
 import Link from "next/link";
 
 type Project = {
@@ -145,7 +144,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
         )}
 
         {deleteTaskConfirmation && (
-          <DeleteTaskModal
+          <DeleteModal
             taskId={deleteTaskConfirmation}
             onClose={() => setDeleteTaskConfirmation(null)}
           />
