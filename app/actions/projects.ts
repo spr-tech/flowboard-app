@@ -3,10 +3,10 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/get-current-user";
 import { revalidatePath } from "next/cache";
-import type { createProjectProps } from "@/types/project";
+import type { ProjectProps } from "@/types/project";
 
 //create project
-export async function createProject(data: createProjectProps) {
+export async function createProject(data: ProjectProps) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -151,6 +151,7 @@ export async function getSingleProject(projectId: string) {
   };
 }
 
+//delete project
 export async function deleteProject(projectId: string) {
   const user = await getCurrentUser();
 
@@ -186,3 +187,5 @@ export async function deleteProject(projectId: string) {
     deletedProject,
   };
 }
+
+export function editProject(data: ProjectProps) {}

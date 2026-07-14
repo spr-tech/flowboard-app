@@ -4,13 +4,11 @@ import React, { useState, useRef } from "react";
 import { createProject } from "@/app/actions/projects";
 import { toast } from "sonner";
 
-interface CreateProjectModalProps {
+type ProjectModalProps = {
   onClose: () => void;
-}
+};
 
-export default function CreateProjectModal({
-  onClose,
-}: CreateProjectModalProps) {
+export default function ProjectModal({ onClose }: ProjectModalProps) {
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
@@ -32,7 +30,7 @@ export default function CreateProjectModal({
         description,
         color: projectColor,
         dueDate: dueDate ? new Date(dueDate) : undefined,
-      }); 
+      });
 
       if (result.success) {
         toast.success("Project created successfully");

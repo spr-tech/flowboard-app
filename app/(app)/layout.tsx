@@ -3,7 +3,7 @@
 import Sidebar from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { useState, useEffect } from "react";
-import CreateProjectModal from "@/components/modals/CreateProjectModal";
+import CreateProjectModal from "@/components/modals/ProjectModal";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);

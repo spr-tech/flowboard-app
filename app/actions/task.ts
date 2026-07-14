@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/get-current-user";
 import { revalidatePath } from "next/cache";
 import type { CreateTaskProps } from "@/types/task";
-import { EditTaskProps } from "@/types/task";
+import type { EditTaskProps } from "@/types/task";
 import { Priority } from "@/lib/generated/prisma";
 //create task
 export async function createTask(data: CreateTaskProps) {
