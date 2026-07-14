@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteTask } from "@/app/actions/projects";
+import { deleteTask } from "@/app/actions/task";
 import { useState } from "react";
 import { toast } from "sonner";
 

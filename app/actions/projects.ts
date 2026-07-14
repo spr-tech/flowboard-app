@@ -143,3 +143,39 @@ export async function getSingleProject(projectId: string) {
     project,
   };
 }
+
+export async function deleteProject(projectId: string) {
+  const user = await getCurrentUser();
+
+  if (!user)
+    return {
+      success: false,
+      error: "You must be logged in to delete a project",
+    };
+
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      ownerId: user.id,
+    },
+  });
+
+  if (!project) {
+    return {
+      success: false,
+      error: "Project not found",
+    };
+  }
+
+  const deletedProject = await prisma.project.delete({
+    where: { id: project.id },
+  });
+
+  revalidatePath("/projects");
+  revalidatePath("/dashboard");
+
+  return {
+    success: true,
+    deletedProject,
+  };
+}
