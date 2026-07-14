@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterFormValues } from "@/lib/validations/auth";
 import { registerNewUser } from "@/app/actions/auth";
+import { Eye, EyeOff } from "lucide-react";
+
 import Image from "next/image";
 
 // Defined OUTSIDE the component — created once, not re-created on every render
@@ -33,7 +35,11 @@ const GoogleIcon = () => (
 export default function RegisterForm() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
+  const handleShowPassword = () => {
+    setShowPassword((prev) => !prev);
+  };
   const {
     register,
     handleSubmit,
@@ -143,13 +149,27 @@ export default function RegisterForm() {
 
           {/* Password */}
           <div className="mb-3">
-            <input
-              id="password"
-              type="password"
-              placeholder="Create a password"
-              {...register("password")}
-              className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder-[#9CA3AF] outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/10 transition-colors"
-            />
+            <div className=" flex justify-between items-center  w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder-[#9CA3AF] outline-none focus-within:border-[#7C3AED] focus-within:ring-2 focus-within:ring-[#7C3AED]/10 transition-colors">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a password"
+                {...register("password")}
+                className="border-0 outline-0 flex-1"
+              />
+
+              <button
+                onClick={handleShowPassword}
+                className="hover:cursor-pointer"
+                type="button"
+              >
+                {showPassword ? (
+                  <EyeOff className="text-slate-700" size={15} />
+                ) : (
+                  <Eye className="text-slate-700" size={15} />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-xs text-[#EF4444] mt-1">
                 {errors.password.message}
@@ -158,19 +178,33 @@ export default function RegisterForm() {
           </div>
 
           {/* Confirm password */}
-          <div className="mb-4">
-            <input
-              id="confirmPassword"
-              type="password"
-              placeholder="Confirm your password"
-              {...register("confirmPassword")}
-              className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder-[#9CA3AF] outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/10 transition-colors"
-            />
-            {errors.confirmPassword && (
-              <p className="text-xs text-[#EF4444] mt-1">
-                {errors.confirmPassword.message}
-              </p>
-            )}
+          <div className="mb-3">
+            <div className=" flex justify-between items-center  w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder-[#9CA3AF] outline-none focus-within:border-[#7C3AED] focus-within:ring-2 focus-within:ring-[#7C3AED]/10 transition-colors">
+              <input
+                id="confirmPassword"
+                type={showPassword ? "text" : "password"}
+                placeholder="confirm password"
+                {...register("confirmPassword")}
+                className="border-0 outline-0 flex-1"
+              />
+              <button
+                onClick={handleShowPassword}
+                className="hover:cursor-pointer"
+                type="button"
+              >
+                {showPassword ? (
+                  <EyeOff className="text-slate-700" size={15} />
+                ) : (
+                  <Eye className="text-slate-700" size={15} />
+                )}
+              </button>
+
+              {errors.confirmPassword && (
+                <p className="text-xs text-[#EF4444] mt-1">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Terms */}

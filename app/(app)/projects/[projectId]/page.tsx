@@ -22,16 +22,5 @@ export default async function ProjectBoardPage({ params }: Props) {
     return <div>Project not found</div>;
   }
 
-  const normalizedProject = {
-    ...project,
-    columns: project.columns.map((column) => ({
-      ...column,
-      tasks: column.tasks.map((task) => ({
-        ...task,
-        priority: task.priority as "Low" | "Medium" | "High" | undefined,
-      })),
-    })),
-  };
-
-  return <ProjectBoard project={normalizedProject} />;
+  return <ProjectBoard project={project} />;
 }

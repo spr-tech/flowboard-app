@@ -1,7 +1,4 @@
 import { getProjects } from "@/app/actions/projects";
-import Link from "next/link";
-import { Delete } from "lucide-react";
-import { deleteProject } from "@/app/actions/projects";
 import ProjectSettings from "@/components/projects/ProjectSettings";
 
 export default async function ProjectPage() {

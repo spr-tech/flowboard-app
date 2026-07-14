@@ -5,6 +5,7 @@ import { Delete, Edit, ArrowLeft } from "lucide-react";
 import DeleteModal from "../modals/DeleteModal";
 import type { Task } from "@/types/task";
 import Link from "next/link";
+import { Priority } from "@/lib/generated/prisma";
 
 type Project = {
   id: string;
@@ -24,7 +25,7 @@ type Column = {
     title: string;
     description: string | null;
     status: string;
-    priority?: "Low" | "Medium" | "High";
+    priority: Priority;
     dueDate: Date | null;
   }[];
 };

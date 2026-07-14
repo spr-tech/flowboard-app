@@ -5,6 +5,7 @@ import { createTask } from "@/app/actions/task";
 import { toast } from "sonner";
 import { editTask } from "@/app/actions/task";
 import type { Task } from "@/types/task";
+import { Priority } from "@/lib/generated/prisma";
 
 type TaskModalProps = {
   columnId?: string;
@@ -17,9 +18,9 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
 
   const [title, setTitle] = useState(task?.title ?? "");
   const [description, setDescription] = useState(task?.description ?? "");
-  const [priority, setPriority] = useState<
-    "Low" | "Medium" | "High" | undefined
-  >(task?.priority ?? "Medium");
+  const [priority, setPriority] = useState<Priority>(
+    (task?.priority as Priority) ?? "MEDIUM"
+  );
   const existingDueDate = task?.dueDate
     ? new Date(task.dueDate).toISOString().split("T")[0]
     : "";
@@ -143,14 +144,12 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
           <select
             id="priority"
             value={priority}
-            onChange={(e) =>
-              setPriority(e.target.value as "Low" | "Medium" | "High")
-            }
+            onChange={(e) => setPriority(e.target.value as Priority)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#7C3AED] text-gray-800"
           >
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
           </select>
         </div>
 

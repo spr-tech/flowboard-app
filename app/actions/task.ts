@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/get-current-user";
 import { revalidatePath } from "next/cache";
 import type { CreateTaskProps } from "@/types/task";
 import { EditTaskProps } from "@/types/task";
-
+import { Priority } from "@/lib/generated/prisma";
 //create task
 export async function createTask(data: CreateTaskProps) {
   const user = await getCurrentUser();
@@ -43,7 +43,7 @@ export async function createTask(data: CreateTaskProps) {
     data: {
       title: data.title,
       description: data.description ?? "No description",
-      priority: data.priority,
+      priority: data.priority as Priority,
       dueDate: data.dueDate,
       column: {
         connect: {
@@ -168,7 +168,7 @@ export async function editTask(data: EditTaskProps) {
     data: {
       title: data.title.trim(),
       description: data.description,
-      priority: data.priority,
+      priority: data.priority as Priority,
       dueDate: data.dueDate,
     },
   });

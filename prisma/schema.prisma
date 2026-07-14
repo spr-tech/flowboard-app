@@ -28,7 +28,7 @@ model User {
 model Project {
   id          String    @id @default(cuid())
   name        String
-  description String?
+  description String
   color       String    @default("#7C3AED")
   status      String    @default("Active")
   dueDate     DateTime?
@@ -67,7 +67,7 @@ model Task {
   id          String    @id @default(cuid())
   title       String
   description String?
-  priority    String    @default("Medium")
+  priority    Priority    @default(MEDIUM)
   status      String    @default("todo")
   position    Int       @default(0)
   dueDate     DateTime?
@@ -78,4 +78,10 @@ model Task {
   column      Column    @relation(fields: [columnId], references: [id], onDelete: Cascade)
   assigneeId  String?
   assignee    User?     @relation("TaskAssignee", fields: [assigneeId], references: [id])
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
 }

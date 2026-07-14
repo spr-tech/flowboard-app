@@ -23,10 +23,17 @@ export async function createProject(data: createProjectProps) {
     };
   }
 
+  if (!data.description?.trim()) {
+    return {
+      success: false,
+      error: "Project description is required",
+    };
+  }
+
   const newProject = await prisma.project.create({
     data: {
       name: data.name,
-      description: data.description ?? null,
+      description: data.description,
       color: data.color ?? "#7C3AED",
       dueDate: data.dueDate,
       owner: {
