@@ -31,6 +31,11 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
     string | null
   >(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const priorityStyles = {
+    LOW: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    MEDIUM: "bg-amber-50 text-amber-700 border-amber-200",
+    HIGH: "bg-rose-50 text-rose-700 border-rose-100",
+  };
 
   return (
     <div>
@@ -105,6 +110,26 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
                         {task.description}
                       </p>
                     )}
+
+                    <div className=" flex justify-between mt-3">
+                      {task.priority && (
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md border tracking-wider uppercase ${priorityStyles[task.priority]}`}
+                        >
+                          {task.priority.toLowerCase()}
+                        </span>
+                      )}
+
+                      {task.dueDate && (
+                        <span className="text-slate-600 text-sm">
+                          {task.dueDate.toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (

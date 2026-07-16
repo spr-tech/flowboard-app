@@ -188,4 +188,4 @@ export async function deleteProject(projectId: string) {
   };
 }
 
-export function editProject(data: ProjectProps) {}
+// export function editProject(data: ProjectProps) {}
