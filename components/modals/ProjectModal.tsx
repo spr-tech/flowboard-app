@@ -6,21 +6,21 @@ import { toast } from "sonner";
 import { Project } from "@/types/project";
 
 type ProjectModalProps = {
-  project: Project;
+  project?: Project;
   onClose: () => void;
 };
 
 export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   const isEditing = !!project;
-  const [projectName, setProjectName] = useState(project.name ?? "");
-  const [description, setDescription] = useState(project.description ?? "");
+  const [projectName, setProjectName] = useState(project?.name ?? "");
+  const [description, setDescription] = useState(project?.description ?? "");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [projectColor, setProjectColor] = useState(project.color ?? "#7C3AED");
+  const [projectColor, setProjectColor] = useState(project?.color ?? "#7C3AED");
 
-  const existingDueDate = project.dueDate
-    ? new Date(project.dueDate).toISOString().split("T")[0]
+  const existingDueDate = project?.dueDate
+    ? new Date(project?.dueDate).toISOString().split("T")[0]
     : "";
   const [dueDate, setDueDate] = useState(existingDueDate);
 
