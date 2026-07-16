@@ -29,7 +29,7 @@ export default function ProjectModal({ onClose }: ProjectModalProps) {
         name: projectName,
         description,
         color: projectColor,
-        dueDate: dueDate ? new Date(dueDate) : undefined,
+        dueDate: dueDate ? new Date(dueDate) : null,
       });
 
       if (result.success) {

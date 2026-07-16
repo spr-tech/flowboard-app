@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Delete } from "lucide-react";
+import { Edit, Delete } from "lucide-react";
 import { useState } from "react";
 import DeleteModal from "../modals/DeleteModal";
 
@@ -26,7 +26,7 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
     <>
       <div
         key={project.id}
-        className="flex justify-between hover:cursor-pointer bg-white border border-[#E5E7EB] rounded-xl p-4 transition-all hover:shadow-md hover:-translate-y-1"
+        className="flex flex-1 justify-between hover:cursor-pointer bg-white border border-[#E5E7EB] rounded-xl p-4 transition-all hover:shadow-md hover:-translate-y-1"
       >
         <Link href={`/projects/${project.id}`}>
           <div className="">
@@ -43,8 +43,24 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
           </div>
         </Link>
 
-        <div className="hover:text-red-200 text-red-500">
-          <Delete onClick={() => setSelectedProjectId(project.id)} />
+        {/* Edit Icon Wrapper Button */}
+        <div className="flex  items-start">
+          <button
+            type="button"
+            className="p-1 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+            aria-label="Edit project"
+          >
+            <Edit size={20} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedProjectId(project.id)}
+            className="p-1 rounded-md text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+            aria-label="Delete project"
+          >
+            <Delete size={20} />
+          </button>
         </div>
       </div>
 

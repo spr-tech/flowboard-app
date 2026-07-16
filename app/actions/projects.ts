@@ -3,10 +3,10 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/get-current-user";
 import { revalidatePath } from "next/cache";
-import type { ProjectProps } from "@/types/project";
+import type { CreateProjectProps, EditProjectProps } from "@/types/project";
 
 //create project
-export async function createProject(data: ProjectProps) {
+export async function createProject(data: CreateProjectProps) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -188,4 +188,54 @@ export async function deleteProject(projectId: string) {
   };
 }
 
-// export function editProject(data: ProjectProps) {}
+export async function editProject(data: EditProjectProps) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return {
+      success: false,
+      error: "You must be logged in to edit projects",
+    };
+  }
+  if (!data.name?.trim()) {
+    return { success: false, error: "Project name cannot be empty" };
+  }
+  if (!data.description?.trim()) {
+    return { success: false, error: "Project description cannot be empty" };
+  }
+
+  const project = await prisma.project.findFirst({
+    where: {
+      id: data.id,
+      ownerId: user.id,
+    },
+  });
+
+  if (!project) {
+    return {
+      success: false,
+      error: "Project not found or you do not have access to edit",
+    };
+  }
+
+  const updatedProject = await prisma.project.update({
+    where: {
+      id: project.id,
+    },
+    data: {
+      name: data.name,
+      description: data.description,
+      color: data.color,
+      dueDate: data.dueDate,
+    },
+  });
+
+  revalidatePath("/projects");
+  revalidatePath("/dashboard");
+  revalidatePath(`/projects/${project.id}`);
+
+  return {
+    success: true,
+    project: updatedProject,
+  };
+}
