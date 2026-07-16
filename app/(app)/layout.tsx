@@ -3,7 +3,7 @@
 import Sidebar from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import { useState, useEffect } from "react";
-import CreateProjectModal from "@/components/modals/ProjectModal";
+import ProjectModal from "@/components/modals/ProjectModal";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -52,9 +52,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         <main className="flex-1 min-w-0 bg-[#F9FAFB] p-5 overflow-y-auto">
           {children}
-          {modalOpen && (
-            <CreateProjectModal onClose={() => setModalOpen(false)} />
-          )}
+          {modalOpen && <ProjectModal onClose={() => setModalOpen(false)} />}
         </main>
       </div>
     </div>

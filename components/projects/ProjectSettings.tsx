@@ -3,15 +3,9 @@
 import Link from "next/link";
 import { Edit, Delete } from "lucide-react";
 import { useState } from "react";
+import ProjectModal from "../modals/ProjectModal";
 import DeleteModal from "../modals/DeleteModal";
-
-type Project = {
-  id: string;
-  name: string;
-  color: string;
-  description: string;
-  status: string;
-};
+import { Project } from "@/types/project";
 
 type ProjectSettingsProps = {
   project: Project;
@@ -21,6 +15,7 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     null
   );
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   return (
     <>
@@ -44,13 +39,13 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
         </Link>
 
         {/* Edit Icon Wrapper Button */}
-        <div className="flex  items-start">
+        <div className="flex items-start ">
           <button
             type="button"
             className="p-1 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
             aria-label="Edit project"
           >
-            <Edit size={20} />
+            <Edit size={20} onClick={() => setSelectedProject(project)} />
           </button>
 
           <button
@@ -63,6 +58,12 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
           </button>
         </div>
       </div>
+      {selectedProject && (
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
 
       {selectedProjectId && (
         <DeleteModal

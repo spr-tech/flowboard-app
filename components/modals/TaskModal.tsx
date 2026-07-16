@@ -188,10 +188,10 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
           >
             {isLoading
               ? isEditing
-                ? "saving"
+                ? "Updating"
                 : "creating"
               : isEditing
-                ? "Save"
+                ? "Update"
                 : "Create Task"}
           </button>
         </div>

@@ -1,29 +1,32 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { createProject } from "@/app/actions/projects";
+import { createProject, editProject } from "@/app/actions/projects";
 import { toast } from "sonner";
+import { Project } from "@/types/project";
 
 type ProjectModalProps = {
+  project: Project;
   onClose: () => void;
 };
 
-export default function ProjectModal({ onClose }: ProjectModalProps) {
-  const [projectName, setProjectName] = useState("");
-  const [description, setDescription] = useState("");
+export default function ProjectModal({ project, onClose }: ProjectModalProps) {
+  const isEditing = !!project;
+  const [projectName, setProjectName] = useState(project.name ?? "");
+  const [description, setDescription] = useState(project.description ?? "");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [projectColor, setProjectColor] = useState("#7C3AED");
-  const [dueDate, setDueDate] = useState("");
+  const [projectColor, setProjectColor] = useState(project.color ?? "#7C3AED");
+
+  const existingDueDate = project.dueDate
+    ? new Date(project.dueDate).toISOString().split("T")[0]
+    : "";
+  const [dueDate, setDueDate] = useState(existingDueDate);
 
   const colorInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
+  const createNewProject = async () => {
     try {
       const result = await createProject({
         name: projectName,
@@ -48,13 +51,53 @@ export default function ProjectModal({ onClose }: ProjectModalProps) {
     }
   };
 
+  const editExistingProject = async (project: Project) => {
+    try {
+      const result = await editProject({
+        id: project.id,
+        name: projectName,
+        description,
+        color: projectColor,
+        dueDate: dueDate ? new Date(dueDate) : null,
+      });
+
+      if (result.success) {
+        toast.success("Project updated successfully");
+
+        onClose();
+      } else {
+        setError(result?.error ?? "Unable update project");
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    if (isEditing) {
+      await editExistingProject(project);
+    } else {
+      await createNewProject();
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <form
         className="w-full max-w-md bg-white rounded-xl shadow-xl p-6 space-y-5"
         onSubmit={handleSubmit}
       >
-        <h2 className="text-xl font-semibold text-gray-900">Create Project</h2>
+        <h2 className="text-xl font-semibold text-gray-900">
+          {isEditing ? "Edit Project" : "Create Project"}
+        </h2>
 
         {/* Project Name */}
         <div className="w-full flex flex-col gap-1.5">
@@ -153,7 +196,13 @@ export default function ProjectModal({ onClose }: ProjectModalProps) {
             disabled={isLoading}
             className="px-4 py-2 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white transition disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-gray-500"
           >
-            {isLoading ? "creating project..." : "create project"}
+            {isLoading
+              ? isEditing
+                ? "Updating project..."
+                : "Creating project"
+              : isEditing
+                ? "Update project"
+                : "Create project"}
           </button>
         </div>
       </form>
