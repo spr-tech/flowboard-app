@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Project } from "@/types/project";
 
 type ProjectModalProps = {
-  project?: Project;
+  project?: Project | null;
   onClose: () => void;
 };
 
