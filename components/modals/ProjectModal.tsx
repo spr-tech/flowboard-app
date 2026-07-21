@@ -91,9 +91,9 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 p bg-black/70 backdrop-blur-sm">
       <form
-        className="w-full max-w-md bg-white rounded-xl shadow-xl p-6 space-y-5"
+        className="w-full max-w-md p-6 space-y-5 bg-white shadow-xl rounded-xl"
         onSubmit={handleSubmit}
       >
         <h2 className="text-xl font-semibold text-gray-900">
@@ -144,7 +144,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           <div className="flex items-center gap-2 w-full  px-3 py-2 border border-gray-300 rounded-lg resize-none outline-none focus-within:ring-1 focus-within:ring-[#7C3AED]">
             <div
               style={{ backgroundColor: projectColor }}
-              className="w-8 h-8 rounded-md border"
+              className="w-8 h-8 border rounded-md"
               onClick={() => colorInputRef.current?.click()}
             />
             <input
@@ -157,7 +157,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
 
             <input
               type="text"
-              className=" border-none outline-none text-gray-600"
+              className="text-gray-600 border-none outline-none "
               value={projectColor}
               onChange={(e) => setProjectColor(e.target.value)}
             />
@@ -165,7 +165,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         </div>
 
         <div>
-          <label htmlFor="due_date " className="text-gray-800 text-sm">
+          <label htmlFor="due_date " className="text-sm text-gray-800">
             Due date
           </label>
           <input
@@ -177,7 +177,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         </div>
 
         {error && (
-          <p className="text-red-600 text-base justify-center items-center mt-2 mb-2">
+          <p className="items-center justify-center mt-2 mb-2 text-base text-red-600">
             {error}
           </p>
         )}
@@ -187,7 +187,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
+            className="px-4 py-2 text-gray-700 transition border border-gray-300 rounded-lg hover:bg-gray-100"
           >
             Cancel
           </button>

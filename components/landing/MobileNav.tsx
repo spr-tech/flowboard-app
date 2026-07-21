@@ -30,11 +30,14 @@ const MobileNav = () => {
               height={50}
             />{" "}
           </div>
-          <span className="text-white font-medium text-base">FlowBoard</span>
+          <span className="text-base font-medium text-white ">FlowBoard</span>
         </div>
 
         {/* Hamburger / X */}
-        <button onClick={() => setOpen((prev) => !prev)} className="text-white">
+        <button
+          onClick={() => setOpen((prev) => !prev)}
+          className="text-white hover:cursor-pointer "
+        >
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
       </nav>
@@ -42,37 +45,37 @@ const MobileNav = () => {
       {/* Mobile modal — slides below navbar */}
       {open && (
         <div className="fixed top-14 left-0 right-0 bottom-0 z-40 bg-[#1E1B2E] flex flex-col px-6 py-8 md:hidden">
-          {/* Nav links */}
+          {/* Nav links */}-
           <div className="flex flex-col gap-1">
             <Link
               href="#features"
-              className="text-base text-white/80 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-colors"
+              className="px-4 py-3 text-base transition-colors rounded-lg text-white/80 hover:text-white hover:bg-white/5"
             >
               Features
             </Link>
             <Link
               href="#pricing"
-              className="text-base text-white/80 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-colors"
+              className="px-4 py-3 text-base transition-colors rounded-lg text-white/80 hover:text-white hover:bg-white/5"
             >
               Pricing
             </Link>
             <Link
               href="#docs"
-              className="text-base text-white/80 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-colors"
+              className="px-4 py-3 text-base transition-colors rounded-lg text-white/80 hover:text-white hover:bg-white/5"
             >
               Docs
             </Link>
           </div>
 
           {/* Divider */}
-          <div className="h-px bg-white/10 my-6" />
+          <div className="h-px my-6 bg-white/10" />
 
           {/* Buttons */}
           <div className="flex flex-col gap-3">
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              className="w-full text-center border border-white/20 text-white/80 rounded-lg px-4 py-3 text-sm hover:bg-white/10 transition-colors"
+              className="w-full px-4 py-3 text-sm text-center transition-colors border rounded-lg border-white/20 text-white/80 hover:bg-white/10"
             >
               Sign in
             </Link>
