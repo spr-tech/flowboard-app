@@ -1,10 +1,12 @@
 "use client";
 import { useState } from "react";
 import TaskModal from "../modals/TaskModal";
-import { Delete, Edit, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import DeleteModal from "../modals/DeleteModal";
 import type { Task } from "@/types/task";
 import Link from "next/link";
+import { DndContext } from "@dnd-kit/core";
+import DraggableTask from "../board/DraggableTask";
 
 type Project = {
   id: string;
@@ -31,11 +33,6 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
     string | null
   >(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const priorityStyles = {
-    LOW: "bg-emerald-50 text-emerald-700 border-emerald-100",
-    MEDIUM: "bg-amber-50 text-amber-700 border-amber-200",
-    HIGH: "bg-rose-50 text-rose-700 border-rose-100",
-  };
 
   return (
     <div>
@@ -64,108 +61,68 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
       </div>
 
       {/* Project Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {project?.columns.map((column) => (
-          <div
-            key={column.id}
-            className="bg-white border border-[#E5E7EB] rounded-xl p-4 overflow-y-auto"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[#111827] font-semibold">{column.name}</h2>
+      <DndContext>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {project?.columns.map((column) => (
+            <div
+              key={column.id}
+              className="bg-white border border-[#E5E7EB] rounded-xl p-4 overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[#111827] font-semibold">{column.name}</h2>
 
-              <span className="text-xs font-medium px-2 py-1 rounded-full bg-[#F3F4F6] text-[#6B7280]">
-                {column.tasks.length}
-              </span>
-            </div>
+                <span className="text-xs font-medium px-2 py-1 rounded-full bg-[#F3F4F6] text-[#6B7280]">
+                  {column.tasks.length}
+                </span>
+              </div>
 
-            <div className="space-y-3 min-h-55">
-              {column.tasks.length > 0 ? (
-                column.tasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-3 hover:border-[#7C3AED] transition-colors cursor-pointer"
-                  >
-                    <div className="flex justify-between">
-                      <p className="text-sm font-medium text-[#111827]">
-                        {task.title.toUpperCase()}
-                      </p>
-                      <div className="flex gap-1">
-                        <Edit
-                          size={20}
-                          className=" rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
-                          onClick={() => setSelectedTask(task)}
-                        />
-                        <Delete
-                          size={20}
-                          className=" rounded-md text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-                          onClick={() => setDeleteTaskConfirmation(task.id)}
-                        />
-                      </div>
-                    </div>
-
-                    {task.description && (
-                      <p className="text-sm text-[#6B7280] mt-1 ">
-                        {task.description}
-                      </p>
-                    )}
-
-                    <div className=" flex justify-between mt-3">
-                      {task.priority && (
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md border tracking-wider uppercase ${priorityStyles[task.priority]}`}
-                        >
-                          {task.priority.toLowerCase()}
-                        </span>
-                      )}
-
-                      {task.dueDate && (
-                        <span className="text-slate-600 text-sm">
-                          {task.dueDate.toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </span>
-                      )}
-                    </div>
+              <div className="space-y-3 min-h-55">
+                {column.tasks.length > 0 ? (
+                  column.tasks.map((task) => (
+                    <DraggableTask
+                      key={task.id}
+                      task={task}
+                      onEdit={() => setSelectedTask(task)}
+                      onDelete={() => setDeleteTaskConfirmation(task.id)}
+                    />
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center h-32 rounded-lg border-2 border-dashed border-[#E5E7EB]">
+                    <p className="text-sm text-[#9CA3AF]">No tasks yet</p>
                   </div>
-                ))
-              ) : (
-                <div className="flex items-center justify-center h-32 rounded-lg border-2 border-dashed border-[#E5E7EB]">
-                  <p className="text-sm text-[#9CA3AF]">No tasks yet</p>
-                </div>
-              )}
+                )}
 
-              <button
-                onClick={() => setSelectedColumnId(column.id)}
-                className="w-full py-2 rounded-lg border border-dashed border-[#D1D5DB] text-[#7C3AED] hover:bg-[#F5F3FF] transition"
-              >
-                + Add Task
-              </button>
+                <button
+                  onClick={() => setSelectedColumnId(column.id)}
+                  className="w-full py-2 rounded-lg border border-dashed border-[#D1D5DB] text-[#7C3AED] hover:bg-[#F5F3FF] transition"
+                >
+                  + Add Task
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-        {selectedColumnId && (
-          <TaskModal
-            columnId={selectedColumnId}
-            onClose={() => setSelectedColumnId(null)}
-          />
-        )}
+          ))}
+          {selectedColumnId && (
+            <TaskModal
+              columnId={selectedColumnId}
+              onClose={() => setSelectedColumnId(null)}
+            />
+          )}
 
-        {selectedTask && (
-          <TaskModal
-            task={selectedTask}
-            onClose={() => setSelectedTask(null)}
-          />
-        )}
+          {selectedTask && (
+            <TaskModal
+              task={selectedTask}
+              onClose={() => setSelectedTask(null)}
+            />
+          )}
 
-        {deleteTaskConfirmation && (
-          <DeleteModal
-            taskId={deleteTaskConfirmation}
-            onClose={() => setDeleteTaskConfirmation(null)}
-          />
-        )}
-      </div>
+          {deleteTaskConfirmation && (
+            <DeleteModal
+              taskId={deleteTaskConfirmation}
+              onClose={() => setDeleteTaskConfirmation(null)}
+            />
+          )}
+        </div>
+      </DndContext>
     </div>
   );
 }

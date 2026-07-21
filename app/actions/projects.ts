@@ -180,9 +180,9 @@ export async function deleteProject(projectId: string) {
   });
 
   revalidatePath("/projects");
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard"); 
 
-  return {
+  return {  
     success: true,
     deletedProject,
   };
