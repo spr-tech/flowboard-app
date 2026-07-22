@@ -151,7 +151,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
                   items={column.tasks.map((task) => task.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="mb-4 space-y-37.5 min-h-37">
+                  <div className="mb-4 space-y-37.5 min-h-90">
                     {column.tasks.length > 0 ? (
                       column.tasks.map((task) => (
                         <DraggableTask
