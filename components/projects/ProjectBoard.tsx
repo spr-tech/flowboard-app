@@ -10,12 +10,15 @@ import {
   useSensors,
   useSensor,
   PointerSensor,
-} from "@dnd-kit/core"; // Fixed: Added PointerSensor import
+  DragEndEvent,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import DraggableTask from "../board/DraggableTask";
+import DroppableColumn from "../board/DroppableColumn";
+import { moveTask } from "@/app/actions/task";
 
 type Project = {
   id: string;
@@ -43,6 +46,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
     string | null
   >(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [currentProject, setCurrentProject] = useState(project);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -52,13 +56,65 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
     })
   );
 
+  const findColumn = (taskId: string) => {
+    return currentProject.columns.find((column) =>
+      column.tasks.some((task) => taskId === task.id)
+    );
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const sourceColumn = findColumn(active.id as string);
+
+    const draggedTask = sourceColumn?.tasks.find(
+      (task) => task.id === active.id
+    );
+
+    if (!draggedTask) return;
+
+    const destinationColumn = currentProject.columns.find(
+      (column) => column.id === over.id
+    );
+
+    if (!destinationColumn) return;
+    if (sourceColumn?.id === destinationColumn?.id) return;
+
+    const columnsCopy = [...currentProject.columns];
+
+    const sourceColumnCopy = columnsCopy.find(
+      (column) => column.id === sourceColumn?.id
+    );
+
+    const destinationColumnCopy = columnsCopy.find(
+      (column) => column.id === destinationColumn?.id
+    );
+
+    const newTaskList = sourceColumnCopy?.tasks.filter(
+      (task) => task.id !== active.id
+    );
+
+    if (sourceColumnCopy) {
+      sourceColumnCopy.tasks = newTaskList ?? [];
+    }
+
+    const updatedTask = { ...draggedTask, columnId: destinationColumn!.id };
+    destinationColumnCopy?.tasks.push(updatedTask);
+    console.log(columnsCopy);
+
+    setCurrentProject({ ...currentProject, columns: columnsCopy });
+
+    await moveTask(draggedTask.id as string, destinationColumn.id as string);
+  };
+
   return (
     <div>
       {/* Header */}
       <div className="flex items-center justify-between w-full pb-4 mb-6 border-b border-gray-100">
         <div>
           <h2 className="text-lg font-bold tracking-tight text-gray-900">
-            {project?.name} Board
+            {currentProject?.name} Board
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">
             Drag tasks between columns to update their status
@@ -77,50 +133,50 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
       </div>
 
       {/* Project Columns */}
-      <DndContext sensors={sensors}>
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <div className="grid items-start grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {project?.columns.map((column) => (
-            <div
-              key={column.id}
-              id={column.id}
-              className="bg-white border border-[#E5E7EB] rounded-xl p-4 overflow-y-auto"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-[#111827] font-semibold">{column.name}</h2>
-                <span className="text-xs font-medium px-2 py-1 rounded-full bg-[#F3F4F6] text-[#6B7280]">
-                  {column.tasks.length}
-                </span>
-              </div>
-
-              <SortableContext
-                items={column.tasks.map((task) => task.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className="mb-4 space-y-37.5 min-h-">
-                  {column.tasks.length > 0 ? (
-                    column.tasks.map((task) => (
-                      <DraggableTask
-                        key={task.id}
-                        task={task}
-                        onEdit={() => setSelectedTask(task)}
-                        onDelete={() => setDeleteTaskConfirmation(task.id)}
-                      />
-                    ))
-                  ) : (
-                    <div className="flex items-center justify-center h-32 rounded-lg border-2 border-dashed border-[#E5E7EB]">
-                      <p className="text-sm text-[#9CA3AF]">No tasks yet</p>
-                    </div>
-                  )}
+          {currentProject.columns.map((column) => (
+            <DroppableColumn key={column.id} id={column.id}>
+              <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-[#111827] font-semibold">
+                    {column.name}
+                  </h2>
+                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-[#F3F4F6] text-[#6B7280]">
+                    {column.tasks.length}
+                  </span>
                 </div>
-              </SortableContext>
 
-              <button
-                onClick={() => setSelectedColumnId(column.id)}
-                className="w-full py-2 rounded-lg border border-dashed border-[#D1D5DB] text-[#7C3AED] hover:bg-[#F5F3FF] transition"
-              >
-                + Add task
-              </button>
-            </div>
+                <SortableContext
+                  items={column.tasks.map((task) => task.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="mb-4 space-y-37.5 min-h-37">
+                    {column.tasks.length > 0 ? (
+                      column.tasks.map((task) => (
+                        <DraggableTask
+                          key={task.id}
+                          task={task}
+                          onEdit={() => setSelectedTask(task)}
+                          onDelete={() => setDeleteTaskConfirmation(task.id)}
+                        />
+                      ))
+                    ) : (
+                      <div className="flex items-center justify-center h-32 rounded-lg border-2 border-dashed border-[#E5E7EB]">
+                        <p className="text-sm text-[#9CA3AF]">No tasks yet</p>
+                      </div>
+                    )}
+                  </div>
+                </SortableContext>
+
+                <button
+                  onClick={() => setSelectedColumnId(column.id)}
+                  className="w-full py-2 rounded-lg border border-dashed border-[#D1D5DB] text-[#7C3AED] hover:bg-[#F5F3FF] transition"
+                >
+                  + Add task
+                </button>
+              </div>
+            </DroppableColumn>
           ))}
         </div>
       </DndContext>
