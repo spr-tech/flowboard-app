@@ -74,11 +74,16 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
 
     if (!draggedTask) return;
 
-    const destinationColumn = currentProject.columns.find(
+    let destinationColumn = currentProject.columns.find(
       (column) => column.id === over.id
     );
 
+    if (!destinationColumn) {
+      destinationColumn = findColumn(over.id as string);
+    }
+
     if (!destinationColumn) return;
+
     if (sourceColumn?.id === destinationColumn?.id) return;
 
     const columnsCopy = [...currentProject.columns];
@@ -99,13 +104,23 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
       sourceColumnCopy.tasks = newTaskList ?? [];
     }
 
-    const updatedTask = { ...draggedTask, columnId: destinationColumn!.id };
+    const updatedTask = { ...draggedTask, columnId: destinationColumn.id };
     destinationColumnCopy?.tasks.push(updatedTask);
-    console.log(columnsCopy);
 
     setCurrentProject({ ...currentProject, columns: columnsCopy });
 
     await moveTask(draggedTask.id as string, destinationColumn.id as string);
+  };
+
+  const handleTaskCreated = (newTask: Task) => {
+    const columnsCopy = [...currentProject.columns];
+
+    const targetColumn = columnsCopy.find(
+      (column) => newTask.columnId === column.id
+    );
+    targetColumn?.tasks.unshift(newTask);
+
+    setCurrentProject({ ...currentProject, columns: columnsCopy });
   };
 
   return (
@@ -151,7 +166,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
                   items={column.tasks.map((task) => task.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="mb-4 space-y-37.5 min-h-90">
+                  <div className="mb-4 space-y-37.5 min-h-50">
                     {column.tasks.length > 0 ? (
                       column.tasks.map((task) => (
                         <DraggableTask
@@ -186,6 +201,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
         <TaskModal
           columnId={selectedColumnId}
           onClose={() => setSelectedColumnId(null)}
+          onTaskCreated={handleTaskCreated}
         />
       )}
 

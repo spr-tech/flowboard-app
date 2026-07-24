@@ -11,9 +11,15 @@ type TaskModalProps = {
   columnId?: string;
   task?: Task;
   onClose: () => void;
+  onTaskCreated?: (newTask: Task) => void;
 };
 
-export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
+export default function TaskModal({
+  columnId,
+  task,
+  onClose,
+  onTaskCreated,
+}: TaskModalProps) {
   const isEditing = !!task;
 
   const [title, setTitle] = useState(task?.title ?? "");
@@ -39,7 +45,17 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
         // projectId,
       });
 
-      if (result.success) {
+      if (result.success && result.newTask) {
+        const cleanTask: Task = {
+          id: result.newTask.id,
+          title: result.newTask.title,
+          description: result.newTask.description,
+          priority: result.newTask.priority as Priority,
+          dueDate: result.newTask.dueDate,
+          columnId: result.newTask.columnId,
+        };
+
+        onTaskCreated?.(cleanTask);
         onClose();
         toast.success("Task created successfully");
       } else {
@@ -92,9 +108,9 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/10 backdrop-blur-sm">
       <form
-        className="w-full max-w-md bg-white rounded-xl shadow-xl p-6 space-y-4"
+        className="w-full max-w-md p-6 space-y-4 bg-white shadow-xl rounded-xl"
         onSubmit={handleSubmit}
       >
         <h2 className="text-xl font-semibold text-gray-900">
@@ -170,14 +186,14 @@ export default function TaskModal({ columnId, task, onClose }: TaskModalProps) {
           />
         </div>
 
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
 
         {/* Buttons */}
         <div className="flex justify-end gap-3 pt-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
+            className="px-4 py-2 text-gray-700 transition border border-gray-300 rounded-lg hover:bg-gray-100"
           >
             Cancel
           </button>

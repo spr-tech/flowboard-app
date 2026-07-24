@@ -15,11 +15,12 @@ export default function DroppableColumn({
     id,
   });
 
-  
   return (
     <div
       ref={setNodeRef}
-      className={isOver ? "bg-purple-50 rounded-xl" : ""}
+      className={
+        isOver ? "bg-purple-50 rounded-xl border-purple-900" : "border-red-500"
+      }
     >
       {children}
     </div>
