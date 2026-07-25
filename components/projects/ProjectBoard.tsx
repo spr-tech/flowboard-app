@@ -67,8 +67,9 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
     if (!over) return;
 
     const sourceColumn = findColumn(active.id as string);
+    if (!sourceColumn) return;
 
-    const draggedTask = sourceColumn?.tasks.find(
+    const draggedTask = sourceColumn.tasks.find(
       (task) => task.id === active.id
     );
 
@@ -77,20 +78,38 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
     let destinationColumn = currentProject.columns.find(
       (column) => column.id === over.id
     );
-
+    console.log(sourceColumn.id);
+    console.log(destinationColumn?.id);
+    console.log(active.id);
+    console.log(over.id);
     if (!destinationColumn) {
       destinationColumn = findColumn(over.id as string);
     }
 
     if (!destinationColumn) return;
 
-    if (sourceColumn?.id === destinationColumn?.id) return;
-
     const columnsCopy = [...currentProject.columns];
 
     const sourceColumnCopy = columnsCopy.find(
       (column) => column.id === sourceColumn?.id
     );
+    if (!sourceColumnCopy) return;
+
+    // reordering within a column
+    if (sourceColumn.id === destinationColumn.id) {
+      const activeIndex = sourceColumnCopy?.tasks.findIndex(
+        (task) => task.id === active.id
+      );
+      const overIndex = sourceColumnCopy.tasks.findIndex(
+        (task) => task.id === over.id
+      );
+
+      const [movedTask] = sourceColumnCopy.tasks.splice(activeIndex, 1);
+      sourceColumnCopy.tasks.splice(overIndex, 0, movedTask);
+      setCurrentProject({ ...currentProject, columns: columnsCopy });
+
+      return;
+    }
 
     const destinationColumnCopy = columnsCopy.find(
       (column) => column.id === destinationColumn?.id
