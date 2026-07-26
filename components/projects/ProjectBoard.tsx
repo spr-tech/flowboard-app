@@ -46,7 +46,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
     string | null
   >(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [currentProject, setCurrentProject] = useState(project);
+  const [currentProject, setCurrentProject] = useState<Project | null>(project);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -55,6 +55,8 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
       },
     })
   );
+
+  if (!currentProject) return;
 
   const findColumn = (taskId: string) => {
     return currentProject.columns.find((column) =>
@@ -78,10 +80,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
     let destinationColumn = currentProject.columns.find(
       (column) => column.id === over.id
     );
-    console.log(sourceColumn.id);
-    console.log(destinationColumn?.id);
-    console.log(active.id);
-    console.log(over.id);
+
     if (!destinationColumn) {
       destinationColumn = findColumn(over.id as string);
     }
@@ -105,9 +104,20 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
       );
 
       const [movedTask] = sourceColumnCopy.tasks.splice(activeIndex, 1);
-      sourceColumnCopy.tasks.splice(overIndex, 0, movedTask);
-      setCurrentProject({ ...currentProject, columns: columnsCopy });
 
+      const insertIndex =
+        overIndex === -1 ? sourceColumnCopy.tasks.length : overIndex;
+      sourceColumnCopy.tasks.splice(insertIndex, 0, movedTask);
+
+      sourceColumnCopy.tasks.forEach((task, index) => {
+        task.position = index;
+      });
+      setCurrentProject({ ...currentProject, columns: columnsCopy });
+      await moveTask(
+        draggedTask.id as string,
+        destinationColumn.id as string,
+        sourceColumnCopy.tasks
+      );
       return;
     }
 
@@ -124,11 +134,15 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
     }
 
     const updatedTask = { ...draggedTask, columnId: destinationColumn.id };
-    destinationColumnCopy?.tasks.push(updatedTask);
+    destinationColumnCopy?.tasks.unshift(updatedTask);
 
     setCurrentProject({ ...currentProject, columns: columnsCopy });
 
-    await moveTask(draggedTask.id as string, destinationColumn.id as string);
+    await moveTask(
+      draggedTask.id as string,
+      destinationColumn.id as string,
+      sourceColumnCopy.tasks
+    );
   };
 
   const handleTaskCreated = (newTask: Task) => {
@@ -231,6 +245,7 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
       {deleteTaskConfirmation && (
         <DeleteModal
           taskId={deleteTaskConfirmation}
+          setCurrentProject={setCurrentProject}
           onClose={() => setDeleteTaskConfirmation(null)}
         />
       )}

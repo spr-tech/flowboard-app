@@ -7,14 +7,15 @@ export type Task = {
   priority: Priority;
   dueDate: Date | null;
   columnId: string;
+  position: number;
 };
 
-export type CreateTaskProps = Omit<Task, "id"> & {
+export type CreateTaskProps = Omit<Task, "id" | "position"> & {
   description?: string | null;
   dueDate?: Date | null;
 };
 
-export type EditTaskProps = Omit<Task, "columnId"> & {
+export type EditTaskProps = Omit<Task, "columnId" | "position"> & {
   description?: string | null;
   dueDate?: Date | null;
 };

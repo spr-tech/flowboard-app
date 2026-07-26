@@ -122,9 +122,14 @@ export async function getSingleProject(projectId: string) {
       columns: {
         include: {
           tasks: {
-            orderBy: {
-              createdAt: "desc",
-            },
+            orderBy: [
+              {
+                position: "asc",
+              },
+              {
+                createdAt: "desc",
+              },
+            ],
           },
         },
       },
@@ -180,9 +185,9 @@ export async function deleteProject(projectId: string) {
   });
 
   revalidatePath("/projects");
-  revalidatePath("/dashboard"); 
+  revalidatePath("/dashboard");
 
-  return {  
+  return {
     success: true,
     deletedProject,
   };

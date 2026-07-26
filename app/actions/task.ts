@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/get-current-user";
 import { revalidatePath } from "next/cache";
-import type { CreateTaskProps } from "@/types/task";
+import type { CreateTaskProps, Task } from "@/types/task";
 import type { EditTaskProps } from "@/types/task";
 import { Priority } from "@/lib/generated/prisma";
 //create task
@@ -181,7 +181,11 @@ export async function editTask(data: EditTaskProps) {
 }
 
 //moving a task
-export async function moveTask(taskId: string, destinationColumnId: string) {
+export async function moveTask(
+  taskId: string,
+  destinationColumnId: string,
+  tasks: Task[]
+) {
   const user = await getCurrentUser();
   if (!user)
     return {
@@ -239,6 +243,19 @@ export async function moveTask(taskId: string, destinationColumnId: string) {
       error: "Column not found",
     };
   }
+
+  const updates = tasks.map((task) => {
+    return prisma.task.update({
+      where: {
+        id: task.id,
+      },
+      data: {
+        position: task.position,
+      },
+    });
+  });
+
+  await prisma.$transaction(updates);
 
   const movedTask = await prisma.task.update({
     where: { id: task.id },

@@ -53,6 +53,7 @@ export default function TaskModal({
           priority: result.newTask.priority as Priority,
           dueDate: result.newTask.dueDate,
           columnId: result.newTask.columnId,
+          position: result.newTask.position,
         };
 
         onTaskCreated?.(cleanTask);
