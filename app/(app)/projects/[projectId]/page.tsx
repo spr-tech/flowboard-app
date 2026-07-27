@@ -1,4 +1,5 @@
 import { getSingleProject } from "@/app/actions/projects";
+import { ProjectProvider } from "@/context/ProjectProvider";
 
 import ProjectBoard from "@/components/projects/ProjectBoard";
 
@@ -22,5 +23,5 @@ export default async function ProjectBoardPage({ params }: Props) {
     return <div>Project not found</div>;
   }
 
-  return <ProjectBoard project={project} />;
+  return <ProjectProvider initialProject={project}>{children}</ProjectProvider>;
 }

@@ -11,7 +11,7 @@ type ProjectSettingsProps = {
   project: Project;
 };
 
-export default function ProjectSettings({ project }: ProjectSettingsProps) {
+export default function ProjectCard({ project }: ProjectSettingsProps) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     null
   );
@@ -27,7 +27,7 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
         <Link href={`/projects/${project.id}`}>
           <div className="">
             <span
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-medium mb-3"
+              className="flex items-center justify-center w-10 h-10 mb-3 font-medium text-white rounded-lg"
               style={{ backgroundColor: project.color }}
             >
               {project.name[0].toUpperCase()}
@@ -42,17 +42,18 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
         {/* Edit Icon Wrapper Button */}
         <div className="flex items-start ">
           <button
+            onClick={() => setSelectedProject(project)}
             type="button"
-            className="p-1 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="p-1 transition-colors rounded-md cursor-pointer text-slate-500 hover:text-slate-800 hover:bg-slate-100"
             aria-label="Edit project"
           >
-            <Edit size={20} onClick={() => setSelectedProject(project)} />
+            <Edit size={20} />
           </button>
 
           <button
             type="button"
             onClick={() => setSelectedProjectId(project.id)}
-            className="p-1 rounded-md text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+            className="p-1 text-red-500 transition-colors rounded-md cursor-pointer hover:text-red-600 hover:bg-red-50"
             aria-label="Delete project"
           >
             <Delete size={20} />
