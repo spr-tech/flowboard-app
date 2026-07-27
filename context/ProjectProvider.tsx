@@ -1,3 +1,5 @@
+"use client";
+
 import { ProjectContext } from "./ProjectContext";
 import { useState, useContext } from "react";
 import type { Task } from "@/types/task";
@@ -41,4 +43,6 @@ export function useProject() {
   if (!context) {
     throw new Error("useProject must be used inside ProjectProvider");
   }
+
+  return context;
 }

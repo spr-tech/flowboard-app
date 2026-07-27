@@ -4,6 +4,7 @@ import TaskModal from "../modals/TaskModal";
 import { ArrowLeft } from "lucide-react";
 import DeleteModal from "../modals/DeleteModal";
 import type { Task } from "@/types/task";
+import { useProject } from "@/context/ProjectProvider";
 import Link from "next/link";
 import {
   DndContext,
@@ -20,33 +21,13 @@ import DraggableTask from "../board/DraggableTask";
 import DroppableColumn from "../board/DroppableColumn";
 import { moveTask } from "@/app/actions/task";
 
-type Project = {
-  id: string;
-  name: string;
-  color: string;
-  description: string | null;
-  status: string;
-  columns: Column[];
-};
-
-type Column = {
-  id: string;
-  name: string;
-  order: number;
-  tasks: Task[];
-};
-
-type ProjectBoardProps = {
-  project: Project;
-};
-
-export default function ProjectBoard({ project }: ProjectBoardProps) {
+export default function ProjectBoard() {
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
   const [deleteTaskConfirmation, setDeleteTaskConfirmation] = useState<
     string | null
   >(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [currentProject, setCurrentProject] = useState<Project | null>(project);
+  const { currentProject, setCurrentProject } = useProject();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

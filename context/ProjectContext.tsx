@@ -1,5 +1,4 @@
 import type { Task } from "@/types/task";
-import React from "react";
 import { createContext } from "react";
 
 type Project = {
