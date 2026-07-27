@@ -239,7 +239,11 @@ export default function ProjectBoard({ project }: ProjectBoardProps) {
       )}
 
       {selectedTask && (
-        <TaskModal task={selectedTask} onClose={() => setSelectedTask(null)} />
+        <TaskModal
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          setCurrentProject={setCurrentProject}
+        />
       )}
 
       {deleteTaskConfirmation && (

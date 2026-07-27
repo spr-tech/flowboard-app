@@ -38,7 +38,7 @@ export default function DeleteModal({
   const [isLoading, setIsLoading] = useState(false);
 
   const isDeletingProject = !!projectId;
-  const deleteType = isDeletingProject ? "Project" : "Task ";
+  const deleteType = isDeletingProject ? "Project" : "Task";
 
   const handleDelete = async () => {
     if (!taskId && !projectId) return;

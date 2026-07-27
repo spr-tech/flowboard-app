@@ -7,11 +7,28 @@ import { editTask } from "@/app/actions/task";
 import type { Task } from "@/types/task";
 import { Priority } from "@/lib/generated/prisma";
 
+type Project = {
+  id: string;
+  name: string;
+  color: string;
+  description: string | null;
+  status: string;
+  columns: Column[];
+};
+
+type Column = {
+  id: string;
+  name: string;
+  order: number;
+  tasks: Task[];
+};
+
 type TaskModalProps = {
   columnId?: string;
   task?: Task;
   onClose: () => void;
   onTaskCreated?: (newTask: Task) => void;
+  setCurrentProject?: React.Dispatch<React.SetStateAction<Project | null>>;
 };
 
 export default function TaskModal({

@@ -4,7 +4,6 @@ import React, { useState, useRef } from "react";
 import { createProject, editProject } from "@/app/actions/projects";
 import { toast } from "sonner";
 import { Project } from "@/types/project";
-import DraggableTask from "../board/DraggableTask";
 
 type ProjectModalProps = {
   project?: Project | null;
