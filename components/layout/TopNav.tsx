@@ -11,9 +11,9 @@ type TopNavProps = {
 
 const TopNav = ({ sidebarToggle, modalToggle, isOpen }: TopNavProps) => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-13 bg-white backdrop-blur-md border-b border-slate-500 flex items-center justify-between px-6 transition-all">
+    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 transition-all bg-white border-b h-13 backdrop-blur-md border-slate-500">
       {/* Left */}
-      <div className="flex gap-4 items-center min-w-0">
+      <div className="flex items-center min-w-0 gap-4">
         <button
           onClick={sidebarToggle}
           className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-900 transition-colors"
@@ -21,15 +21,15 @@ const TopNav = ({ sidebarToggle, modalToggle, isOpen }: TopNavProps) => {
         >
           {isOpen ? <PanelRight size={20} /> : <PanelLeft size={20} />}
         </button>
-        <h1 className="text-gray-900 font-semibold text-base hidden md:block truncate">
-          <div className="h-14 flex items-center gap-2 px-4 border-b border-white/10">
+        <h1 className="hidden text-base font-semibold text-gray-900 truncate md:block">
+          <div className="flex items-center gap-2 px-4 border-b h-14 border-white/10">
             <Image
               src="/flowboard logo.svg"
               alt="FlowBoard"
               width={30}
               height={30}
             />
-            <span className="text-slate-800 font-medium whitespace-nowrap">
+            <span className="font-medium text-slate-800 whitespace-nowrap">
               FlowBoard
             </span>
           </div>
@@ -37,14 +37,14 @@ const TopNav = ({ sidebarToggle, modalToggle, isOpen }: TopNavProps) => {
       </div>
 
       {/* Center: Search and Quick Action */}
-      <div className="flex-1 max-w-xl mx-4 flex items-center justify-center gap-3">
+      <div className="flex items-center justify-center flex-1 max-w-xl gap-3 mx-4">
         {/* Search Bar Wrapper */}
-        <div className="flex-1 min-w-30 max-w-md h-10 flex items-center gap-2 bg-gray-50/80 border border-gray-200/80 rounded-xl px-3 transition-all duration-300 focus-within:bg-white  focus-within:ring-1 focus-within:ring-purple-400 ">
+        <div className="flex items-center flex-1 h-10 max-w-md gap-2 px-3 transition-all duration-300 border min-w-30 bg-gray-50/80 border-gray-200/80 rounded-xl focus-within:bg-white focus-within:ring-1 focus-within:ring-purple-400 ">
           <Search size={18} className="text-gray-400 shrink-0" />
           <input
             type="text"
             placeholder="Search tasks..."
-            className="w-full bg-transparent outline-none text-gray-800 placeholder:text-gray-400 text-sm"
+            className="w-full text-sm text-gray-800 bg-transparent outline-none placeholder:text-gray-400"
           />
         </div>
 
@@ -61,13 +61,13 @@ const TopNav = ({ sidebarToggle, modalToggle, isOpen }: TopNavProps) => {
       {/* Right side: Actions & Profile */}
       <div className="flex items-center gap-3 shrink-0">
         {/* Notification bell */}
-        <button className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-50 border border-gray-100 transition-colors group">
+        <button className="relative flex items-center justify-center transition-colors border border-gray-100 w-9 h-9 rounded-xl hover:bg-gray-50 group">
           <Bell className="w-4.5 h-4.5 text-gray-500 group-hover:text-gray-800 transition-colors" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 ring-2 ring-white rounded-full"></span>
+          <span className="absolute w-2 h-2 bg-red-500 rounded-full top-2 right-2 ring-2 ring-white"></span>
         </button>
 
         {/* User avatar */}
-        <div className="w-9 h-9 rounded-xl bg-purple-600 hover:bg-purple-700 shadow-sm shadow-purple-600/10 flex items-center justify-center text-white text-xs font-semibold cursor-pointer active:scale-95 transition-all">
+        <div className="flex items-center justify-center text-xs font-semibold text-white transition-all bg-purple-600 shadow-sm cursor-pointer w-9 h-9 rounded-xl hover:bg-purple-700 shadow-purple-600/10 active:scale-95">
           AO
         </div>
       </div>

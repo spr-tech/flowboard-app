@@ -193,6 +193,7 @@ export async function deleteProject(projectId: string) {
   };
 }
 
+//edit project
 export async function editProject(data: EditProjectProps) {
   const user = await getCurrentUser();
 

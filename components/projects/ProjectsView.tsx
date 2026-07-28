@@ -1,10 +1,11 @@
 "use client";
+//list of projects component
 import ProjectCard from "@/components/projects/ProjectCard";
 import type { Project } from "@/types/project";
 import ProjectModal from "../modals/ProjectModal";
 import { useState } from "react";
 
-export default function ProjectView({ projects }: { projects: Project[] }) {
+export default function ProjectsView({ projects }: { projects: Project[] }) {
   const [modalOpen, setModalOpen] = useState(false);
   return (
     <>

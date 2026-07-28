@@ -1,8 +1,10 @@
 "use client";
+//  board that displays the column and task for each project card
+
 import { useState } from "react";
-import TaskModal from "../modals/TaskModal";
+import TaskModal from "../../modals/TaskModal";
 import { ArrowLeft } from "lucide-react";
-import DeleteModal from "../modals/DeleteModal";
+import DeleteModal from "../../modals/DeleteModal";
 import type { Task } from "@/types/task";
 import { useProject } from "@/context/ProjectProvider";
 import Link from "next/link";
@@ -17,8 +19,8 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import DraggableTask from "../board/DraggableTask";
-import DroppableColumn from "../board/DroppableColumn";
+import DraggableTask from "../../board/DraggableTask";
+import DroppableColumn from "../../board/DroppableColumn";
 import { moveTask } from "@/app/actions/task";
 
 export default function ProjectBoard() {
@@ -86,6 +88,7 @@ export default function ProjectBoard() {
 
       const [movedTask] = sourceColumnCopy.tasks.splice(activeIndex, 1);
 
+      //incase the over index returns -1 , use the length of the task in the column instead
       const insertIndex =
         overIndex === -1 ? sourceColumnCopy.tasks.length : overIndex;
       sourceColumnCopy.tasks.splice(insertIndex, 0, movedTask);
