@@ -8,7 +8,7 @@ const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Projects", href: "/projects", icon: Folder },
   { label: "Team", href: "/teams", icon: Users },
-  { label: "Settings", href: "/settings", icon: Settings },
+  { label: "Workspace", href: "/workspace", icon: Settings },
 ];
 
 type SidebarProps = {
