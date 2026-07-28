@@ -6,29 +6,13 @@ import { toast } from "sonner";
 import { editTask } from "@/app/actions/task";
 import type { Task } from "@/types/task";
 import { Priority } from "@/lib/generated/prisma";
-
-type Project = {
-  id: string;
-  name: string;
-  color: string;
-  description: string | null;
-  status: string;
-  columns: Column[];
-};
-
-type Column = {
-  id: string;
-  name: string;
-  order: number;
-  tasks: Task[];
-};
+import { useProject } from "@/context/ProjectProvider";
 
 type TaskModalProps = {
   columnId?: string;
   task?: Task;
   onClose: () => void;
   onTaskCreated?: (newTask: Task) => void;
-  setCurrentProject?: React.Dispatch<React.SetStateAction<Project | null>>;
 };
 
 export default function TaskModal({
@@ -38,6 +22,8 @@ export default function TaskModal({
   onTaskCreated,
 }: TaskModalProps) {
   const isEditing = !!task;
+
+  const { setCurrentProject } = useProject();
 
   const [title, setTitle] = useState(task?.title ?? "");
   const [description, setDescription] = useState(task?.description ?? "");
@@ -59,7 +45,6 @@ export default function TaskModal({
         priority,
         dueDate: dueDate ? new Date(dueDate) : null,
         columnId: columnId!,
-        // projectId,
       });
 
       if (result.success && result.newTask) {
@@ -88,10 +73,11 @@ export default function TaskModal({
     }
   };
 
-  const editExistingTask = async (task: Task) => {
+  const editExistingTask = async (currentTask: Task) => {
     try {
+      // 🔥 Fixed: Now passes local state variables up to your server action
       const result = await editTask({
-        id: task.id,
+        id: currentTask.id,
         title,
         description,
         priority,
@@ -99,7 +85,31 @@ export default function TaskModal({
       });
 
       if (result.success) {
+        setCurrentProject((prev) => {
+          if (!prev) return null;
+
+          return {
+            ...prev,
+            columns: prev.columns.map((column) => ({
+              ...column,
+              tasks: column.tasks.map((t) =>
+                t.id === result.editedTask?.id
+                  ? {
+                      ...t,
+                      title: result.editedTask.title,
+                      description: result.editedTask.description,
+                      priority: result.editedTask.priority as Priority,
+                      dueDate: result.editedTask.dueDate
+                        ? new Date(result.editedTask.dueDate)
+                        : null,
+                    }
+                  : t
+              ),
+            })),
+          };
+        });
         onClose();
+
         toast.success("Task updated successfully");
       } else {
         setError(result?.error ?? "Unable to update task");
@@ -143,6 +153,7 @@ export default function TaskModal({
           <input
             id="title"
             type="text"
+            required
             placeholder="e.g. Design homepage hero"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -222,8 +233,8 @@ export default function TaskModal({
           >
             {isLoading
               ? isEditing
-                ? "Updating"
-                : "creating"
+                ? "Updating..."
+                : "Creating..."
               : isEditing
                 ? "Update"
                 : "Create Task"}

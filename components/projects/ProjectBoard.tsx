@@ -115,7 +115,7 @@ export default function ProjectBoard() {
     }
 
     const updatedTask = { ...draggedTask, columnId: destinationColumn.id };
-    destinationColumnCopy?.tasks.unshift(updatedTask);
+    destinationColumnCopy?.tasks.push(updatedTask);
 
     setCurrentProject({ ...currentProject, columns: columnsCopy });
 
@@ -220,11 +220,7 @@ export default function ProjectBoard() {
       )}
 
       {selectedTask && (
-        <TaskModal
-          task={selectedTask}
-          onClose={() => setSelectedTask(null)}
-          setCurrentProject={setCurrentProject}
-        />
+        <TaskModal task={selectedTask} onClose={() => setSelectedTask(null)} />
       )}
 
       {deleteTaskConfirmation && (
