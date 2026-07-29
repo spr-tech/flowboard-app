@@ -5,37 +5,21 @@ import { deleteTask } from "@/app/actions/task";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Task } from "@/types/task";
-
-type Project = {
-  id: string;
-  name: string;
-  color: string;
-  description: string | null;
-  status: string;
-  columns: Column[];
-};
-
-type Column = {
-  id: string;
-  name: string;
-  order: number;
-  tasks: Task[];
-};
+import { useProject } from "@/context/ProjectProvider";
 
 type DeleteModalProps = {
   projectId?: string | null;
   taskId?: string | null;
   onClose: () => void;
-  setCurrentProject?: React.Dispatch<React.SetStateAction<Project | null>>;
 };
 
 export default function DeleteModal({
   projectId,
   taskId,
   onClose,
-  setCurrentProject,
 }: DeleteModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { setCurrentProject } = useProject();
 
   const isDeletingProject = !!projectId;
   const deleteType = isDeletingProject ? "Project" : "Task";

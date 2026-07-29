@@ -10,6 +10,7 @@ type Project = {
   color: string;
   description: string | null;
   status: string;
+  dueDate: Date | null;
   columns: Column[];
 };
 

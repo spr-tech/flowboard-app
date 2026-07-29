@@ -229,7 +229,6 @@ export default function ProjectBoard() {
       {deleteTaskConfirmation && (
         <DeleteModal
           taskId={deleteTaskConfirmation}
-          setCurrentProject={setCurrentProject}
           onClose={() => setDeleteTaskConfirmation(null)}
         />
       )}

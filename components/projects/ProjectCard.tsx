@@ -1,7 +1,7 @@
 "use client";
-// represent each project 
+// represent each project
 import Link from "next/link";
-import { Edit, Delete, Settings2 } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useState } from "react";
 import ProjectModal from "../modals/ProjectModal";
 import DeleteModal from "../modals/DeleteModal";
@@ -58,15 +58,15 @@ export default function ProjectCard({ project }: ProjectSettingsProps) {
           >
             {/* <Delete size={20} /> */}
           </button>
-          
-          <button
-            type="button"
-            onClick={() => setSelectedProjectId(project.id)}
+
+          <Link
+            href={`/projects/${project.id}/settings`}
+            // onClick={() => setSelectedProjectId(project.id)}
             className="p-1 text-red-500 transition-colors rounded-md cursor-pointer hover:text-red-600 hover:bg-red-50"
-            aria-label="Delete project"
+            // aria-label="Delete project"
           >
-            <Settings2 size={20} />
-          </button>
+            <Settings size={20} />
+          </Link>
         </div>
       </div>
 
