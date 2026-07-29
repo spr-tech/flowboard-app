@@ -69,7 +69,7 @@ export default function LoginForm() {
   return (
     <main className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center px-4 py-10">
       {/* Logo and subtext */}
-      <div className="text-center mb-5">
+      <div className="mb-5 text-center">
         <div className="flex flex-col items-center gap-2 mb-3">
           <Image
             src="/flowboard logo.svg"
@@ -78,7 +78,7 @@ export default function LoginForm() {
             height={50}
           />
         </div>
-        <p className="text-slate-600 text-2xl font-semibold">
+        <p className="text-2xl font-semibold text-slate-600">
           Welcome to FlowBoard
         </p>
         <span className="text-sm text-slate-600">

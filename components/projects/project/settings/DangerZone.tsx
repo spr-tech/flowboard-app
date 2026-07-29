@@ -1,8 +1,19 @@
 "use client";
 
 import { AlertTriangle, Trash2 } from "lucide-react";
+import { useProject } from "@/context/ProjectProvider";
+import { useState } from "react";
+
+import DeleteModal from "@/components/modals/DeleteModal";
+
+
 
 export default function DangerZone() {
+  const { currentProject } = useProject();
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null
+  );
+
   return (
     <div className="border border-red-200 rounded-2xl bg-red-50">
       {/* Header */}
@@ -33,11 +44,21 @@ export default function DangerZone() {
           </p>
         </div>
 
-        <button className="flex items-center justify-center w-full gap-2 font-medium text-white transition bg-red-600 h-11 rounded-xl hover:bg-red-700">
+        <button
+          onClick={() => setSelectedProjectId(currentProject?.id ?? null)}
+          className="flex items-center justify-center w-full gap-2 font-medium text-white transition bg-red-600 h-11 rounded-xl hover:bg-red-700"
+        >
           <Trash2 size={18} />
           Delete Project
         </button>
       </div>
+
+      {selectedProjectId && (
+        <DeleteModal
+          projectId={selectedProjectId}
+          onClose={() => setSelectedProjectId(null)}
+        />
+      )}
     </div>
   );
 }

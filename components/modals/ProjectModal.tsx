@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { createProject,  } from "@/app/actions/projects";
+import { createProject } from "@/app/actions/projects";
 import { toast } from "sonner";
 import { Project } from "@/types/project";
 

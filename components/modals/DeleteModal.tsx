@@ -4,8 +4,8 @@ import { deleteProject } from "@/app/actions/projects";
 import { deleteTask } from "@/app/actions/task";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Task } from "@/types/task";
 import { useProject } from "@/context/ProjectProvider";
+import { useRouter } from "next/navigation";
 
 type DeleteModalProps = {
   projectId?: string | null;
@@ -23,6 +23,7 @@ export default function DeleteModal({
 
   const isDeletingProject = !!projectId;
   const deleteType = isDeletingProject ? "Project" : "Task";
+  const router = useRouter();
 
   const handleDelete = async () => {
     if (!taskId && !projectId) return;
@@ -35,6 +36,7 @@ export default function DeleteModal({
         if (result.success) {
           setCurrentProject?.(null);
           toast.success("Project deleted successfully");
+          router.push("/projects");
           onClose();
         } else {
           toast.error(result.error || "Failed to delete project");

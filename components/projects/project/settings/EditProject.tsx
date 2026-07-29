@@ -20,7 +20,9 @@ export default function EditProject() {
     handleSubmit,
     setValue,
     control,
-    formState: { errors, isSubmitting },
+    reset,
+
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<EditProjectFormValues>({
     resolver: zodResolver(editProjectSchema),
 
@@ -55,6 +57,7 @@ export default function EditProject() {
 
       if (result.success) {
         toast.success("Project updated successfully");
+        reset(data);
       } else {
         // Handles expected errors returned by action from backend
         setError(result?.error ?? "Unable update project");
@@ -151,7 +154,9 @@ export default function EditProject() {
               type="color"
               value={color}
               onChange={(e) => {
-                setValue("color", e.target.value);
+                setValue("color", e.target.value, {
+                  shouldDirty: true,
+                });
               }}
               className="hidden"
             />
@@ -160,7 +165,11 @@ export default function EditProject() {
               type="text"
               value={color}
               className="flex-1 text-gray-700 bg-transparent outline-none"
-              onChange={(e) => setValue("color", e.target.value)}
+              onChange={(e) =>
+                setValue("color", e.target.value, {
+                  shouldDirty: true,
+                })
+              }
             />
           </div>
 
@@ -201,8 +210,12 @@ export default function EditProject() {
         <div className="flex justify-end pt-4 border-t border-gray-200">
           <button
             type="submit"
-            className="px-6 font-medium text-white transition bg-purple-600 h-11 rounded-xl hover:bg-purple-700 active:[0.98]"
-            disabled={isSubmitting}
+            className={`px-6 font-medium text-white transition h-11 rounded-xl active:scale-[0.98] ${
+              isDirty
+                ? "bg-purple-600 hover:bg-purple-700 cursor-pointer"
+                : "bg-gray-400 cursor-not-allowed opacity-70"
+            }`}
+            disabled={isSubmitting || !isDirty}
           >
             {isSubmitting ? "Saving..." : "Save Changes"}
           </button>
