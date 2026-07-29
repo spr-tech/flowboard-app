@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { createProject, editProject } from "@/app/actions/projects";
+import { createProject,  } from "@/app/actions/projects";
 import { toast } from "sonner";
 import { Project } from "@/types/project";
 
@@ -51,42 +51,12 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
     }
   };
 
-  const editExistingProject = async (project: Project) => {
-    try {
-      const result = await editProject({
-        id: project.id,
-        name: projectName,
-        description,
-        color: projectColor,
-        dueDate: dueDate ? new Date(dueDate) : null,
-      });
-
-      if (result.success) {
-        toast.success("Project updated successfully");
-
-        onClose();
-      } else {
-        setError(result?.error ?? "Unable update project");
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    if (isEditing) {
-      await editExistingProject(project);
-    } else {
-      await createNewProject();
-    }
+    await createNewProject();
   };
 
   return (
