@@ -34,10 +34,9 @@ export default function DeleteModal({
       if (projectId) {
         const result = await deleteProject(projectId);
         if (result.success) {
-          setCurrentProject?.(null);
           toast.success("Project deleted successfully");
-          router.push("/projects");
           onClose();
+          router.push("/projects");
         } else {
           toast.error(result.error || "Failed to delete project");
         }
