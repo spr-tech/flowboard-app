@@ -11,6 +11,8 @@ import { InviteMembers } from "@/app/actions/members";
 import { useProject } from "@/context/ProjectProvider";
 import { toast } from "sonner";
 
+import Link from "next/link";
+
 export default function MembersOverview() {
   const { currentProject } = useProject();
   const {
@@ -132,36 +134,22 @@ disabled:cursor-not-allowed"
           </div>
 
           {/* other members */}
-          <div>
-            {currentProject?.members.map((member) => (
-              <div
-                key={member.id}
-                className="flex items-center justify-between mt-4"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 font-semibold text-white rounded-full bg-[#7C3AED]">
-                    {member.user.name?.charAt(0).toUpperCase() ?? "?"}
-                  </div>
 
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {member.user.name}
-                    </p>
-
-                    <p className="text-xs text-gray-500">{member.user.email}</p>
-                  </div>
-                </div>
-
-                <span className="px-3 py-1 text-xs text-gray-600 capitalize bg-gray-100 rounded-full">
-                  {member.role}
-                </span>
-              </div>
-            ))}
-          </div>
+          {currentProject && currentProject.members.length > 0 && (
+            <Link
+              href={`/projects/${currentProject?.id}/members`}
+              className="mt-3 inline-flex items-center text-sm font-medium text-[#7C3AED] hover:translate-x-1.5 duration-200 transition-all"
+            >
+              <span className="hover:underline underline-offset-2">
+                Manage members ({currentProject.members.length})
+              </span>
+              <span> &rarr;</span>
+            </Link>
+          )}
 
           {/* Empty state */}
-          {currentProject?.members.length === 0 && (
-            <div className="p-5 mt-5 text-center border border-gray-300 border-dashed rounded-xl">
+          {currentProject && currentProject.members.length === 0 && (
+            <div className="p-5 mt-5 text-center border border-gray-300 border-dashed rounded-xl ">
               <p className="text-sm text-gray-500">
                 No additional members yet.
               </p>

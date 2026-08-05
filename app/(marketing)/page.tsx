@@ -26,10 +26,10 @@ export default function LandingPage() {
           <Image src="/white.svg" alt="FlowBoard" width={20} height={20} />
           Built for modern teams
         </div>
-        <h1 className="text-4xl font-medium text-white max-w-xl leading-tight mb-4">
+        <h1 className="max-w-xl mb-4 text-4xl font-medium leading-tight text-white">
           Manage projects. Track tasks. Ship faster.
         </h1>
-        <p className="text-white/50 text-sm max-w-md leading-relaxed mb-8">
+        <p className="max-w-md mb-8 text-sm leading-relaxed text-white/50">
           FlowBoard gives your team a clean, focused workspace to plan work, hit
           deadlines, and stay in sync without the clutter.
         </p>
@@ -80,7 +80,7 @@ export default function LandingPage() {
           <p className="text-sm text-[#6B7280] text-center mb-12">
             All the tools to plan, track, and deliver work in one place.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 icon: <Kanban />,
@@ -130,7 +130,7 @@ export default function LandingPage() {
                 className="bg-white border border-[#E5E7EB] rounded-xl p-5 transition-all duration-300 hover:border-b-[#7C3AED] hover:shadow-sm cursor-pointer  hover:-translate-y-1"
               >
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
+                  className="flex items-center justify-center mb-3 rounded-lg w-9 h-9"
                   style={{ background: feature.bg, color: feature.color }}
                 >
                   {feature.icon}
@@ -149,31 +149,31 @@ export default function LandingPage() {
 
       {/* CTA Banner */}
       <section className="bg-[#7C3AED] px-6 py-16 text-center">
-        <h2 className="text-2xl font-medium text-white mb-2">
+        <h2 className="mb-2 text-2xl font-medium text-white">
           Ready to get your team organised?
         </h2>
-        <p className="text-white/70 text-sm mb-6">
+        <p className="mb-6 text-sm text-white/70">
           Join thousands of teams already shipping faster with FlowBoard.
         </p>
         <Link
           href="/register"
           className="bg-white text-[#7C3AED] rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-white/90 transition-colors inline-block"
         >
-          Start for free &rarr; No card needed
+          Start for free&rarr;  No card needed
         </Link>
       </section>
 
       {/* Footer */}
       <footer className="bg-[#1E1B2E] px-6 py-5 flex items-center justify-between">
-        <span className="text-white/40 text-xs">© 2026 FlowBoard</span>
+        <span className="text-xs text-white/40">© 2026 FlowBoard</span>
         <div className="flex items-center gap-5">
-          <span className="text-white/40 text-xs cursor-pointer hover:text-white/60 transition-colors">
+          <span className="text-xs transition-colors cursor-pointer text-white/40 hover:text-white/60">
             Privacy
           </span>
-          <span className="text-white/40 text-xs cursor-pointer hover:text-white/60 transition-colors">
+          <span className="text-xs transition-colors cursor-pointer text-white/40 hover:text-white/60">
             Terms
           </span>
-          <span className="text-white/40 text-xs cursor-pointer hover:text-white/60 transition-colors">
+          <span className="text-xs transition-colors cursor-pointer text-white/40 hover:text-white/60">
             Contact
           </span>
         </div>

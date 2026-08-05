@@ -10,11 +10,11 @@ export default function ProjectSettings() {
     <div className="max-w-6xl px-8 py-8 mx-auto">
       {/* Header */}
       <Link
-        className="flex items-center gap-2 mb-4 text-sm transition-all duration-200 hover:-translate-x-0.5  text-slate-600"
-        href="/projects"
+        className="flex items-center gap-2 mb-4 text-sm transition-all duration-200 hover:-translate-x-1 text-[#7C3AED]"
+        href="/projects "
       >
         <span> ←</span>
-        <span className="hover:underline underline-offset-2">
+        <span className="font-medium hover:underline underline-offset-2">
           Back to Projects
         </span>
       </Link>
