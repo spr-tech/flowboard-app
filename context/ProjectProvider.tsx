@@ -2,33 +2,16 @@
 
 import { ProjectContext } from "./ProjectContext";
 import { useState, useContext } from "react";
-import type { Task } from "@/types/task";
-
-type Project = {
-  id: string;
-  name: string;
-  color: string;
-  description: string | null;
-  status: string;
-  dueDate: Date | null;
-  columns: Column[];
-};
-
-type Column = {
-  id: string;
-  name: string;
-  order: number;
-  tasks: Task[];
-};
+import { ProjectDetails } from "@/types/project";
 
 export function ProjectProvider({
   initialProject,
   children,
 }: {
-  initialProject: Project | null;
+  initialProject: ProjectDetails | null;
   children: React.ReactNode;
 }) {
-  const [currentProject, setCurrentProject] = useState<Project | null>(
+  const [currentProject, setCurrentProject] = useState<ProjectDetails | null>(
     initialProject
   );
 

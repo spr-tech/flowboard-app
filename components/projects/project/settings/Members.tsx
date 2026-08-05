@@ -1,8 +1,43 @@
 "use client";
 
 import { Mail, Plus, Crown } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  InviteMembersFormValues,
+  inviteMemberSchema,
+} from "@/lib/validations/members";
+import { InviteMembers } from "@/app/actions/members";
+import { useProject } from "@/context/ProjectProvider";
+import { toast } from "sonner";
 
 export default function Members() {
+  const { currentProject } = useProject();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<InviteMembersFormValues>({
+    resolver: zodResolver(inviteMemberSchema),
+  });
+
+  const onSubmit = async (data: InviteMembersFormValues) => {
+    if (!currentProject) return;
+
+    const result = await InviteMembers({
+      projectId: currentProject.id,
+      email: data.email,
+    });
+
+    if (result.success) {
+      toast.success("Member invited successfully");
+      reset();
+    } else {
+      toast.error(result.error);
+    }
+  };
+
   return (
     <div className="bg-white border border-gray-200 shadow-sm rounded-2xl">
       {/* Header */}
@@ -18,34 +53,49 @@ export default function Members() {
       <div className="p-6 space-y-6">
         {/* Invite */}
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
+        <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
+          <label className="text-sm font-medium text-gray-700" htmlFor="mail">
             Invite by email
           </label>
 
-          <div className="flex gap-3">
-            <div className="relative flex-1">
-              <Mail
-                size={18}
-                className="absolute text-gray-400 -translate-y-1/2 left-4 top-1/2"
-              />
+          <div className="space-y-2">
+            <div className="">
+              <div
+                className="flex items-center gap-2 w-full h-11 pl-3 pr-4 border border-gray-300 rounded-xl outline-none
+                focus-within:border-[#7C3AED]
+                focus-within:ring-4
+                focus-within:ring-[#7C3AED]/10 placeholder:text-slate-400"
+              >
+                <Mail size={18} className="text-gray-500 " />
 
-              <input
-                type="email"
-                placeholder="teammate@example.com"
-                className="w-full h-11 pl-11 pr-4 border border-gray-300 rounded-xl outline-none
-                focus:border-[#7C3AED]
-                focus:ring-4
-                focus:ring-[#7C3AED]/10"
-              />
+                <input
+                  type="email"
+                  id="mail"
+                  placeholder="teammate@example.com"
+                  {...register("email")}
+                  disabled={isSubmitting}
+                  className="flex-1 border-none outline-0 placeholder:text-slate-300 text-slate-700"
+                />
+              </div>
+
+              {errors.email && (
+                <p className="text-xs text-[#EF4444] mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
-            <button className="flex items-center gap-2 px-4 text-white transition bg-purple-600 h-11 rounded-xl hover:bg-purple-700 active:[0.98]">
+            <button
+              type="submit"
+              className="flex items-center gap-2 px-4 text-white transition bg-purple-600 h-11 rounded-xl hover:bg-purple-700 active:[0.98] disabled:bg-gray-400
+disabled:cursor-not-allowed"
+              disabled={isSubmitting}
+            >
               <Plus size={18} />
-              Invite
+              {isSubmitting ? "Inviting..." : "Invite"}
             </button>
           </div>
-        </div>
+        </form>
 
         {/* Divider */}
 
@@ -63,7 +113,7 @@ export default function Members() {
               </div>
 
               <div>
-                <p className="text-sm font-medium text-gray-900">Muizz Jamiu</p>
+                <p className="text-sm font-medium text-gray-900"></p>
 
                 <p className="text-xs text-gray-500">muizz@example.com</p>
               </div>

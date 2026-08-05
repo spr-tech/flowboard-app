@@ -1,26 +1,11 @@
-import type { Task } from "@/types/task";
 import { createContext } from "react";
-
-type Project = {
-  id: string;
-  name: string;
-  color: string;
-  description: string | null;
-  status: string;
-  dueDate: Date | null;
-  columns: Column[];
-};
-
-type Column = {
-  id: string;
-  name: string;
-  order: number;
-  tasks: Task[];
-};
+import { ProjectDetails } from "@/types/project";
 
 type ProjectContextType = {
-  currentProject: Project | null;
-  setCurrentProject: React.Dispatch<React.SetStateAction<Project | null>>;
+  currentProject: ProjectDetails | null;
+  setCurrentProject: React.Dispatch<
+    React.SetStateAction<ProjectDetails | null>
+  >;
 };
 
 export const ProjectContext = createContext<ProjectContextType | null>(null);
