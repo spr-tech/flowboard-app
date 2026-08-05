@@ -1,7 +1,7 @@
 "use client";
 
 import EditProject from "./EditProject";
-import Members from "./Members";
+import Members from "./MembersOverview";
 import DangerZone from "./DangerZone";
 import Link from "next/link";
 

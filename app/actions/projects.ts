@@ -71,6 +71,7 @@ export async function getProjects() {
     },
 
     include: {
+      owner: true,
       columns: {
         include: {
           tasks: true,
@@ -119,6 +120,7 @@ export async function getSingleProject(projectId: string) {
     },
 
     include: {
+      owner: true,
       columns: {
         include: {
           tasks: {

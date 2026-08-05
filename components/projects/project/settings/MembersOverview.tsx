@@ -11,7 +11,7 @@ import { InviteMembers } from "@/app/actions/members";
 import { useProject } from "@/context/ProjectProvider";
 import { toast } from "sonner";
 
-export default function Members() {
+export default function MembersOverview() {
   const { currentProject } = useProject();
   const {
     register,
@@ -21,6 +21,8 @@ export default function Members() {
   } = useForm<InviteMembersFormValues>({
     resolver: zodResolver(inviteMemberSchema),
   });
+
+  console.log(currentProject?.members);
 
   const onSubmit = async (data: InviteMembersFormValues) => {
     if (!currentProject) return;
@@ -113,9 +115,13 @@ disabled:cursor-not-allowed"
               </div>
 
               <div>
-                <p className="text-sm font-medium text-gray-900"></p>
+                <p className="text-sm font-medium text-gray-900">
+                  {currentProject?.owner?.name}
+                </p>
 
-                <p className="text-xs text-gray-500">muizz@example.com</p>
+                <p className="text-xs text-gray-500">
+                  {currentProject?.owner?.email}
+                </p>
               </div>
             </div>
 
@@ -125,11 +131,42 @@ disabled:cursor-not-allowed"
             </span>
           </div>
 
-          {/* Empty state */}
+          {/* other members */}
+          <div>
+            {currentProject?.members.map((member) => (
+              <div
+                key={member.id}
+                className="flex items-center justify-between mt-4"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 font-semibold text-white rounded-full bg-[#7C3AED]">
+                    {member.user.name?.charAt(0).toUpperCase() ?? "?"}
+                  </div>
 
-          <div className="p-5 mt-5 text-center border border-gray-300 border-dashed rounded-xl">
-            <p className="text-sm text-gray-500">No additional members yet.</p>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {member.user.name}
+                    </p>
+
+                    <p className="text-xs text-gray-500">{member.user.email}</p>
+                  </div>
+                </div>
+
+                <span className="px-3 py-1 text-xs text-gray-600 capitalize bg-gray-100 rounded-full">
+                  {member.role}
+                </span>
+              </div>
+            ))}
           </div>
+
+          {/* Empty state */}
+          {currentProject?.members.length === 0 && (
+            <div className="p-5 mt-5 text-center border border-gray-300 border-dashed rounded-xl">
+              <p className="text-sm text-gray-500">
+                No additional members yet.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
