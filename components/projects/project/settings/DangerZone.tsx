@@ -6,8 +6,6 @@ import { useState } from "react";
 
 import DeleteModal from "@/components/modals/DeleteModal";
 
-
-
 export default function DangerZone() {
   const { currentProject } = useProject();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
@@ -61,4 +59,4 @@ export default function DangerZone() {
       )}
     </div>
   );
-}
+};

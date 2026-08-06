@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export default function ProjectSettings() {
   return (
-    <div className="max-w-6xl px-8 py-8 mx-auto">
+    <div className="px-3 mx-auto md:max-w-6xl">
       {/* Header */}
       <Link
         className="flex items-center gap-2 mb-4 text-sm transition-all duration-200 hover:-translate-x-1 text-[#7C3AED]"

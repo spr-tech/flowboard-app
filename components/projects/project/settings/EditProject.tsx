@@ -73,7 +73,7 @@ export default function EditProject() {
   };
 
   return (
-    <div className="bg-white border border-gray-200 shadow-sm rounded-2xl">
+    <div className="w-full bg-white border border-gray-200 shadow-sm rounded-2xl">
       {/* Header */}
       <div className="px-6 py-5 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-[#111827]">Edit Project</h2>

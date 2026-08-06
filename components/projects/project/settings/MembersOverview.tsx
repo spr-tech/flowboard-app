@@ -46,7 +46,7 @@ export default function MembersOverview() {
     <div className="bg-white border border-gray-200 shadow-sm rounded-2xl">
       {/* Header */}
 
-      <div className="px-6 py-5 border-b border-gray-200">
+      <div className="px-5 py-5 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-[#111827]">Members</h2>
 
         <p className="mt-1 text-sm text-[#6B7280]">
@@ -54,7 +54,7 @@ export default function MembersOverview() {
         </p>
       </div>
 
-      <div className="p-6 space-y-6">
+      <div className="p-5 space-y-6">
         {/* Invite */}
 
         <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
@@ -111,9 +111,9 @@ disabled:cursor-not-allowed"
           {/* Owner */}
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 font-semibold text-white rounded-full bg-[#7C3AED]">
-                M
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-10 font-semibold text-white rounded-full bg-[#7C3AED]">
+                {currentProject?.owner?.name?.charAt(0).toUpperCase() ?? "?"}
               </div>
 
               <div>

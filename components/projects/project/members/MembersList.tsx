@@ -3,16 +3,21 @@
 import Link from "next/link";
 import { ArrowLeft, Crown, Search, UserPlus, MoreVertical } from "lucide-react";
 import { useProject } from "@/context/ProjectProvider";
-import { useState } from "react";
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 export default function MembersList() {
   const { currentProject } = useProject();
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   if (!currentProject) return null;
 
   return (
-    <div className="max-w-5xl px-8 py-8 mx-auto">
+    <div className="px-2 py-8 mx-auto md:max-w-6xl">
       {/* Header */}
 
       <div className="mb-8">
@@ -35,17 +40,14 @@ export default function MembersList() {
 
       {/* Toolbar */}
 
-      <div className="flex items-center gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search
-            size={18}
-            className="absolute text-gray-400 -translate-y-1/2 left-4 top-1/2"
-          />
+      <div className="flex flex-col items-center gap-2 mb-6 md:flex-row">
+        <div className="flex items-center w-full gap-2 pl-3 pr-4 text-gray-700 border border-gray-300 h-11 rounded-xl bg-gray-50">
+          <Search size={20} className="" />
 
           <input
             type="text"
             placeholder="Search members..."
-            className="w-full pr-4 text-gray-700 border border-gray-300 h-11 pl-11 rounded-xl bg-gray-50"
+            className="flex-1 outline-0"
           />
         </div>
 
@@ -96,7 +98,7 @@ export default function MembersList() {
               className="relative flex items-center justify-between px-6 py-5 border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
             >
               <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-11 h-11 rounded-full bg-[#7C3AED] text-white font-semibold">
+                <div className="hidden md:flex items-center justify-center w-11 h-11 rounded-full bg-[#7C3AED] text-white font-semibold">
                   {member.user.name?.charAt(0).toUpperCase() ?? "?"}
                 </div>
 
@@ -114,22 +116,18 @@ export default function MembersList() {
                   {member.role}
                 </span>
 
-                <button
-                  onClick={() =>
-                    setOpenMenu(openMenu === member.id ? null : member.id)
-                  }
-                  className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100"
-                >
-                  <MoreVertical size={18} className="text-gray-500" />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100">
+                    <MoreVertical size={18} className="text-gray-500" />
+                  </DropdownMenuTrigger>
 
-                {openMenu === member.id && (
-                  <div className="absolute w-48 bg-white border border-gray-200 shadow-lg right-6 top-14 rounded-xl">
-                    <button className="w-full px-4 py-3 text-sm text-left text-red-600 hover:bg-red-50">
+                  <DropdownMenuContent align="end" className="w-42">
+                    <DropdownMenuItem>Change Role</DropdownMenuItem>
+                    <DropdownMenuItem variant="destructive">
                       Remove Member
-                    </button>
-                  </div>
-                )}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           ))
