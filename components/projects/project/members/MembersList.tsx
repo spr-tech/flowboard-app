@@ -64,7 +64,7 @@ export default function MembersList() {
 
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center w-11 h-11 rounded-full bg-[#7C3AED] text-white font-semibold">
+            <div className="hidden md:flex items-center justify-center w-11 h-11 rounded-full bg-[#7C3AED] text-white font-semibold">
               {currentProject.owner?.name?.charAt(0).toUpperCase() ?? "?"}
             </div>
 
@@ -103,7 +103,7 @@ export default function MembersList() {
                 </div>
 
                 <div>
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium text-gray-900 capitalize">
                     {member.user.name}
                   </p>
 

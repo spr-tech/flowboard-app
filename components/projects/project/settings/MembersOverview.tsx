@@ -10,6 +10,7 @@ import {
 import { InviteMembers } from "@/app/actions/members";
 import { useProject } from "@/context/ProjectProvider";
 import { toast } from "sonner";
+import { useState } from "react";
 
 import Link from "next/link";
 
@@ -24,7 +25,7 @@ export default function MembersOverview() {
     resolver: zodResolver(inviteMemberSchema),
   });
 
-  console.log(currentProject?.members);
+  const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (data: InviteMembersFormValues) => {
     if (!currentProject) return;
@@ -37,8 +38,13 @@ export default function MembersOverview() {
     if (result.success) {
       toast.success("Member invited successfully");
       reset();
+      setError(null);
     } else {
-      toast.error(result.error);
+      setError(result?.error ?? null);
+
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
     }
   };
 
@@ -78,7 +84,7 @@ export default function MembersOverview() {
                   placeholder="teammate@example.com"
                   {...register("email")}
                   disabled={isSubmitting}
-                  className="flex-1 border-none outline-0 placeholder:text-slate-300 text-slate-700"
+                  className="flex-1 border-0 outline-0 placeholder:text-slate-300 text-slate-700"
                 />
               </div>
 
@@ -87,6 +93,8 @@ export default function MembersOverview() {
                   {errors.email.message}
                 </p>
               )}
+
+              {error && <p className="text-xs text-[#EF4444]">{error}</p>}
             </div>
 
             <button
