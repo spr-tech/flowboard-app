@@ -36,10 +36,15 @@ export default function RegisterForm() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleShowPassword = () => {
     setShowPassword((prev) => !prev);
   };
+  const handleShowConfirmPassword = () => {
+    setShowConfirmPassword((prev) => !prev);
+  };
+
   const {
     register,
     handleSubmit,
@@ -123,6 +128,7 @@ export default function RegisterForm() {
               placeholder="Enter your full name"
               {...register("name")}
               className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder-[#9CA3AF] outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/10 transition-colors"
+              disabled={isSubmitting}
             />
             {errors.name && (
               <p className="text-xs text-[#EF4444] mt-1">
@@ -139,6 +145,7 @@ export default function RegisterForm() {
               placeholder="Enter your email address"
               {...register("email")}
               className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder-[#9CA3AF] outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/10 transition-colors"
+              disabled={isSubmitting}
             />
             {errors.email && (
               <p className="text-xs text-[#EF4444] mt-1">
@@ -156,6 +163,7 @@ export default function RegisterForm() {
                 placeholder="Create a password"
                 {...register("password")}
                 className="border-0 outline-0 flex-1"
+                disabled={isSubmitting}
               />
 
               <button
@@ -186,13 +194,14 @@ export default function RegisterForm() {
                 placeholder="confirm password"
                 {...register("confirmPassword")}
                 className="border-0 outline-0 flex-1"
+                disabled={isSubmitting}
               />
               <button
-                onClick={handleShowPassword}
+                onClick={handleShowConfirmPassword}
                 className="hover:cursor-pointer"
                 type="button"
               >
-                {showPassword ? (
+                {showConfirmPassword ? (
                   <EyeOff className="text-slate-700" size={15} />
                 ) : (
                   <Eye className="text-slate-700" size={15} />

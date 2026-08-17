@@ -47,7 +47,7 @@ export default async function DashboardPage() {
 
             <div className="flex flex-col gap-2 items-center">
               <span className="text-slate-500 text-sm font-medium">
-                Total projects
+                Total project
               </span>
               <span className="text-2xl font-bold text-slate-600">
                 {totalProjects}

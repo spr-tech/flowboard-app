@@ -1,12 +1,12 @@
 "use client";
 
-import  { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormValues } from "@/lib/validations/auth";
 import { signIn } from "next-auth/react";
-import {  Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 
 // Defined OUTSIDE the component — created once, not re-created on every render
@@ -126,6 +126,7 @@ export default function LoginForm() {
               placeholder="Enter your email address"
               {...register("email")}
               className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] placeholder-[#9CA3AF] outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/10 transition-colors"
+              disabled={isSubmitting}
             />
             {errors.email && (
               <p className="text-xs text-[#EF4444] mt-1">
@@ -145,11 +146,13 @@ export default function LoginForm() {
                 placeholder="Enter your password"
                 {...register("password")}
                 className=" flex-1 text-sm text-[#111827] placeholder-[#9CA3AF] outline-none"
+                disabled={isSubmitting}
               />
 
               <button
                 onClick={handleShowPassword}
                 className="hover:cursor-pointer"
+                type="button"
               >
                 {showPassword ? (
                   <EyeOff className="text-slate-700" size={15} />

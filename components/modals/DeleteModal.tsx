@@ -82,6 +82,7 @@ export default function DeleteModal({
           <button
             className="hover:underline hover:cursor-pointer text-slate-400"
             onClick={onClose}
+            disabled={isLoading}
           >
             Cancel
           </button>
