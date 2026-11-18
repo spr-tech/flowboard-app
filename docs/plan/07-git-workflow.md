@@ -3,7 +3,7 @@
 ## Branches
 - `main`: the live app, frozen except urgent fixes. If you fix something on `main`, merge `main` into `rebuild` straight away.
 - `rebuild`: the new app comes together here.
-- `rebuild/mN-<name>`: one per milestone, PR into `rebuild`.
+- `rebuild-mN-<name>`: one per milestone (`rebuild-m1-foundation`, `rebuild-m2-database`, ...), PR into `rebuild`. Hyphens, not slashes: a `rebuild/...` branch can't coexist with the `rebuild` branch, because Git stores `rebuild` as a file and `rebuild/...` would need it to be a folder.
 
 ## Merging
 - Always "Create a merge commit". Never squash (squashed commits lose their own dates and contribution-graph credit). Never force-push `main`.

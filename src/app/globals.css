@@ -1,0 +1,246 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+ * Flowboard has no dark mode. Tying `dark:` to a `.dark` class we never add stops the
+ * operating system's dark setting from switching anything (shadcn's CSS uses `dark:`).
+ */
+@custom-variant dark (&:is(.dark *));
+
+/* ─── 1. Brand palette ──────────────────────────────────────────────────────────
+ * Raw values from docs/designs/README.md. Only the role tokens below may use these;
+ * components never do. A redesign changes this block and nothing else.
+ */
+:root {
+  --brand-white: #ffffff;
+  --brand-cream: #fbf5ee;
+  --brand-cream-2: #f4eadf;
+  --brand-sand: #eadfd3;
+  --brand-sand-strong: #d9c8b8;
+  --brand-sand-divider: #e2d4c6;
+  --brand-espresso: #1e1512;
+  --brand-espresso-2: #2a1f1a;
+  --brand-cocoa: #5a4a42;
+  --brand-mocha: #7a675d;
+  --brand-latte: #bfaea3;
+  /* Light text on espresso; used in the sign-in design, not listed in the README. */
+  --brand-foam: #f6ede4;
+  --brand-vermilion: #d23f27;
+  --brand-vermilion-hover: #b8351f;
+  --brand-vermilion-dark: #8e2614;
+  --brand-danger: #b3261e;
+  --brand-lime: #d4f04a;
+  --brand-olive: #2e3a00;
+
+  --brand-chip-high: #fbe1da;
+  --brand-chip-medium: #fff0c2;
+  --brand-chip-medium-text: #7a5600;
+  --brand-chip-low: #e3eef9;
+  --brand-chip-low-text: #1d4e86;
+  --brand-chip-done: #e2f3e6;
+  --brand-chip-done-text: #1e5b30;
+}
+
+/* ─── 2. Role tokens ─────────────────────────────────────────────────────────────
+ * Named for what they are for, not what colour they are. Components use these,
+ * through the Tailwind classes generated in section 4.
+ */
+:root {
+  /* Surfaces */
+  --surface-page: var(--brand-cream);
+  --surface-sunken: var(--brand-cream-2);
+  --surface-card: var(--brand-white);
+  --surface-inverse: var(--brand-espresso);
+  --surface-inverse-raised: var(--brand-espresso-2);
+
+  /* Foreground (text and icons) */
+  --fg-primary: var(--brand-espresso);
+  --fg-secondary: var(--brand-cocoa);
+  --fg-muted: var(--brand-mocha);
+  --fg-on-inverse: var(--brand-foam);
+  --fg-muted-on-inverse: var(--brand-latte);
+  --fg-on-primary: var(--brand-white);
+  --fg-on-danger: var(--brand-white);
+  --fg-on-highlight: var(--brand-espresso);
+  --fg-on-highlight-secondary: var(--brand-olive);
+  --fg-link: var(--brand-vermilion);
+  --fg-link-hover: var(--brand-vermilion-dark);
+
+  /* Lines */
+  --line-subtle: var(--brand-sand);
+  --line-strong: var(--brand-sand-strong);
+  --line-divider: var(--brand-sand-divider);
+  --line-focus: var(--brand-espresso);
+
+  /* Actions */
+  --action-primary: var(--brand-vermilion);
+  --action-primary-hover: var(--brand-vermilion-hover);
+  --action-danger: var(--brand-danger);
+  --highlight: var(--brand-lime);
+  --focus-ring: color-mix(in srgb, var(--brand-lime) 75%, transparent);
+  /* The dimmed layer behind dialogs and drawers */
+  --overlay: color-mix(in srgb, var(--brand-espresso) 40%, transparent);
+
+  /* Status chips (background, then text) */
+  --status-high: var(--brand-chip-high);
+  --status-high-fg: var(--brand-vermilion-dark);
+  --status-medium: var(--brand-chip-medium);
+  --status-medium-fg: var(--brand-chip-medium-text);
+  --status-low: var(--brand-chip-low);
+  --status-low-fg: var(--brand-chip-low-text);
+  --status-done: var(--brand-chip-done);
+  --status-done-fg: var(--brand-chip-done-text);
+}
+
+/* ─── 3. shadcn compatibility ───────────────────────────────────────────────────
+ * Generated shadcn components use these names (bg-primary, text-muted-foreground…).
+ * Pointing them at our roles lets generated code take on the brand without edits.
+ */
+:root {
+  --background: var(--surface-page);
+  --foreground: var(--fg-primary);
+  --card: var(--surface-card);
+  --card-foreground: var(--fg-primary);
+  --popover: var(--surface-card);
+  --popover-foreground: var(--fg-primary);
+  --primary: var(--action-primary);
+  --primary-foreground: var(--fg-on-primary);
+  --secondary: var(--surface-sunken);
+  --secondary-foreground: var(--fg-primary);
+  --muted: var(--surface-sunken);
+  --muted-foreground: var(--fg-muted);
+  --accent: var(--surface-sunken);
+  --accent-foreground: var(--fg-primary);
+  --destructive: var(--action-danger);
+  --border: var(--line-subtle);
+  --input: var(--line-strong);
+  --ring: var(--focus-ring);
+  /* shadcn derives rounded-sm…rounded-4xl from this; 14px matches the input radius. */
+  --radius: 14px;
+}
+
+/* ─── 4. Tailwind wiring ─────────────────────────────────────────────────────────
+ * Each --color-x here becomes bg-x, text-x, border-x, ring-x… in Tailwind v4.
+ * `inline` makes the class use the variable itself, so section 2 stays the source.
+ */
+@theme inline {
+  /* Ours */
+  --color-surface-page: var(--surface-page);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-card: var(--surface-card);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-surface-inverse-raised: var(--surface-inverse-raised);
+
+  --color-fg-primary: var(--fg-primary);
+  --color-fg-secondary: var(--fg-secondary);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-on-inverse: var(--fg-on-inverse);
+  --color-fg-muted-on-inverse: var(--fg-muted-on-inverse);
+  --color-fg-on-primary: var(--fg-on-primary);
+  --color-fg-on-danger: var(--fg-on-danger);
+  --color-fg-on-highlight: var(--fg-on-highlight);
+  --color-fg-on-highlight-secondary: var(--fg-on-highlight-secondary);
+  --color-fg-link: var(--fg-link);
+  --color-fg-link-hover: var(--fg-link-hover);
+
+  --color-line-subtle: var(--line-subtle);
+  --color-line-strong: var(--line-strong);
+  --color-line-divider: var(--line-divider);
+  --color-line-focus: var(--line-focus);
+
+  --color-primary-hover: var(--action-primary-hover);
+  --color-danger: var(--action-danger);
+  --color-highlight: var(--highlight);
+  --color-focus: var(--focus-ring);
+
+  --color-status-high: var(--status-high);
+  --color-status-high-fg: var(--status-high-fg);
+  --color-status-medium: var(--status-medium);
+  --color-status-medium-fg: var(--status-medium-fg);
+  --color-status-low: var(--status-low);
+  --color-status-low-fg: var(--status-low-fg);
+  --color-status-done: var(--status-done);
+  --color-status-done-fg: var(--status-done-fg);
+
+  /* shadcn names (section 3) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Fonts: the variables are set by next/font in src/app/layout.tsx */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-bricolage), var(--font-inter), ui-sans-serif, sans-serif;
+
+  /* Radii */
+  --radius-input: 14px;
+  --radius-card: 18px;
+  --radius-card-lg: 28px;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ─── 5. Base styles ─────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-surface-page text-fg-primary antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-heading;
+  }
+  /* One focus style for every focusable element, including ones we didn't build. */
+  :focus-visible {
+    outline: 4px solid var(--focus-ring);
+    outline-offset: 0;
+  }
+}
+
+/*
+ * The generated dialog and sheet build their overlay internally with a raw `bg-black/10`, and
+ * don't let us pass a class to it. This rule sits outside any layer, so it beats that utility
+ * class, and keeps the primitives unedited.
+ */
+[data-slot="dialog-overlay"],
+[data-slot="sheet-overlay"] {
+  background-color: var(--overlay);
+}
+
+/* Designs use motion (rising words, wiggling stickers); turn it off for people who ask. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

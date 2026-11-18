@@ -1,6 +1,6 @@
 # 6. Build order
 
-Each milestone is a branch off `rebuild` (for example `rebuild/m3-auth`) and ends with a pull request into `rebuild` and a working Vercel preview.
+Each milestone is a branch off `rebuild` (for example `rebuild-m3-auth`) and ends with a pull request into `rebuild` and a working Vercel preview.
 
 | # | Milestone | Done when |
 |---|---|---|
