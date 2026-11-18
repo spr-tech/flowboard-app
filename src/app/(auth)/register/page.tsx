@@ -1,9 +1,9 @@
-import RegisterForm from "@/components/forms/RegisterForm";
+import type { Metadata } from "next";
 
-export default function RegisterPage() {
-  return (
-    <main>
-      <RegisterForm />
-    </main>
-  );
+import SignUpContent from "@/components/content/auth/signUpContent";
+
+export const metadata: Metadata = { title: "Create your account · Flowboard" };
+
+export default function Page() {
+  return <SignUpContent />;
 }

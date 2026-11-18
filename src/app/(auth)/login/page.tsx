@@ -1,7 +1,9 @@
-import LoginForm from "@/components/forms/LoginForm";
+import type { Metadata } from "next";
 
-const page = () => {
-  return <LoginForm />;
-};
+import SignInContent from "@/components/content/auth/signInContent";
 
-export default page;
+export const metadata: Metadata = { title: "Sign in · Flowboard" };
+
+export default function Page() {
+  return <SignInContent />;
+}
