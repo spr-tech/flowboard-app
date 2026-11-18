@@ -31,7 +31,7 @@ export function AppShell({ user, children }: AppShellProps) {
   return (
     <div className="min-h-dvh">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col gap-8 bg-surface-inverse px-4 py-5 md:flex">
-        <Logo tone="inverse" className="px-2" />
+        <Logo variant="onDark" className="px-2" />
         <SidebarNav />
       </aside>
 
@@ -45,7 +45,7 @@ export function AppShell({ user, children }: AppShellProps) {
         className="border-0 bg-surface-inverse text-fg-on-inverse"
       >
         <div className="flex flex-col gap-8 pt-5">
-          <Logo tone="inverse" className="px-2" />
+          <Logo variant="onDark" className="px-2" />
           <SidebarNav onNavigate={closeMenu} />
         </div>
       </Drawer>
