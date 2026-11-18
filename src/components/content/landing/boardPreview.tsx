@@ -11,22 +11,22 @@ const columns: { title: string; tasks: PreviewTask[]; hasDropSlot?: boolean }[] 
     title: "To do · 3",
     tasks: [
       { title: "Write pricing page copy", status: "low" },
-      { title: "Fix GitHub sign-in", status: "high" },
+      { title: "Fix the checkout bug", status: "high" },
     ],
     hasDropSlot: true,
   },
   {
     title: "In progress · 2",
     tasks: [
-      { title: "Move actions to API routes", status: "medium" },
+      { title: "Plan the launch email", status: "medium" },
       { title: "Design the invite email", status: "medium" },
     ],
   },
   {
     title: "Done · 2",
     tasks: [
-      { title: "Set up Redux store", status: "done", isDone: true },
-      { title: "New brand tokens", status: "done", isDone: true },
+      { title: "Launch checklist", status: "done", isDone: true },
+      { title: "New brand colours", status: "done", isDone: true },
     ],
   },
 ];
@@ -37,7 +37,7 @@ const columns: { title: string; tasks: PreviewTask[]; hasDropSlot?: boolean }[] 
  */
 export function BoardPreview() {
   return (
-    <div aria-hidden className="relative mx-auto mt-18 max-w-260">
+    <div aria-hidden className="relative mx-auto mt-14 max-w-240">
       <div
         className="absolute -top-8.5 -left-9 z-30 hidden animate-float items-center gap-2 rounded-[14px] bg-highlight px-4 py-3 text-sm font-semibold text-fg-on-highlight md:flex"
         style={cssVars({ "--r": "-6deg" })}

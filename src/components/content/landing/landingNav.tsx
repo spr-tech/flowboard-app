@@ -8,7 +8,7 @@ import { cn } from "@/utilities/helpers/cn";
 const sectionLinks = [
   { label: "How it works", href: "#how", hover: "hover:bg-highlight hover:text-fg-on-highlight" },
   { label: "Features", href: "#features", hover: "hover:bg-primary hover:text-fg-on-primary" },
-  { label: "Built with", href: "#stack", hover: "hover:bg-surface-inverse hover:text-highlight" },
+  { label: "Why Flowboard", href: "#why", hover: "hover:bg-surface-inverse hover:text-highlight" },
   { label: "FAQ", href: "#faq", hover: "hover:bg-surface-sunken hover:text-fg-primary" },
 ];
 

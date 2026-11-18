@@ -200,7 +200,21 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* ─── 5. Motion ──────────────────────────────────────────────────────────────────
+/* ─── 5. Type scale ──────────────────────────────────────────────────────────────
+ * Display sizes for big headings; each becomes a `text-display-x` class. They scale with the
+ * viewport between a phone minimum and a desktop maximum. Also registered in
+ * src/utilities/helpers/cn.ts so class merging treats them as sizes, not colours.
+ */
+@theme {
+  --text-display-hero: clamp(38px, 5.6vw, 80px);
+  --text-display-statement: clamp(40px, 7vw, 110px);
+  --text-display-section: clamp(32px, 4vw, 52px);
+  --text-display-why: clamp(38px, 5vw, 72px);
+  --text-display-cta: clamp(34px, 4.6vw, 64px);
+  --text-display-faq: clamp(28px, 3.4vw, 44px);
+}
+
+/* ─── 6. Motion ──────────────────────────────────────────────────────────────────
  * Each --animate-x becomes an `animate-x` class. Stickers set their resting angle with an
  * inline `--r` (style={{ "--r": "-8deg" }}) so one keyframe serves every angle.
  * All of it is switched off for prefers-reduced-motion at the end of this file.
@@ -299,7 +313,7 @@
   }
 }
 
-/* ─── 6. Base styles ─────────────────────────────────────────────────────────── */
+/* ─── 7. Base styles ─────────────────────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border;

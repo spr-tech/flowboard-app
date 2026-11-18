@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { Logo } from "@/components/ui/logo/logo";
-import { GITHUB_REPO_URL, LIVE_APP_URL } from "@/utilities/constants/links";
 
 const linkGroups = [
   {
@@ -13,10 +12,10 @@ const linkGroups = [
     ],
   },
   {
-    title: "Project",
+    title: "Account",
     links: [
-      { label: "GitHub", href: GITHUB_REPO_URL },
-      { label: "Live app", href: LIVE_APP_URL },
+      { label: "Sign in", href: "/login" },
+      { label: "Create an account", href: "/register" },
     ],
   },
 ];

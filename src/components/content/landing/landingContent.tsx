@@ -6,7 +6,7 @@ import { HowItWorksSection } from "./howItWorksSection";
 import { LandingFooter } from "./landingFooter";
 import { LandingNav } from "./landingNav";
 import { SloganSection } from "./sloganSection";
-import { StackSection } from "./stackSection";
+import { WhySection } from "./whySection";
 
 export default function LandingContent() {
   return (
@@ -19,7 +19,7 @@ export default function LandingContent() {
         <SloganSection />
         <HowItWorksSection />
         <FeaturesSection />
-        <StackSection />
+        <WhySection />
         <FaqSection />
         <CtaSection />
       </main>
