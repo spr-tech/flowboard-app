@@ -39,7 +39,7 @@ function StepCard({ number, tone, title, body, mock }: StepCardProps) {
     <div className={cn("relative overflow-hidden rounded-card-lg p-7", colours.card)}>
       <span
         aria-hidden
-        className={cn("absolute top-1.5 right-5 font-heading text-[120px] leading-none font-extrabold", colours.number)}
+        className={cn("absolute top-1.5 right-5 font-heading text-[92px] leading-none font-extrabold", colours.number)}
       >
         {number}
       </span>
@@ -49,7 +49,7 @@ function StepCard({ number, tone, title, body, mock }: StepCardProps) {
       <p className={cn("relative mb-1.5 text-[13px] font-semibold", colours.step)}>
         Step {Number(number)} of 3
       </p>
-      <h3 className="relative mb-2 text-[28px] font-bold tracking-[-0.02em]">{title}</h3>
+      <h3 className="relative mb-2 text-2xl font-bold tracking-[-0.02em]">{title}</h3>
       <p className={cn("relative text-base leading-relaxed", colours.body)}>{body}</p>
     </div>
   );
@@ -60,10 +60,10 @@ const fakeField = "flex h-11 items-center rounded-[10px] px-3 text-[15px]";
 
 export function HowItWorksSection() {
   return (
-    <section id="how" className="px-6 py-24">
+    <section id="how" className="px-6 py-20">
       <div className="mx-auto max-w-300">
         <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
-          <h2 className="max-w-160 text-[clamp(36px,5vw,64px)] leading-none font-extrabold tracking-[-0.04em]">
+          <h2 className="max-w-160 text-display-section leading-none font-extrabold tracking-[-0.04em]">
             Three steps. <span className="text-primary">No setup call.</span>
           </h2>
           <p className="max-w-95 text-[17px] leading-relaxed text-fg-secondary">
@@ -123,7 +123,7 @@ export function HowItWorksSection() {
             mock={
               <div className="flex items-center gap-2.5 rounded-card bg-surface-inverse-raised p-4.5 text-sm font-semibold">
                 <span className="flex-1 -rotate-3 rounded-[10px] bg-surface-page p-3 text-fg-primary">
-                  Fix GitHub sign-in
+                  Fix the checkout bug
                 </span>
                 <ArrowRight className="size-7 text-highlight" strokeWidth={2.5} />
                 <span className="rounded-[10px] bg-highlight p-3 text-fg-on-highlight">Done</span>

@@ -12,7 +12,7 @@ const faceText = "font-sans text-[0.17em] font-semibold tracking-normal rounded-
 export function SloganSection() {
   return (
     <section aria-label="Plan the work, move the cards, ship it" className="px-6 pt-30 pb-10">
-      <div className="mx-auto flex max-w-300 flex-col gap-[0.06em] font-heading text-[clamp(46px,9.4vw,150px)] leading-none font-extrabold tracking-[-0.055em]">
+      <div className="mx-auto flex max-w-300 flex-col gap-[0.06em] font-heading text-display-statement leading-none font-extrabold tracking-[-0.055em]">
         <p className={cn(lineClasses, "pl-[4%]")}>
           Plan
           <span

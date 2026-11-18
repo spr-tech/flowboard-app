@@ -2,11 +2,9 @@ import { Check, Pin } from "lucide-react";
 
 import { ArrowBadge } from "@/components/ui/button/arrowBadge";
 import { ButtonLink } from "@/components/ui/button/buttonLink";
-import { GithubIcon } from "@/components/ui/icons/githubIcon";
 import { Rise } from "@/components/ui/motion/rise";
 import { Highlight } from "@/components/ui/typography/highlight";
 import { cn } from "@/utilities/helpers/cn";
-import { GITHUB_REPO_URL } from "@/utilities/constants/links";
 import { cssVars } from "@/utilities/helpers/cssVars";
 import { BoardPreview } from "./boardPreview";
 
@@ -14,16 +12,17 @@ const stickerBase = "absolute z-20 hidden animate-wiggle md:flex";
 
 export function HeroSection() {
   return (
-    <section id="top" className="relative px-6 pt-18 pb-10">
+    <section id="top" className="relative px-6 pt-14 pb-10">
       <div className="relative mx-auto max-w-300 text-center">
         <p className="inline-flex items-center gap-2.5 rounded-full border border-line-subtle bg-surface-card py-1.5 pr-4 pl-1.5 text-sm text-fg-secondary">
           <span className="rounded-full bg-surface-inverse px-2.5 py-1 text-xs font-semibold text-highlight">
             New
           </span>
-          Rebuilt with Redux Toolkit and a fresh look
+          Due dates, assignees and a done column on every board
         </p>
 
-        {/* Stickers around the headline; desktop only, decorative. */}
+        {/* Stickers around the headline; desktop only, decorative. "High priority" sits level with
+            the badge, above the headline, so it never covers a word whatever the line wrapping. */}
         <span
           aria-hidden
           className={cn(stickerBase, "top-30 left-[2%] size-16 items-center justify-center rounded-full bg-primary text-fg-on-primary")}
@@ -33,7 +32,7 @@ export function HeroSection() {
         </span>
         <span
           aria-hidden
-          className={cn(stickerBase, "top-24 right-[3%] rounded-[14px] bg-surface-inverse px-3.5 py-2.5 text-sm font-semibold text-highlight")}
+          className={cn(stickerBase, "top-1 right-[3%] rounded-[14px] bg-surface-inverse px-3.5 py-2.5 text-sm font-semibold text-highlight")}
           style={{ ...cssVars({ "--r": "10deg" }), animationDelay: "-1.2s" }}
         >
           High priority
@@ -61,7 +60,7 @@ export function HeroSection() {
           </span>
         </span>
 
-        <h1 className="mx-auto mt-7 max-w-265 text-[clamp(44px,7.2vw,104px)] leading-[0.98] font-extrabold tracking-[-0.045em]">
+        <h1 className="mx-auto mt-7 max-w-265 text-display-hero leading-[0.98] font-extrabold tracking-[-0.045em]">
           <Rise delay={0.05}>Move</Rise> <Rise delay={0.12}>your</Rise>{" "}
           <Rise delay={0.19}>team&apos;s</Rise> <Rise delay={0.26}>work</Rise>{" "}
           <Rise delay={0.33}>from</Rise>{" "}
@@ -87,7 +86,7 @@ export function HeroSection() {
             </svg>
           </Rise>
         </h1>
-        <p className="mx-auto mt-7 max-w-150 text-[19px] leading-relaxed text-fg-secondary">
+        <p className="mx-auto mt-7 max-w-150 text-lg leading-relaxed text-fg-secondary">
           Flowboard is a Kanban workspace for small teams. Make a project, invite your people by
           email, and drag tasks across the board until they&apos;re shipped.
         </p>
@@ -99,13 +98,7 @@ export function HeroSection() {
             size="xl"
             endIcon={<ArrowBadge />}
           />
-          <ButtonLink
-            href={GITHUB_REPO_URL}
-            text="View on GitHub"
-            variant="outline"
-            size="xl"
-            startIcon={<GithubIcon />}
-          />
+          <ButtonLink href="#how" text="See how it works" variant="outline" size="xl" />
         </div>
 
         <BoardPreview />
