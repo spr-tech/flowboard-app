@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Flowboard board</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBF5EE}
+a{color:#D23F27}
+.fb-card{transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s;cursor:grab}
+.fb-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(30,21,18,.10)}
+.fb-card:active{cursor:grabbing}
+.fb-card:focus-visible,.fb-btn:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(212,240,74,.85)}
+.fb-in{transition:border-color .2s,box-shadow .2s}
+.fb-in:focus{outline:none;border-color:#1E1512;box-shadow:0 0 0 4px rgba(212,240,74,.75)}
+.fb-menu-item{transition:background .15s}
+.fb-menu-item:hover{background:#F4EADF}
+.fb-pop{animation:fbPop .22s cubic-bezier(.2,.8,.2,1) both}
+@keyframes fbPop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.fb-slide{animation:fbSlide .28s cubic-bezier(.2,.8,.2,1) both}
+@keyframes fbSlide{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+.fb-show-sm{display:none !important}
+@media (max-width:860px){.fb-side{display:none !important}.fb-show-sm{display:inline-flex !important}.fb-hide-sm{display:none !important}}
+@media (prefers-reduced-motion:reduce){.fb-card,.fb-pop,.fb-slide{transition:none;animation:none}}
+</style>
+</helmet>
+<div style="font-family: Inter, system-ui, sans-serif; color: #1E1512; background: #FBF5EE; min-height: 100vh; display: flex">
+
+<div class="fb-side" style="flex: none; position: sticky; top: 0; height: 100vh">
+<dc-import name="Sidebar" active="projects" hint-size="240px,100vh"></dc-import>
+</div>
+
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 32px; border-bottom: 1px solid #EADFD3; background: #FBF5EE">
+<nav aria-label="Breadcrumb" style="display: flex; align-items: center; gap: 8px; font-size: 14px">
+<button type="button" class="fb-show-sm" aria-label="Open menu" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #D9C8B8; background: #FFFFFF; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E1512" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
+<a href="Projects.dc.html" class="fb-hide-sm" style="color: #7A675D; text-decoration: none">Projects</a><span class="fb-hide-sm" aria-hidden="true" style="color: #D9C8B8">/</span><span class="fb-hide-sm" style="font-weight: 600">Website relaunch</span>
+</nav>
+<div style="display: flex; align-items: center; gap: 10px">
+<a href="Projects.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; background: {{accent}}; color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Create</a>
+<button type="button" aria-label="Account menu" style="width: 44px; height: 44px; border-radius: 50%; border: 0; background: {{lime}}; color: #1E1512; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">MJ</button>
+</div>
+</header>
+
+<div style="padding: 28px 32px 0">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<div style="display: flex; align-items: center; gap: 16px">
+<span style="width: 56px; height: 56px; border-radius: 18px; background: {{accent}}; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 800">W</span>
+<div>
+<h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(30px, 3.4vw, 44px); letter-spacing: -0.04em; line-height: 1; margin: 0">Website relaunch</h1>
+<p style="margin: 6px 0 0; font-size: 14px; color: #5A4A42">{{summary}}</p>
+</div>
+</div>
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="display: flex" aria-label="3 members">
+<span style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #FBF5EE; background: {{lime}}; color: #1E1512; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">MJ</span>
+<span style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #FBF5EE; margin-left: -10px; background: #FBE1DA; color: #8E2614; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">AO</span>
+<span style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #FBF5EE; margin-left: -10px; background: #1E1512; color: #FBF5EE; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">TK</span>
+</span>
+<a href="#" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; background: #1E1512; color: #FBF5EE; text-decoration: none; font-size: 14px; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 8v6M22 11h-6"></path></svg>Invite</a>
+<a href="#" aria-label="Project settings" style="width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid #D9C8B8; display: inline-flex; align-items: center; justify-content: center; color: #1E1512"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M15 5v4M4 17h3M11 17h9M9 15v4"></path></svg></a>
+</div>
+</div>
+
+<div role="toolbar" aria-label="Board filters" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 22px">
+<div style="display: inline-flex; gap: 4px; background: #F4EADF; padding: 4px; border-radius: 999px">
+<sc-for list="{{prFilters}}" as="f" hint-placeholder-count="4">
+<sc-if value="{{f.on}}" hint-placeholder-val="{{ false }}"><button type="button" aria-pressed="true" onClick="{{f.pick}}" style="min-height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: #1E1512; color: #FBF5EE; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{f.label}}</button></sc-if>
+<sc-if value="{{f.off}}" hint-placeholder-val="{{ true }}"><button type="button" aria-pressed="false" onClick="{{f.pick}}" style="min-height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: transparent; color: #5A4A42; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{f.label}}</button></sc-if>
+</sc-for>
+</div>
+<button type="button" onClick="{{toggleMine}}" aria-pressed="{{mine}}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid {{mineBorder}}; background: {{mineBg}}; font: inherit; font-size: 13px; font-weight: 600; color: #1E1512; cursor: pointer"><span style="width: 22px; height: 22px; border-radius: 50%; background: {{lime}}; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700">MJ</span>Only my tasks</button>
+<span style="font-size: 13px; color: #7A675D">Drag cards between columns, or open one and change its column.</span>
+</div>
+</div>
+
+<div style="flex: 1; overflow-x: auto; padding: 22px 32px 40px">
+<div style="display: flex; gap: 16px; align-items: flex-start; min-height: 560px">
+<sc-for list="{{cols}}" as="c" hint-placeholder-count="4">
+<section aria-label="{{c.name}} column" onDragOver="{{c.over}}" onDrop="{{c.drop}}" style="flex: none; width: 300px; border-radius: 24px; padding: 12px; background: {{c.bg}}; border: 2px dashed {{c.edge}}; box-sizing: border-box">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 6px 12px; position: relative">
+<sc-if value="{{c.renaming}}" hint-placeholder-val="{{ false }}">
+<input class="fb-in" aria-label="Column name" value="{{renameText}}" onChange="{{onRename}}" onKeyDown="{{renameKey}}" onBlur="{{saveRename}}" style="flex: 1; min-width: 0; height: 36px; border: 1.5px solid #1E1512; border-radius: 10px; padding: 0 10px; font: inherit; font-size: 15px; font-weight: 600; background: #FFFFFF; color: #1E1512">
+</sc-if>
+<sc-if value="{{c.named}}" hint-placeholder-val="{{ true }}">
+<span style="display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700">{{c.name}}<span style="font-size: 12px; font-weight: 600; background: #FFFFFF; color: #5A4A42; padding: 1px 8px; border-radius: 999px">{{c.count}}</span><sc-if value="{{c.isDone}}" hint-placeholder-val="{{ false }}"><span title="Tasks here count as done" style="font-size: 11px; font-weight: 600; background: #E2F3E6; color: #1E5B30; padding: 2px 8px; border-radius: 999px">Done column</span></sc-if></span>
+</sc-if>
+<button type="button" class="fb-btn" aria-label="{{c.name}} column options" aria-expanded="{{c.menuOpen}}" onClick="{{c.toggleMenu}}" style="flex: none; width: 36px; height: 36px; border-radius: 10px; border: 0; background: transparent; cursor: pointer; color: #5A4A42; font-size: 20px; line-height: 1">⋯</button>
+<sc-if value="{{c.menuOpen}}" hint-placeholder-val="{{ false }}">
+<div role="menu" class="fb-pop" style="position: absolute; right: 0; top: 44px; z-index: 20; width: 220px; background: #FFFFFF; border: 1px solid #EADFD3; border-radius: 16px; padding: 6px; box-shadow: 0 18px 40px rgba(30,21,18,.14)">
+<button type="button" role="menuitem" class="fb-menu-item" onClick="{{c.startRename}}" style="width: 100%; text-align: left; min-height: 40px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font: inherit; font-size: 14px; color: #1E1512; cursor: pointer">Rename</button>
+<sc-if value="{{c.notDone}}" hint-placeholder-val="{{ true }}"><button type="button" role="menuitem" class="fb-menu-item" onClick="{{c.makeDone}}" style="width: 100%; text-align: left; min-height: 40px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font: inherit; font-size: 14px; color: #1E1512; cursor: pointer">Set as done column</button></sc-if>
+<sc-if value="{{c.canDelete}}" hint-placeholder-val="{{ true }}"><button type="button" role="menuitem" class="fb-menu-item" onClick="{{c.askDelete}}" style="width: 100%; text-align: left; min-height: 40px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font: inherit; font-size: 14px; font-weight: 600; color: #B3261E; cursor: pointer">Delete column</button></sc-if>
+<sc-if value="{{c.lastOne}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 8px 12px; font-size: 13px; color: #7A675D">A board needs at least one column.</p></sc-if>
+</div>
+</sc-if>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px; min-height: 40px">
+<sc-for list="{{c.cards}}" as="t" hint-placeholder-count="3">
+<div role="button" tabindex="0" class="fb-card" draggable="true" onDragStart="{{t.dragStart}}" onDragEnd="{{dragEnd}}" onDragOver="{{t.over}}" onDrop="{{t.drop}}" onClick="{{t.open}}" onKeyDown="{{t.key}}" aria-label="Open task {{t.title}}" style="background: #FFFFFF; border-radius: 16px; padding: 14px; border: 1px solid #EADFD3; opacity: {{t.opacity}}">
+<sc-if value="{{t.done}}" hint-placeholder-val="{{ false }}"><p style="margin: 0 0 12px; font-size: 15px; font-weight: 600; line-height: 1.35; color: #7A675D; text-decoration: line-through">{{t.title}}</p></sc-if>
+<sc-if value="{{t.open2}}" hint-placeholder-val="{{ true }}"><p style="margin: 0 0 12px; font-size: 15px; font-weight: 600; line-height: 1.35">{{t.title}}</p></sc-if>
+<div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+<span style="font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: {{t.chipBg}}; color: {{t.chipFg}}">{{t.pr}}</span>
+<sc-if value="{{t.hasDue}}" hint-placeholder-val="{{ true }}"><span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: {{t.dueBg}}; color: {{t.dueFg}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M8 3v3M16 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"></path></svg>{{t.dueLabel}}</span></sc-if>
+<span style="margin-left: auto"></span>
+<sc-if value="{{t.hasPerson}}" hint-placeholder-val="{{ true }}"><span title="{{t.personName}}" style="width: 28px; height: 28px; border-radius: 50%; background: {{t.pBg}}; color: {{t.pFg}}; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">{{t.person}}</span></sc-if>
+<sc-if value="{{t.noPerson}}" hint-placeholder-val="{{ false }}"><span title="Unassigned" style="width: 28px; height: 28px; border-radius: 50%; border: 1.5px dashed #D9C8B8"></span></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+
+<sc-if value="{{c.quickOpen}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 10px; background: #FFFFFF; border-radius: 16px; padding: 10px; border: 1.5px solid #1E1512">
+<input aria-label="New task title" value="{{quickText}}" onChange="{{onQuick}}" onKeyDown="{{quickKey}}" placeholder="What needs doing?" style="width: 100%; box-sizing: border-box; border: 0; outline: none; font: inherit; font-size: 15px; padding: 6px 4px; color: #1E1512; background: transparent">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px">
+<span style="font-size: 12px; color: #7A675D">Enter to add · Esc to close</span>
+<button type="button" onClick="{{addQuick}}" style="min-height: 34px; padding: 0 14px; border-radius: 999px; border: 0; background: #1E1512; color: #FBF5EE; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Add</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{c.quickClosed}}" hint-placeholder-val="{{ true }}">
+<button type="button" class="fb-btn" onClick="{{c.startQuick}}" style="margin-top: 10px; width: 100%; min-height: 44px; border-radius: 14px; border: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 600; color: #5A4A42; text-align: left; padding: 0 10px; cursor: pointer">+ Add task</button>
+</sc-if>
+</section>
+</sc-for>
+
+<sc-if value="{{addingCol}}" hint-placeholder-val="{{ false }}">
+<div style="flex: none; width: 280px; border-radius: 24px; padding: 14px; background: #FFFFFF; border: 1.5px solid #1E1512; box-sizing: border-box">
+<input class="fb-in" aria-label="New column name" value="{{newColText}}" onChange="{{onNewCol}}" onKeyDown="{{newColKey}}" placeholder="Column name, e.g. Review" style="width: 100%; box-sizing: border-box; height: 44px; border: 1.5px solid #D9C8B8; border-radius: 12px; padding: 0 12px; font: inherit; font-size: 15px; color: #1E1512">
+<div style="display: flex; gap: 8px; margin-top: 10px">
+<button type="button" onClick="{{addCol}}" style="min-height: 38px; padding: 0 16px; border-radius: 999px; border: 0; background: #1E1512; color: #FBF5EE; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Add column</button>
+<button type="button" onClick="{{cancelCol}}" style="min-height: 38px; padding: 0 14px; border-radius: 999px; border: 0; background: transparent; color: #5A4A42; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Cancel</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{notAddingCol}}" hint-placeholder-val="{{ true }}">
+<button type="button" class="fb-btn" onClick="{{startCol}}" style="flex: none; width: 260px; min-height: 120px; border-radius: 24px; border: 2px dashed #D9C8B8; background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: #5A4A42; cursor: pointer">+ Add column</button>
+</sc-if>
+</div>
+</div>
+</div>
+
+<sc-if value="{{drawer}}" hint-placeholder-val="{{ false }}">
+<div style="position: fixed; inset: 0; z-index: 40">
+<div onClick="{{closeDrawer}}" style="position: absolute; inset: 0; background: rgba(30,21,18,0.35)"></div>
+<aside role="dialog" aria-modal="true" aria-label="Task details" class="fb-slide" style="position: absolute; top: 0; right: 0; bottom: 0; width: min(460px, 100%); background: #FBF5EE; box-shadow: -20px 0 50px rgba(30,21,18,.18); display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #EADFD3">
+<span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #5A4A42"><span style="width: 10px; height: 10px; border-radius: 3px; background: {{accent}}"></span>Website relaunch · {{dColName}}</span>
+<button type="button" onClick="{{closeDrawer}}" aria-label="Close task details" style="width: 40px; height: 40px; border-radius: 50%; border: 0; background: #F4EADF; font-size: 20px; color: #1E1512; cursor: pointer">×</button>
+</div>
+<div style="flex: 1; overflow-y: auto; padding: 22px">
+<label for="d-title" style="display: block; font-size: 13px; font-weight: 600; color: #5A4A42; margin-bottom: 6px">Title</label>
+<textarea id="d-title" class="fb-in" rows="2" value="{{dTitle}}" onChange="{{onDTitle}}" style="width: 100%; box-sizing: border-box; border: 1.5px solid transparent; border-radius: 12px; padding: 8px 10px; font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; background: transparent; color: #1E1512; resize: none"></textarea>
+
+<div style="display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 14px 12px; align-items: center; margin-top: 18px">
+<label for="d-col" style="font-size: 14px; color: #5A4A42">Column</label>
+<select id="d-col" class="fb-in" value="{{dCol}}" onChange="{{onDCol}}" style="height: 44px; border: 1.5px solid #D9C8B8; border-radius: 12px; padding: 0 10px; font: inherit; font-size: 14px; background: #FFFFFF; color: #1E1512">
+<sc-for list="{{colOptions}}" as="o" hint-placeholder-count="4"><option value="{{o.id}}">{{o.name}}</option></sc-for>
+</select>
+<label for="d-who" style="font-size: 14px; color: #5A4A42">Assignee</label>
+<select id="d-who" class="fb-in" value="{{dWho}}" onChange="{{onDWho}}" style="height: 44px; border: 1.5px solid #D9C8B8; border-radius: 12px; padding: 0 10px; font: inherit; font-size: 14px; background: #FFFFFF; color: #1E1512">
+<option value="">Unassigned</option><option value="MJ">Muizz (you)</option><option value="AO">Ada</option><option value="TK">Tobi</option>
+</select>
+<span id="d-pr-label" style="font-size: 14px; color: #5A4A42">Priority</span>
+<div role="radiogroup" aria-labelledby="d-pr-label" style="display: flex; gap: 6px">
+<sc-for list="{{prOptions}}" as="p" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{p.on}}" onClick="{{p.pick}}" style="flex: 1; min-height: 40px; border-radius: 999px; border: {{p.border}}; background: {{p.bg}}; color: {{p.fg}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{p.label}}</button>
+</sc-for>
+</div>
+<label for="d-due" style="font-size: 14px; color: #5A4A42">Due date</label>
+<input id="d-due" class="fb-in" type="date" value="{{dDue}}" onChange="{{onDDue}}" style="height: 44px; border: 1.5px solid #D9C8B8; border-radius: 12px; padding: 0 10px; font: inherit; font-size: 14px; background: #FFFFFF; color: #1E1512">
+</div>
+
+<label for="d-desc" style="display: block; font-size: 13px; font-weight: 600; color: #5A4A42; margin: 22px 0 6px">Description</label>
+<textarea id="d-desc" class="fb-in" rows="5" value="{{dDesc}}" onChange="{{onDDesc}}" placeholder="Add more detail, links or acceptance criteria" style="width: 100%; box-sizing: border-box; border: 1.5px solid #D9C8B8; border-radius: 14px; padding: 12px; font: inherit; font-size: 15px; line-height: 1.5; background: #FFFFFF; color: #1E1512; resize: vertical"></textarea>
+
+<p style="font-size: 13px; font-weight: 600; color: #5A4A42; margin: 22px 0 10px">Activity</p>
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: #5A4A42">
+<li><strong style="color: #1E1512">Ada</strong> moved this to {{dColName}} · 12m ago</li>
+<li><strong style="color: #1E1512">You</strong> created this task · 2 days ago</li>
+</ol>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; border-top: 1px solid #EADFD3">
+<button type="button" onClick="{{deleteTask}}" style="min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #B3261E; background: transparent; font: inherit; font-size: 14px; font-weight: 600; color: #B3261E; cursor: pointer">Delete task</button>
+<span style="font-size: 12px; color: #7A675D">Changes save automatically</span>
+</div>
+</aside>
+</div>
+</sc-if>
+
+<sc-if value="{{delOpen}}" hint-placeholder-val="{{ false }}">
+<div style="position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px">
+<div onClick="{{cancelDelete}}" style="position: absolute; inset: 0; background: rgba(30,21,18,0.55)"></div>
+<div role="alertdialog" aria-modal="true" aria-labelledby="del-title" class="fb-pop" style="position: relative; width: 100%; max-width: 500px; background: #FBF5EE; border-radius: 28px; padding: 28px; box-sizing: border-box">
+<h2 id="del-title" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 8px">Delete “{{delName}}”?</h2>
+<sc-if value="{{delEmpty}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 15px; line-height: 1.6; color: #5A4A42">This column is empty, so nothing else is affected.</p></sc-if>
+<sc-if value="{{delHasTasks}}" hint-placeholder-val="{{ true }}">
+<p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #5A4A42">This column has <strong style="color: #1E1512">{{delCount}} tasks</strong>. What should happen to them?</p>
+<div role="radiogroup" aria-label="What to do with the tasks" style="display: flex; flex-direction: column; gap: 10px">
+<div onClick="{{pickMove}}" style="border-radius: 18px; padding: 14px 16px; background: #FFFFFF; border: {{moveBorder}}; cursor: pointer">
+<span role="radio" aria-checked="{{modeMove}}" style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600"><span style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #1E1512; display: inline-flex; align-items: center; justify-content: center"><sc-if value="{{modeMove}}" hint-placeholder-val="{{ true }}"><span style="width: 8px; height: 8px; border-radius: 50%; background: #1E1512"></span></sc-if></span>Move them, then delete the column</span>
+<div style="display: flex; align-items: center; gap: 8px; margin: 10px 0 0 28px; font-size: 14px; color: #5A4A42">Move {{delCount}} tasks to
+<select aria-label="Target column" value="{{moveTo}}" onChange="{{onMoveTo}}" style="height: 38px; border: 1.5px solid #D9C8B8; border-radius: 10px; padding: 0 8px; font: inherit; font-size: 14px; background: #FFFFFF; color: #1E1512">
+<sc-for list="{{moveOptions}}" as="o" hint-placeholder-count="3"><option value="{{o.id}}">{{o.name}}</option></sc-for>
+</select>
+</div>
+</div>
+<div onClick="{{pickWipe}}" style="border-radius: 18px; padding: 14px 16px; background: #FFFFFF; border: {{wipeBorder}}; cursor: pointer">
+<span role="radio" aria-checked="{{modeWipe}}" style="display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: #B3261E"><span style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #B3261E; display: inline-flex; align-items: center; justify-content: center"><sc-if value="{{modeWipe}}" hint-placeholder-val="{{ false }}"><span style="width: 8px; height: 8px; border-radius: 50%; background: #B3261E"></span></sc-if></span>Delete the column and its {{delCount}} tasks</span>
+<sc-if value="{{modeWipe}}" hint-placeholder-val="{{ false }}">
+<label for="del-type" style="display: block; margin: 12px 0 6px 28px; font-size: 13px; color: #5A4A42">Type <strong style="color: #1E1512">{{delName}}</strong> to confirm. This can't be undone.</label>
+<input id="del-type" class="fb-in" value="{{typed}}" onChange="{{onTyped}}" autocomplete="off" style="margin-left: 28px; width: calc(100% - 28px); box-sizing: border-box; height: 44px; border: 1.5px solid #D9C8B8; border-radius: 12px; padding: 0 12px; font: inherit; font-size: 15px; background: #FFFFFF; color: #1E1512">
+</sc-if>
+</div>
+</div>
+</sc-if>
+<div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px">
+<button type="button" onClick="{{cancelDelete}}" style="min-height: 48px; padding: 0 20px; border-radius: 999px; border: 1.5px solid #1E1512; background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: #1E1512; cursor: pointer">Cancel</button>
+<sc-if value="{{canConfirm}}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{confirmDelete}}" style="min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: {{confirmBg}}; font: inherit; font-size: 15px; font-weight: 600; color: #FFFFFF; cursor: pointer">{{confirmLabel}}</button></sc-if>
+<sc-if value="{{cannotConfirm}}" hint-placeholder-val="{{ false }}"><button type="button" disabled aria-disabled="true" style="min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #E2D4C6; font: inherit; font-size: 15px; font-weight: 600; color: #7A675D; cursor: not-allowed">{{confirmLabel}}</button></sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{toast}}" hint-placeholder-val="{{ false }}">
+<div role="status" class="fb-pop" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 10px; background: #1E1512; color: #FBF5EE; border-radius: 16px; padding: 14px 18px; font-size: 15px; font-weight: 500">
+<span style="width: 24px; height: 24px; border-radius: 8px; background: {{lime}}; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E1512" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span>{{toastText}}
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#D23F27","options":["#D23F27","#E8552B","#C2352F"]},"lime":{"editor":"color","default":"#D4F04A","options":["#D4F04A","#C8F169","#E4F58A"]},"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      columns: [
+        { id: 'c1', name: 'To do', isDone: false },
+        { id: 'c2', name: 'In progress', isDone: false },
+        { id: 'c3', name: 'Review', isDone: false },
+        { id: 'c4', name: 'Done', isDone: true }
+      ],
+      tasks: [
+        { id: 't1', col: 'c1', title: 'Write pricing page copy', pr: 'Low', who: 'AO', due: '2026-11-26', desc: '' },
+        { id: 't2', col: 'c1', title: 'Fix GitHub sign-in', pr: 'High', who: 'MJ', due: '2026-11-16', desc: 'GitHub users never get a row in the User table. Add the Prisma adapter.' },
+        { id: 't3', col: 'c1', title: 'Accessibility pass', pr: 'Medium', who: '', due: '2026-11-28', desc: '' },
+        { id: 't4', col: 'c2', title: 'Move actions to API routes', pr: 'Medium', who: 'TK', due: '2026-11-20', desc: '' },
+        { id: 't5', col: 'c2', title: 'Design the task drawer', pr: 'High', who: 'MJ', due: '2026-11-19', desc: '' },
+        { id: 't6', col: 'c3', title: 'Write invite email copy', pr: 'Medium', who: 'MJ', due: '2026-11-17', desc: '' },
+        { id: 't7', col: 'c4', title: 'Set up Redux store', pr: 'High', who: 'MJ', due: '2026-11-14', desc: '' },
+        { id: 't8', col: 'c4', title: 'New brand tokens', pr: 'Medium', who: 'AO', due: '', desc: '' }
+      ],
+      prFilter: 'all', mine: false,
+      dragId: '', overCol: '',
+      drawerId: '',
+      menuCol: '', renameCol: '', renameText: '',
+      quickCol: '', quickText: '',
+      addingCol: false, newColText: '',
+      delCol: '', delMode: 'move', moveTo: '', typed: '',
+      toast: ''
+    };
+    this.onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      const s = this.state;
+      if (s.delCol) this.setState({ delCol: '' });
+      else if (s.drawerId) this.setState({ drawerId: '' });
+      else if (s.menuCol) this.setState({ menuCol: '' });
+    };
+  }
+  componentDidMount() { document.addEventListener('keydown', this.onKey); }
+  componentWillUnmount() { document.removeEventListener('keydown', this.onKey); clearTimeout(this.toastTimer); }
+  flash(text) {
+    clearTimeout(this.toastTimer);
+    this.setState({ toast: text });
+    this.toastTimer = setTimeout(() => this.setState({ toast: '' }), 2600);
+  }
+  colName(id) { const c = this.state.columns.find((x) => x.id === id); return c ? c.name : ''; }
+  move(id, colId, beforeId) {
+    const s = this.state;
+    const task = s.tasks.find((t) => t.id === id);
+    if (!task || id === beforeId) return;
+    const rest = s.tasks.filter((t) => t.id !== id);
+    const moved = { ...task, col: colId };
+    let idx = beforeId ? rest.findIndex((t) => t.id === beforeId) : -1;
+    if (idx < 0) idx = rest.length;
+    rest.splice(idx, 0, moved);
+    this.setState({ tasks: rest, dragId: '', overCol: '' });
+    if (task.col !== colId) this.flash('Moved to ' + this.colName(colId));
+  }
+  updateTask(patch) {
+    const s = this.state;
+    this.setState({ tasks: s.tasks.map((t) => (t.id === s.drawerId ? { ...t, ...patch } : t)) });
+  }
+  renderVals() {
+    const s = this.state;
+    const accent = this.props.accent ?? '#D23F27';
+    const lime = this.props.lime ?? '#D4F04A';
+    const chips = { High: ['#FBE1DA', '#8E2614'], Medium: ['#FFF0C2', '#7A5600'], Low: ['#E3EEF9', '#1D4E86'] };
+    const people = { MJ: ['Muizz', lime, '#1E1512'], AO: ['Ada', '#FBE1DA', '#8E2614'], TK: ['Tobi', '#1E1512', '#FBF5EE'] };
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const today = Date.UTC(2026, 10, 18);
+    const doneCols = {};
+    s.columns.forEach((c) => { doneCols[c.id] = c.isDone; });
+    const dueInfo = (due, done) => {
+      if (!due) return { has: false, label: '', bg: '', fg: '' };
+      const p = due.split('-').map(Number);
+      const t = Date.UTC(p[0], p[1] - 1, p[2]);
+      const diff = Math.round((t - today) / 86400000);
+      const short = p[2] + ' ' + months[p[1] - 1];
+      if (done) return { has: true, label: short, bg: '#E2F3E6', fg: '#1E5B30' };
+      if (diff < 0) return { has: true, label: (-diff) + 'd late', bg: '#B3261E', fg: '#FFFFFF' };
+      if (diff === 0) return { has: true, label: 'Today', bg: '#1E1512', fg: '#FBF5EE' };
+      if (diff === 1) return { has: true, label: 'Tomorrow', bg: '#F4EADF', fg: '#1E1512' };
+      return { has: true, label: short, bg: '#F4EADF', fg: '#5A4A42' };
+    };
+    const passes = (t) => (s.prFilter === 'all' || t.pr === s.prFilter) && (!s.mine || t.who === 'MJ');
+    const last = s.columns.length === 1;
+
+    const cols = s.columns.map((c) => {
+      const items = s.tasks.filter((t) => t.col === c.id);
+      const over = s.overCol === c.id && !!s.dragId;
+      return {
+        id: c.id, name: c.name, count: items.length,
+        isDone: c.isDone, notDone: !c.isDone,
+        bg: over ? '#FFFBEA' : '#F4EADF',
+        edge: over ? '#1E1512' : 'transparent',
+        renaming: s.renameCol === c.id, named: s.renameCol !== c.id,
+        menuOpen: s.menuCol === c.id,
+        canDelete: !last, lastOne: last,
+        quickOpen: s.quickCol === c.id, quickClosed: s.quickCol !== c.id,
+        toggleMenu: (e) => { e.stopPropagation(); this.setState({ menuCol: s.menuCol === c.id ? '' : c.id }); },
+        startRename: () => this.setState({ menuCol: '', renameCol: c.id, renameText: c.name }),
+        makeDone: () => { this.setState({ menuCol: '', columns: s.columns.map((x) => ({ ...x, isDone: x.id === c.id })) }); this.flash(c.name + ' is now the done column'); },
+        askDelete: () => {
+          const other = s.columns.find((x) => x.id !== c.id);
+          this.setState({ menuCol: '', delCol: c.id, delMode: 'move', moveTo: other ? other.id : '', typed: '' });
+        },
+        startQuick: () => this.setState({ quickCol: c.id, quickText: '' }),
+        over: (e) => { e.preventDefault(); if (s.overCol !== c.id) this.setState({ overCol: c.id }); },
+        drop: (e) => { e.preventDefault(); const id = s.dragId || e.dataTransfer.getData('text/plain'); this.move(id, c.id, ''); },
+        cards: items.filter(passes).map((t) => {
+          const done = !!doneCols[t.col];
+          const d = dueInfo(t.due, done);
+          const person = people[t.who];
+          return {
+            title: t.title, pr: t.pr, chipBg: chips[t.pr][0], chipFg: chips[t.pr][1],
+            done: done, open2: !done,
+            hasDue: d.has, dueLabel: d.label, dueBg: d.bg, dueFg: d.fg,
+            hasPerson: !!person, noPerson: !person,
+            person: t.who, personName: person ? person[0] : '', pBg: person ? person[1] : '', pFg: person ? person[2] : '',
+            opacity: s.dragId === t.id ? 0.4 : 1,
+            dragStart: (e) => { e.dataTransfer.setData('text/plain', t.id); e.dataTransfer.effectAllowed = 'move'; this.setState({ dragId: t.id, menuCol: '' }); },
+            over: (e) => { e.preventDefault(); },
+            drop: (e) => { e.preventDefault(); e.stopPropagation(); const id = s.dragId || e.dataTransfer.getData('text/plain'); this.move(id, c.id, t.id); },
+            open: () => this.setState({ drawerId: t.id, menuCol: '' }),
+            key: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.setState({ drawerId: t.id }); } }
+          };
+        })
+      };
+    });
+
+    const addQuick = () => {
+      const title = s.quickText.trim();
+      if (!title) return;
+      const t = { id: 'n' + Date.now(), col: s.quickCol, title: title, pr: 'Medium', who: '', due: '', desc: '' };
+      this.setState({ tasks: s.tasks.concat([t]), quickText: '' });
+    };
+    const saveRename = () => {
+      const name = s.renameText.trim();
+      this.setState({ renameCol: '', columns: name ? s.columns.map((x) => (x.id === s.renameCol ? { ...x, name: name } : x)) : s.columns });
+    };
+    const addCol = () => {
+      const name = s.newColText.trim();
+      if (!name) return;
+      const doneIdx = s.columns.findIndex((x) => x.isDone);
+      const col = { id: 'c' + Date.now(), name: name, isDone: false };
+      const next = s.columns.slice();
+      next.splice(doneIdx >= 0 ? doneIdx : next.length, 0, col);
+      this.setState({ columns: next, addingCol: false, newColText: '' });
+      this.flash(name + ' column added');
+    };
+
+    const dt = s.tasks.find((t) => t.id === s.drawerId);
+    const delC = s.columns.find((x) => x.id === s.delCol);
+    const delCount = delC ? s.tasks.filter((t) => t.col === delC.id).length : 0;
+    const wipe = s.delMode === 'wipe';
+    const canConfirm = !!delC && (delCount === 0 || !wipe || s.typed.trim() === delC.name);
+    const confirmDelete = () => {
+      if (!delC) return;
+      const remaining = s.columns.filter((x) => x.id !== delC.id);
+      let tasks = s.tasks;
+      if (delCount > 0 && !wipe) tasks = tasks.map((t) => (t.col === delC.id ? { ...t, col: s.moveTo } : t));
+      else tasks = tasks.filter((t) => t.col !== delC.id);
+      let cols2 = remaining;
+      if (delC.isDone && !remaining.some((x) => x.isDone)) {
+        const target = !wipe && delCount > 0 ? s.moveTo : remaining[remaining.length - 1].id;
+        cols2 = remaining.map((x) => ({ ...x, isDone: x.id === target }));
+      }
+      this.setState({ columns: cols2, tasks: tasks, delCol: '' });
+      this.flash(delC.name + ' deleted');
+    };
+
+    const total = s.tasks.length;
+    const doneTotal = s.tasks.filter((t) => doneCols[t.col]).length;
+
+    return {
+      accent: accent, lime: lime,
+      summary: total + ' tasks · ' + doneTotal + ' done · 3 members',
+      prFilters: [['all', 'All'], ['High', 'High'], ['Medium', 'Medium'], ['Low', 'Low']].map((f) => ({
+        label: f[1], on: s.prFilter === f[0], off: s.prFilter !== f[0], pick: () => this.setState({ prFilter: f[0] })
+      })),
+      mine: s.mine,
+      mineBg: s.mine ? lime : '#FFFFFF',
+      mineBorder: s.mine ? lime : '#D9C8B8',
+      toggleMine: () => this.setState({ mine: !s.mine }),
+      cols: cols,
+      dragEnd: () => this.setState({ dragId: '', overCol: '' }),
+      renameText: s.renameText,
+      onRename: (e) => this.setState({ renameText: e.target.value }),
+      renameKey: (e) => { if (e.key === 'Enter') saveRename(); if (e.key === 'Escape') this.setState({ renameCol: '' }); },
+      saveRename: saveRename,
+      quickText: s.quickText,
+      onQuick: (e) => this.setState({ quickText: e.target.value }),
+      quickKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); addQuick(); } if (e.key === 'Escape') this.setState({ quickCol: '' }); },
+      addQuick: addQuick,
+      addingCol: s.addingCol, notAddingCol: !s.addingCol,
+      startCol: () => this.setState({ addingCol: true, newColText: '' }),
+      cancelCol: () => this.setState({ addingCol: false }),
+      newColText: s.newColText,
+      onNewCol: (e) => this.setState({ newColText: e.target.value }),
+      newColKey: (e) => { if (e.key === 'Enter') addCol(); if (e.key === 'Escape') this.setState({ addingCol: false }); },
+      addCol: addCol,
+      drawer: !!dt,
+      closeDrawer: () => this.setState({ drawerId: '' }),
+      dTitle: dt ? dt.title : '',
+      dCol: dt ? dt.col : '',
+      dColName: dt ? this.colName(dt.col) : '',
+      dWho: dt ? dt.who : '',
+      dDue: dt ? dt.due : '',
+      dDesc: dt ? dt.desc : '',
+      onDTitle: (e) => this.updateTask({ title: e.target.value }),
+      onDCol: (e) => { const to = e.target.value; this.updateTask({ col: to }); this.flash('Moved to ' + this.colName(to)); },
+      onDWho: (e) => this.updateTask({ who: e.target.value }),
+      onDDue: (e) => this.updateTask({ due: e.target.value }),
+      onDDesc: (e) => this.updateTask({ desc: e.target.value }),
+      colOptions: s.columns.map((c) => ({ id: c.id, name: c.name })),
+      prOptions: ['High', 'Medium', 'Low'].map((p) => {
+        const on = !!dt && dt.pr === p;
+        return { label: p, on: on, bg: on ? chips[p][0] : '#FFFFFF', fg: chips[p][1], border: on ? '1.5px solid ' + chips[p][1] : '1.5px solid #D9C8B8', pick: () => this.updateTask({ pr: p }) };
+      }),
+      deleteTask: () => { this.setState({ tasks: s.tasks.filter((t) => t.id !== s.drawerId), drawerId: '' }); this.flash('Task deleted'); },
+      delOpen: !!delC,
+      delName: delC ? delC.name : '',
+      delCount: delCount,
+      delEmpty: delCount === 0, delHasTasks: delCount > 0,
+      modeMove: !wipe, modeWipe: wipe,
+      moveBorder: !wipe ? '2px solid #1E1512' : '2px solid #EADFD3',
+      wipeBorder: wipe ? '2px solid #B3261E' : '2px solid #EADFD3',
+      pickMove: () => this.setState({ delMode: 'move' }),
+      pickWipe: () => this.setState({ delMode: 'wipe' }),
+      moveTo: s.moveTo,
+      onMoveTo: (e) => this.setState({ moveTo: e.target.value }),
+      moveOptions: s.columns.filter((c) => c.id !== s.delCol).map((c) => ({ id: c.id, name: c.name })),
+      typed: s.typed,
+      onTyped: (e) => this.setState({ typed: e.target.value }),
+      canConfirm: canConfirm, cannotConfirm: !canConfirm,
+      confirmBg: wipe && delCount > 0 ? '#B3261E' : '#1E1512',
+      confirmLabel: delCount === 0 ? 'Delete column' : (wipe ? 'Delete column and ' + delCount + ' tasks' : 'Move tasks and delete'),
+      confirmDelete: confirmDelete,
+      cancelDelete: () => this.setState({ delCol: '' }),
+      toast: s.toast !== '', toastText: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>
