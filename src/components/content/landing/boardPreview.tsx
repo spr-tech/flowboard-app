@@ -37,17 +37,22 @@ const columns: { title: string; tasks: PreviewTask[]; hasDropSlot?: boolean }[] 
  */
 export function BoardPreview() {
   return (
-    <div aria-hidden className="relative mx-auto mt-14 max-w-240">
+    <div
+      aria-hidden
+      // Rises in on load; the tilt is on an inner element, so the two transforms never clash.
+      className="load-in relative mx-auto mt-14 max-w-240"
+      style={cssVars({ "--load-delay": "650ms", "--load-duration": "800ms", "--load-from-y": "40px" })}
+    >
       <div
-        className="absolute -top-8.5 -left-9 z-30 hidden animate-float items-center gap-2 rounded-[14px] bg-highlight px-4 py-3 text-sm font-semibold text-fg-on-highlight md:flex"
-        style={cssVars({ "--r": "-6deg" })}
+        className="absolute -top-8.5 -left-9 z-30 hidden pop-then-float items-center gap-2 rounded-[14px] bg-highlight px-4 py-3 text-sm font-semibold text-fg-on-highlight md:flex"
+        style={cssVars({ "--r": "-6deg", "--pop-delay": "1100ms" })}
       >
         <Check className="size-4.5" strokeWidth={2.5} />
         Moved to Done
       </div>
       <div
-        className="absolute top-30 -right-10 z-30 hidden animate-float-slow items-center gap-3 rounded-2xl border border-line-subtle bg-surface-card px-4 py-3.5 text-left md:flex"
-        style={cssVars({ "--r": "4deg" })}
+        className="absolute top-30 -right-10 z-30 hidden pop-then-float-slow items-center gap-3 rounded-2xl border border-line-subtle bg-surface-card px-4 py-3.5 text-left md:flex"
+        style={cssVars({ "--r": "4deg", "--pop-delay": "1200ms" })}
       >
         <span className="inline-flex size-9.5 items-center justify-center rounded-full bg-status-high text-sm font-semibold text-status-high-fg">
           AO

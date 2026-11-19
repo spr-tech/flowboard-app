@@ -1,4 +1,5 @@
 import { Accordion, type AccordionEntry } from "@/components/ui/accordion/accordion";
+import { Reveal } from "@/components/ui/reveal/reveal";
 
 const faqs: AccordionEntry[] = [
   { id: "free", title: "Is Flowboard free?", content: "Yes. Make an account and start a board. There is nothing to pay." },
@@ -12,10 +13,13 @@ export function FaqSection() {
   return (
     <section id="faq" className="bg-surface-inverse px-6 pb-28">
       <div className="mx-auto max-w-220 rounded-[32px] bg-surface-page p-[clamp(28px,5vw,56px)]">
-        <h2 className="mb-8 text-display-faq leading-none font-extrabold tracking-[-0.04em]">
+        <Reveal as="h2" effect="rise" className="mb-8 text-display-faq leading-none font-extrabold tracking-[-0.04em]">
           Questions, answered
-        </h2>
-        <Accordion items={faqs} defaultOpenId={faqs[0].id} />
+        </Reveal>
+        {/* staggerDepth 2: the questions live inside the Accordion root, one level down. */}
+        <Reveal effect="rise" delay={120} stagger={80} staggerDepth={2}>
+          <Accordion items={faqs} defaultOpenId={faqs[0].id} />
+        </Reveal>
       </div>
     </section>
   );
