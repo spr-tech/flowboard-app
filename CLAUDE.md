@@ -29,6 +29,12 @@ Server code (the backend lives in this same Next.js app for now):
 ## Departures from the structure guide (agreed for this project)
 - Forms use React Hook Form + Zod, not Formik + Yup, so one Zod schema in `src/models/validations/` validates both the form and the API route.
 - shadcn components are generated on Radix UI.
+- shadcn: we keep clsx + tailwind-merge. After any `shadcn add`, change the generated `cn` import to `@/utilities/helpers/cn` and uninstall any `cn` package it installed. The `text-display-*` classes rely on the custom tailwind-merge setup in `src/utilities/helpers/cn.ts`.
+
+## Database safety
+- The old live database (London, separate Neon account) is commented out in `.env`. Never touch it.
+- `.env` points at the new Neon project's **dev** branch: `DATABASE_URL` is pooled (the app), `DIRECT_URL` is direct (Prisma CLI: migrations, seed). Never run anything against the new project's production branch; it stays empty until cutover.
+- `pnpm db:seed` and `pnpm db:reset` wipe the database. They refuse to run unless `ALLOW_DB_RESET=true` is set, and print the host first. Set it in your local `.env` only, never on Vercel. Always ask before running either.
 
 ## Rules
 - Colours: role-named tokens from `src/app/globals.css` only. No raw hex or raw Tailwind colours in components.
@@ -48,4 +54,4 @@ Server code (the backend lives in this same Next.js app for now):
 Next.js (App Router) · React · TypeScript · Redux Toolkit + RTK Query · Prisma + PostgreSQL (Neon) · Auth.js v5 with the Prisma adapter (email + password, GitHub) · Resend for email · dnd-kit · Tailwind CSS v4 · shadcn on Radix UI · React Hook Form + Zod · Vitest + Cypress.
 
 ## Git
-See `docs/plan/07-git-workflow.md`. Merge with merge commits, never squash, never force-push `main`.
+See `docs/plan/07-git-workflow.md`. Merge with merge commits, never squash, never force-push `master`.

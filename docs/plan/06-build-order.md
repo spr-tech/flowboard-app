@@ -14,7 +14,7 @@ Each milestone is a branch off `rebuild` (for example `rebuild-m3-auth`) and end
 | 7 | Members + invites: invite, resend, cancel, accept page (4 states), remove, leave | A second account accepts an invite, sees the board, and is unassigned when removed |
 | 8 | Dashboard: all sections, split endpoints, activity polling | Account B's move appears in account A's feed within about 30 s |
 | 9 | Account settings | Name and password changes work |
-| 10 | Polish + ship: skeletons, errors, phone pass, accessibility pass, landing/sign-in/sign-up from the designs, cutover | Live on `main` |
+| 10 | Polish + ship: skeletons, errors, phone pass, accessibility pass, landing/sign-in/sign-up from the designs, cutover | Live on `master` |
 
 Throughout:
 - Write Activity rows inside each service from milestone 5 onward.
