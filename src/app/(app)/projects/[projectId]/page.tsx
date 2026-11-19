@@ -1,5 +1,5 @@
-import ProjectBoard from "@/components/projects/project/ProjectBoard";
+import RebuildingContent from "@/components/content/rebuilding/rebuildingContent";
 
-export default function ProjectBoardPage() {
-  return <ProjectBoard />;
+export default function Page() {
+  return <RebuildingContent />;
 }

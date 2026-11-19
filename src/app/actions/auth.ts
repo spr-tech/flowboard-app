@@ -11,7 +11,9 @@ type formDataType = {
 
 //this creates the user in the database 
 export const registerNewUser = async (formData: formDataType) => {
-  const { name, email, password } = formData;
+  const { name, password } = formData;
+  // Emails are stored lowercase.
+  const email = formData.email.trim().toLowerCase();
 
   //Basic validation- to avoid submission of empty fields
   if (!name.trim() || !email.trim() || !password.trim()) {
@@ -40,7 +42,7 @@ export const registerNewUser = async (formData: formDataType) => {
     data: {
       name,
       email,
-      password: hashedPassword,
+      passwordHash: hashedPassword,
     },
   });
 

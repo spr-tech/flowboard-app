@@ -24,16 +24,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         //find the user by email
         const user = await prisma.user.findUnique({
-          where: { email: credentials?.email as string },
+          // Emails are stored lowercase.
+          where: { email: (credentials.email as string).trim().toLowerCase() },
         });
 
         //user not found , reject login
-        if (!user || !user.password) return null;
+        if (!user || !user.passwordHash) return null;
 
         //comparing the password typed with the hashed version in the databse
         const passwordMatch = await bcrypt.compare(
           credentials.password as string,
-          user.password
+          user.passwordHash
         );
 
         if (!passwordMatch) return null;

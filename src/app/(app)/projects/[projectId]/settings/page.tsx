@@ -1,5 +1,5 @@
-import ProjectSettings from "@/components/projects/project/settings/ProjectSettings";
+import RebuildingContent from "@/components/content/rebuilding/rebuildingContent";
 
-export default function SettingsPage() {
-  return <ProjectSettings />;
+export default function Page() {
+  return <RebuildingContent />;
 }

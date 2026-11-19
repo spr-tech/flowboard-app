@@ -1,5 +1,5 @@
-import MembersList from "@/components/projects/project/members/MembersList";
+import RebuildingContent from "@/components/content/rebuilding/rebuildingContent";
 
-export default function MembersPage() {
-  return <MembersList />;
+export default function Page() {
+  return <RebuildingContent />;
 }
