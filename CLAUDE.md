@@ -50,6 +50,14 @@ Server code (the backend lives in this same Next.js app for now):
 - Projects a user is not a member of return 404, not 403.
 - No `: any`. No files over 400 lines.
 
+## Testing and CI
+- Vitest + Testing Library (jsdom). Config: `vitest.config.mts`; shared setup: `src/test/setup.ts`.
+- Name tests `<name>.test.ts(x)` and put them next to the file they test.
+- **No network, no database, no `.env` in tests.** Tests must pass anywhere: any laptop, GitHub Actions, any time zone, offline. The setup makes `fetch`, raw sockets, `@/lib/prisma` and any new Prisma client throw, and stops `dotenv` loading `.env`; every env value tests need is set in `vitest.config.mts`. Mock Prisma, `fetch` and email senders in the test that needs them.
+- **Time zone is fixed to America/New_York** (not Lagos), so date code that depends on the machine's zone fails instead of passing by luck. Use fake timers (`vi.useFakeTimers()`, `vi.setSystemTime()`) for anything time-based.
+- **Every new service or helper gets a test in the same branch.**
+- CI (`.github/workflows/ci.yml`) runs one job, `check`: install with the frozen lockfile, Prisma generate, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, with dummy env values that point at a host that can't exist. It must pass before merging into `rebuild` or `master`.
+
 ## Stack
 Next.js (App Router) · React · TypeScript · Redux Toolkit + RTK Query · Prisma + PostgreSQL (Neon) · Auth.js v5 with the Prisma adapter (email + password, GitHub) · Resend for email · dnd-kit · Tailwind CSS v4 · shadcn on Radix UI · React Hook Form + Zod · Vitest + Cypress.
 
