@@ -313,6 +313,132 @@
   }
 }
 
+/* The easing every entrance shares: quick start, long soft landing. */
+:root {
+  --ease-entrance: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@theme {
+  /* Hero load: rises (or drops, with a negative distance) into place and fades in. */
+  @keyframes load-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--load-from-y, 16px));
+    }
+  }
+  /* Hero stickers: pop from small and flat to their resting angle, overshooting a little. */
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.6) rotate(0deg);
+    }
+    70% {
+      opacity: 1;
+      transform: scale(1.06) rotate(var(--r, 0deg));
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotate(var(--r, 0deg));
+    }
+  }
+  /* Scroll reveals (see src/components/ui/reveal/reveal.tsx). */
+  @keyframes reveal-rise {
+    from {
+      opacity: 0;
+      transform: translateY(32px);
+    }
+  }
+  @keyframes reveal-slide-left {
+    from {
+      opacity: 0;
+      transform: translateX(-48px);
+    }
+  }
+  @keyframes reveal-slide-right {
+    from {
+      opacity: 0;
+      transform: translateX(48px);
+    }
+  }
+  @keyframes reveal-scale {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+  @keyframes reveal-fade {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+/*
+ * Hero entrance on page load. Pure CSS with fill-mode both, so it also plays without
+ * JavaScript. Set --load-delay, and optionally --load-from-y and --load-duration, inline.
+ */
+@utility load-in {
+  animation: load-in var(--load-duration, 600ms) var(--ease-entrance) var(--load-delay, 0ms) both;
+}
+
+/*
+ * A sticker pops in, then starts its idle loop once it has landed. Two animations on one
+ * element: while the loop waits out its delay, the pop's end state holds; the loop starts at
+ * that same resting angle, so the hand-over is seamless and they never fight over transform.
+ */
+@utility pop-then-wiggle {
+  animation:
+    pop 500ms var(--ease-entrance) var(--pop-delay, 0ms) both,
+    wiggle 3.4s ease-in-out calc(var(--pop-delay, 0ms) + 500ms) infinite;
+}
+@utility pop-then-float {
+  animation:
+    pop 500ms var(--ease-entrance) var(--pop-delay, 0ms) both,
+    float 5s ease-in-out calc(var(--pop-delay, 0ms) + 500ms) infinite;
+}
+@utility pop-then-float-slow {
+  animation:
+    pop 500ms var(--ease-entrance) var(--pop-delay, 0ms) both,
+    float 6s ease-in-out calc(var(--pop-delay, 0ms) + 500ms) infinite reverse;
+}
+
+/*
+ * Scroll reveals. The server renders data-reveal with no state, so content is visible if
+ * JavaScript never runs. Reveal sets data-reveal-state="hidden" after mount (only below the
+ * fold), then "shown" when it scrolls into view. With data-reveal-stagger the direct children
+ * animate instead of the element, each delayed by its --i (set by Reveal) times the stagger.
+ */
+[data-reveal="rise"] {
+  --reveal-name: reveal-rise;
+}
+[data-reveal="slide-left"] {
+  --reveal-name: reveal-slide-left;
+}
+[data-reveal="slide-right"] {
+  --reveal-name: reveal-slide-right;
+}
+[data-reveal="scale"] {
+  --reveal-name: reveal-scale;
+}
+[data-reveal="fade"] {
+  --reveal-name: reveal-fade;
+}
+[data-reveal-state="hidden"]:not([data-reveal="fan"], [data-reveal-stagger]),
+[data-reveal-state="hidden"][data-reveal-stagger=""] > *,
+[data-reveal-state="hidden"][data-reveal-stagger="deep"] > * > * {
+  opacity: 0;
+}
+[data-reveal-state="shown"]:not([data-reveal="fan"], [data-reveal-stagger]),
+[data-reveal-state="shown"][data-reveal-stagger=""] > *,
+[data-reveal-state="shown"][data-reveal-stagger="deep"] > * > * {
+  animation: var(--reveal-name) 700ms var(--ease-entrance) both;
+  animation-delay: calc(var(--reveal-delay, 0ms) + var(--i, 0) * var(--reveal-stagger, 0ms));
+}
+/* "fan": the deck sits stacked while hidden; once shown, deck-card's own transition fans it out. */
+[data-reveal="fan"][data-reveal-state="hidden"] .deck-card {
+  transform: none;
+}
+
 /* ─── 7. Base styles ─────────────────────────────────────────────────────────── */
 @layer base {
   * {
@@ -368,16 +494,33 @@
   .animate-float-slow,
   .animate-sway,
   .animate-flip,
-  .animate-tilt-on-scroll {
+  .animate-tilt-on-scroll,
+  .load-in,
+  .pop-then-wiggle,
+  .pop-then-float,
+  .pop-then-float-slow {
     animation: none !important;
   }
   /* Stickers keep their resting angle, which otherwise only exists inside the keyframes. */
   .animate-wiggle,
   .animate-float,
-  .animate-float-slow {
+  .animate-float-slow,
+  .pop-then-wiggle,
+  .pop-then-float,
+  .pop-then-float-slow {
     transform: rotate(var(--r, 0deg));
   }
   .deck-card {
     transition: none !important;
+  }
+  /* Reveal skips hiding under reduced motion; this is the safety net if it ever doesn't. */
+  [data-reveal-state],
+  [data-reveal-state] > *,
+  [data-reveal-state][data-reveal-stagger="deep"] > * > * {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+  [data-reveal="fan"][data-reveal-state] .deck-card {
+    transform: translate(var(--x0), var(--y0)) rotate(var(--r0));
   }
 }

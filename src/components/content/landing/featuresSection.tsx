@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { ButtonLink } from "@/components/ui/button/buttonLink";
 import { GithubIcon } from "@/components/ui/icons/githubIcon";
+import { Reveal } from "@/components/ui/reveal/reveal";
 import { cn } from "@/utilities/helpers/cn";
 
 type FeatureCardProps = {
@@ -29,7 +30,7 @@ export function FeaturesSection() {
   return (
     <section id="features" className="px-6 pt-10 pb-28">
       <div className="mx-auto max-w-300">
-        <h2 className="mx-auto mb-14 max-w-190 text-center text-display-section leading-none font-extrabold tracking-[-0.04em]">
+        <Reveal as="h2" effect="rise" className="mx-auto mb-14 max-w-190 text-center text-display-section leading-none font-extrabold tracking-[-0.04em]">
           Everything a small team{" "}
           <span className="relative inline-block">
             actually
@@ -41,9 +42,9 @@ export function FeaturesSection() {
             </span>
           </span>{" "}
           needs
-        </h2>
+        </Reveal>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        <Reveal effect="rise" stagger={100} className="grid grid-cols-1 gap-5 md:grid-cols-3">
           <div className="flex flex-wrap items-center gap-7 rounded-card-lg border border-line-subtle bg-surface-card p-8 md:col-span-2">
             <div className="flex-[1_1_260px]">
               <h3 className="mb-2.5 text-[26px] font-bold tracking-[-0.02em]">A board you can grab</h3>
@@ -144,7 +145,7 @@ export function FeaturesSection() {
               <ButtonLink href="/register" text="Use email instead" variant="secondary" />
             </div>
           </FeatureCard>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import { ButtonLink } from "@/components/ui/button/buttonLink";
+import { Reveal } from "@/components/ui/reveal/reveal";
 import { Highlight } from "@/components/ui/typography/highlight";
 import { cn } from "@/utilities/helpers/cn";
 import { cssVars } from "@/utilities/helpers/cssVars";
@@ -23,13 +24,19 @@ export function WhySection() {
       <div className="mx-auto flex max-w-300 flex-wrap items-center gap-14">
         <div className="flex-[1_1_420px]">
           <p className="mb-4.5 text-sm font-semibold text-highlight">Why teams pick it</p>
-          <h2 className="text-display-why leading-[0.95] font-extrabold tracking-[-0.045em]">
-            Plan it.
-            <br />
-            <span className="text-primary">Drag it.</span>
-            <br />
-            <Highlight className="-rotate-2 rounded-[0.12em]">Ship it.</Highlight>
-          </h2>
+          {/* One block per line (not <br />s), so the lines can rise one after another. */}
+          <Reveal
+            as="h2"
+            effect="rise"
+            stagger={120}
+            className="text-display-why leading-[0.95] font-extrabold tracking-[-0.045em]"
+          >
+            <span className="block">Plan it.</span>
+            <span className="block text-primary">Drag it.</span>
+            <span className="block">
+              <Highlight className="-rotate-2 rounded-[0.12em]">Ship it.</Highlight>
+            </span>
+          </Reveal>
           <p className="mt-7 mb-8 max-w-115 text-[17px] leading-relaxed text-fg-muted-on-inverse">
             Everything lives on one board your whole team can see. No setup call, no training, no
             clutter. Just the work, who owns it and where it stands.
@@ -39,8 +46,10 @@ export function WhySection() {
 
         <div className="min-w-0 flex-[1_1_420px]">
           {/* Focusable so keyboard users can fan the deck too (it fans on :focus-within).
-              Scaled down on phones, where the pile is wider than the screen. */}
-          <div
+              Scaled down on phones, where the pile is wider than the screen.
+              Starts stacked and spreads to its resting pile when it scrolls into view. */}
+          <Reveal
+            effect="fan"
             tabIndex={0}
             role="list"
             aria-label="What your team gets"
@@ -71,7 +80,7 @@ export function WhySection() {
                 </div>
               ))}
             </div>
-          </div>
+          </Reveal>
           <p className="mt-2 text-center text-sm text-fg-muted-on-inverse">Hover the deck to fan it out</p>
         </div>
       </div>

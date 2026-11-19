@@ -2,6 +2,7 @@ import { Check, CheckCheck, Pin } from "lucide-react";
 
 import { StatusChip } from "@/components/ui/chip/statusChip";
 import { FlipCard } from "@/components/ui/flipcard/flipCard";
+import { Reveal } from "@/components/ui/reveal/reveal";
 import { cn } from "@/utilities/helpers/cn";
 import { cssVars } from "@/utilities/helpers/cssVars";
 
@@ -13,7 +14,7 @@ export function SloganSection() {
   return (
     <section aria-label="Plan the work, move the cards, ship it" className="px-6 pt-30 pb-10">
       <div className="mx-auto flex max-w-300 flex-col gap-[0.06em] font-heading text-display-statement leading-none font-extrabold tracking-[-0.055em]">
-        <p className={cn(lineClasses, "pl-[4%]")}>
+        <Reveal as="p" effect="slide-left" className={cn(lineClasses, "pl-[4%]")}>
           Plan
           <span
             aria-hidden
@@ -23,8 +24,8 @@ export function SloganSection() {
             <Pin className="size-[52%]" strokeWidth={2.4} />
           </span>
           the work
-        </p>
-        <p className={cn(lineClasses, "justify-center")}>
+        </Reveal>
+        <Reveal as="p" effect="slide-right" delay={120} className={cn(lineClasses, "justify-center")}>
           move
           <FlipCard
             className="h-[0.82em] w-[2.3em]"
@@ -44,8 +45,8 @@ export function SloganSection() {
             }
           />
           the cards
-        </p>
-        <p className={cn(lineClasses, "justify-end pr-[4%]")}>
+        </Reveal>
+        <Reveal as="p" effect="slide-left" delay={240} className={cn(lineClasses, "justify-end pr-[4%]")}>
           <span className="text-primary">ship</span>it
           <span
             aria-hidden
@@ -54,7 +55,7 @@ export function SloganSection() {
           >
             <CheckCheck className="size-[52%]" strokeWidth={2.4} />
           </span>
-        </p>
+        </Reveal>
       </div>
     </section>
   );

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 
+import { Reveal } from "@/components/ui/reveal/reveal";
 import { cn } from "@/utilities/helpers/cn";
 
 const tones = {
@@ -62,16 +63,16 @@ export function HowItWorksSection() {
   return (
     <section id="how" className="px-6 py-20">
       <div className="mx-auto max-w-300">
-        <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
+        <Reveal effect="rise" className="mb-12 flex flex-wrap items-end justify-between gap-6">
           <h2 className="max-w-160 text-display-section leading-none font-extrabold tracking-[-0.04em]">
             Three steps. <span className="text-primary">No setup call.</span>
           </h2>
           <p className="max-w-95 text-[17px] leading-relaxed text-fg-secondary">
             From an empty account to a team moving tasks in a few minutes.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
+        <Reveal effect="rise" stagger={120} className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
           <StepCard
             number="01"
             tone="light"
@@ -130,7 +131,7 @@ export function HowItWorksSection() {
               </div>
             }
           />
-        </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Logo } from "@/components/ui/logo/logo";
+import { Reveal } from "@/components/ui/reveal/reveal";
 
 const linkGroups = [
   {
@@ -22,7 +23,7 @@ const linkGroups = [
 
 export function LandingFooter() {
   return (
-    <footer className="bg-surface-inverse px-6 pt-16 pb-10 text-fg-muted-on-inverse">
+    <Reveal as="footer" effect="fade" className="bg-surface-inverse px-6 pt-16 pb-10 text-fg-muted-on-inverse">
       <div className="mx-auto flex max-w-300 flex-wrap justify-between gap-10">
         <div className="max-w-80">
           <Logo variant="onDark" className="mb-3.5" />
@@ -50,6 +51,6 @@ export function LandingFooter() {
       <p className="mx-auto mt-12 max-w-300 border-t border-fg-on-inverse/10 pt-6 text-sm">
         © 2026 Flowboard
       </p>
-    </footer>
+    </Reveal>
   );
 }

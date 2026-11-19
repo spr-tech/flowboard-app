@@ -1,10 +1,11 @@
 import { ButtonLink } from "@/components/ui/button/buttonLink";
+import { Reveal } from "@/components/ui/reveal/reveal";
 import { cssVars } from "@/utilities/helpers/cssVars";
 
 export function CtaSection() {
   return (
     <section className="bg-surface-inverse px-6 pb-6">
-      <div className="relative mx-auto max-w-300 overflow-hidden rounded-[40px] bg-primary px-8 py-[clamp(36px,6vw,80px)] text-center">
+      <Reveal effect="scale" className="relative mx-auto max-w-300 overflow-hidden rounded-[40px] bg-primary px-8 py-[clamp(36px,6vw,80px)] text-center">
         <span
           aria-hidden
           className="absolute top-9 right-[7%] animate-float rounded-full bg-highlight px-4 py-2 text-sm font-semibold text-fg-on-highlight"
@@ -25,7 +26,7 @@ export function CtaSection() {
             className="border-fg-on-primary text-fg-on-primary hover:bg-fg-on-primary/10"
           />
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
