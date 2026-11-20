@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button/button";
 import { FormInput } from "@/components/ui/form/formInput";
 import { forgotPasswordSchema, type ForgotPasswordFormValues } from "@/models/validations/authValidation";
-import { authService } from "@/services/authService";
+import { useForgotPasswordMutation } from "@/services/authService";
 import { applyApiError } from "./applyApiError";
 
 type ForgotPasswordFormProps = {
@@ -17,6 +17,7 @@ type ForgotPasswordFormProps = {
 
 /** Asks for a reset link. The server answers the same whether or not the email has an account. */
 export function ForgotPasswordForm({ onSent }: ForgotPasswordFormProps) {
+  const [requestResetLink] = useForgotPasswordMutation();
   const [formError, setFormError] = useState<string | null>(null);
   const {
     control,
@@ -31,7 +32,7 @@ export function ForgotPasswordForm({ onSent }: ForgotPasswordFormProps) {
   const onSubmit = async (values: ForgotPasswordFormValues) => {
     setFormError(null);
     try {
-      await authService.forgotPassword(values);
+      await requestResetLink(values).unwrap();
       onSent(values.email);
     } catch (error) {
       setFormError(applyApiError(error, ["email"], setError));

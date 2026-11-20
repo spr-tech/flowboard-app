@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { AuthShell } from "@/components/layouts/authShell/authShell";
 import { Button } from "@/components/ui/button/button";
@@ -8,7 +8,8 @@ import { ButtonLink } from "@/components/ui/button/buttonLink";
 import { TextLink } from "@/components/ui/link/textLink";
 import { Highlight } from "@/components/ui/typography/highlight";
 import type { ResetTokenState } from "@/models/responses/authResponses";
-import { authService, NETWORK_ERROR_MESSAGE } from "@/services/authService";
+import { useResetTokenState } from "@/services/authService";
+import { NETWORK_ERROR_MESSAGE } from "@/utilities/constants/errorMessages";
 import { ResetPasswordForm } from "./forms/resetPasswordForm";
 import { SignInPanel } from "./signInPanel";
 
@@ -46,20 +47,14 @@ const DEAD_ENDS: Record<"invalid" | "expired" | "used", { heading: ReactNode; te
 };
 
 export default function ResetPasswordContent({ token }: { token: string }) {
-  // Temporary: verification lives in component state until RTK Query (milestone 4) holds it.
-  const [state, setState] = useState<ScreenState>("checking");
-  const [attempt, setAttempt] = useState(0);
+  // The link's state comes straight from the RTK Query cache (never copied into state).
+  const verification = useResetTokenState(token);
+  // What happened when the form was submitted: saved, or the link stopped working meanwhile.
+  // That's this screen's own outcome, so it's local state; it wins over the check above.
+  const [outcome, setOutcome] = useState<"done" | Exclude<ResetTokenState, "valid"> | null>(null);
 
-  useEffect(() => {
-    let isCurrent = true;
-    authService
-      .verifyResetToken({ token })
-      .then(({ state: tokenState }) => isCurrent && setState(tokenState))
-      .catch(() => isCurrent && setState("unreachable"));
-    return () => {
-      isCurrent = false;
-    };
-  }, [token, attempt]);
+  const state: ScreenState =
+    outcome ?? (verification.isError ? "unreachable" : (verification.data?.state ?? "checking"));
 
   return (
     <AuthShell tone="inverse" panel={<SignInPanel />}>
@@ -79,10 +74,7 @@ export default function ResetPasswordContent({ token }: { token: string }) {
             variant="secondary"
             size="lg"
             className="w-full"
-            onClick={() => {
-              setState("checking");
-              setAttempt((count) => count + 1);
-            }}
+            onClick={() => verification.refetch()}
           />
         </>
       )}
@@ -95,7 +87,7 @@ export default function ResetPasswordContent({ token }: { token: string }) {
           <p className="mt-3.5 mb-8 text-fg-secondary">
             Once it&apos;s saved, every device signed in to your account is signed out.
           </p>
-          <ResetPasswordForm token={token} onDone={() => setState("done")} onTokenRejected={setState} />
+          <ResetPasswordForm token={token} onDone={() => setOutcome("done")} onTokenRejected={setOutcome} />
         </>
       )}
 
