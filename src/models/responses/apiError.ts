@@ -9,3 +9,17 @@ export type ApiErrorBody = {
     fields?: Record<string, string>;
   };
 };
+
+/**
+ * Every failed request, as the browser sees it (made by src/configs/baseQuery.ts from whatever
+ * went wrong: our error body, no network, a page that isn't JSON). Screens branch on `code`.
+ */
+export type AppError = {
+  /** The HTTP status, or "NETWORK" when no answer arrived (offline, server unreachable). */
+  status: number | "NETWORK";
+  code: string;
+  /** Written for a person; safe to show as is. */
+  message: string;
+  /** Per-field messages; when present, the form shows them and no toast is shown. */
+  fields?: Record<string, string>;
+};

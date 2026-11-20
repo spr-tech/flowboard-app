@@ -3,14 +3,22 @@
 // page. StoreProvider calls makeStore() once per browser tab instead.
 import { combineSlices, configureStore } from "@reduxjs/toolkit";
 
+import { baseApi } from "@/configs/serviceConfig";
 import { uiSlice } from "./uiSlice";
 
-const rootReducer = combineSlices(uiSlice);
+// The API is a slice too: its reducer holds the RTK Query cache under state.api.
+const rootReducer = combineSlices(uiSlice, baseApi);
 
 export type RootState = ReturnType<typeof rootReducer>;
 
 export function makeStore(preloadedState?: Partial<RootState>) {
-  return configureStore({ reducer: rootReducer, preloadedState });
+  return configureStore({
+    reducer: rootReducer,
+    preloadedState,
+    // The API middleware runs the cache: starts requests, counts subscribers, removes unused
+    // data after keepUnusedDataFor, and refetches when tags are invalidated.
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
+  });
 }
 
 export type AppStore = ReturnType<typeof makeStore>;
