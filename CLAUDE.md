@@ -64,6 +64,7 @@ Server code (the backend lives in this same Next.js app for now):
 - New API routes go through `route()` in `src/server/lib/route.ts` (see `docs/plan/04-api.md`); new RTK Query endpoints go through `baseApi.injectEndpoints` (see `docs/plan/05-state.md`).
 - **Time zone is fixed to America/New_York** (not Lagos), so date code that depends on the machine's zone fails instead of passing by luck. Use fake timers (`vi.useFakeTimers()`, `vi.setSystemTime()`) for anything time-based.
 - **Every new service or helper gets a test in the same branch.**
+- **Never send real email to addresses that can't receive it** (example.com, example.org, `.test`, `.invalid` and similar) in proofs or end-to-end checks: the bounces hurt the sending Gmail account's reputation. Use `adetoroshina434+<something>@gmail.com`, or mock `sendEmail`.
 - CI (`.github/workflows/ci.yml`) runs one job, `check`: install with the frozen lockfile, Prisma generate, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, with dummy env values that point at a host that can't exist. It must pass before merging into `rebuild` or `master`.
 
 ## Stack
