@@ -38,7 +38,7 @@ export async function sendEmail(message: EmailMessage): Promise<void> {
       throw new Error("EMAIL_USER and EMAIL_PASS must be set to send email.");
     }
     console.info(
-      `[email] EMAIL_USER/EMAIL_PASS not set, so this was not sent.\nTo: ${message.to}\nSubject: ${message.subject}\n\n${message.text}\n`,
+      `[email] EMAIL_USER/EMAIL_PASS not set, so this was not sent.\nTo: ${message.to}\nSubject: ${message.subject}\n\n${message.text}\n`
     );
     return;
   }

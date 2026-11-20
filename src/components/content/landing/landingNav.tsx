@@ -27,10 +27,7 @@ export function LandingNav() {
             <Link
               key={link.href}
               href={link.href}
-              className={cn(
-                "rounded-full px-3.5 py-2 text-fg-secondary transition hover:-rotate-3",
-                link.hover,
-              )}
+              className={cn("rounded-full px-3.5 py-2 text-fg-secondary transition hover:-rotate-3", link.hover)}
             >
               {link.label}
             </Link>

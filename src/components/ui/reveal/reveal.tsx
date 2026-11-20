@@ -83,7 +83,7 @@ export function Reveal({
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) show();
       },
-      { threshold: THRESHOLD },
+      { threshold: THRESHOLD }
     );
     observer.observe(element);
 

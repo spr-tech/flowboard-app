@@ -1,8 +1,4 @@
-import {
-  Avatar as AvatarRoot,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/primitives/avatar";
+import { Avatar as AvatarRoot, AvatarFallback, AvatarImage } from "@/components/ui/primitives/avatar";
 import { cn } from "@/utilities/helpers/cn";
 
 const sizeClasses = {
@@ -31,9 +27,7 @@ export function Avatar({ name, imageUrl, size = "md", className }: AvatarProps) 
   return (
     <AvatarRoot className={cn(sizeClasses[size], "after:border-0", className)}>
       {imageUrl && <AvatarImage src={imageUrl} alt={name} />}
-      <AvatarFallback className="bg-highlight font-semibold text-fg-on-highlight">
-        {getInitials(name)}
-      </AvatarFallback>
+      <AvatarFallback className="bg-highlight font-semibold text-fg-on-highlight">{getInitials(name)}</AvatarFallback>
     </AvatarRoot>
   );
 }

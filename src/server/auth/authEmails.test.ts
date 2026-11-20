@@ -7,7 +7,7 @@ import { githubSignInEmail, resetPasswordEmail } from "./authEmails";
 describe("escapeHtml", () => {
   it("escapes the five characters that matter in HTML", () => {
     expect(escapeHtml(`<a href="x" title='y'>&</a>`)).toBe(
-      "&lt;a href=&quot;x&quot; title=&#39;y&#39;&gt;&amp;&lt;/a&gt;",
+      "&lt;a href=&quot;x&quot; title=&#39;y&#39;&gt;&amp;&lt;/a&gt;"
     );
   });
 

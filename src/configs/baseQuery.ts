@@ -6,7 +6,12 @@
 //   3. otherwise show one toast with the server's message, unless the form shows it
 //      (errors with `fields`) or the endpoint opted out with extraOptions: { toast: false }.
 // That's why components never catch-and-toast: the reason is already on screen.
-import { fetchBaseQuery, type BaseQueryFn, type FetchArgs, type FetchBaseQueryArgs } from "@reduxjs/toolkit/query/react";
+import {
+  fetchBaseQuery,
+  type BaseQueryFn,
+  type FetchArgs,
+  type FetchBaseQueryArgs,
+} from "@reduxjs/toolkit/query/react";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 import { toast } from "@/components/ui/toast/toast";
@@ -21,7 +26,9 @@ export type AppExtraOptions = {
 
 export type AppBaseQuery = BaseQueryFn<string | FetchArgs, unknown, AppError, AppExtraOptions>;
 
-function isErrorBody(data: unknown): data is { error: { code: string; message: string; fields?: Record<string, string> } } {
+function isErrorBody(
+  data: unknown
+): data is { error: { code: string; message: string; fields?: Record<string, string> } } {
   if (typeof data !== "object" || data === null || !("error" in data)) return false;
   const error = data.error;
   return typeof error === "object" && error !== null && "code" in error && "message" in error;
@@ -53,7 +60,10 @@ function leaveForPage(url: string) {
  * Builds the base query. serviceConfig.ts calls it with baseUrl "/api"; tests call it with an
  * absolute URL, a mocked fetch and their own `leave`.
  */
-export function createBaseQuery(options: FetchBaseQueryArgs, leave: (url: string) => void = leaveForPage): AppBaseQuery {
+export function createBaseQuery(
+  options: FetchBaseQueryArgs,
+  leave: (url: string) => void = leaveForPage
+): AppBaseQuery {
   const rawBaseQuery = fetchBaseQuery(options);
   // Five queries can fail with 401 at once; the first one navigates, the rest do nothing.
   let isLeaving = false;

@@ -75,9 +75,7 @@ export function BoardPreview() {
             <span className="rounded-full border border-fg-on-inverse/15 px-3 py-1.5 text-fg-muted-on-inverse">
               Board
             </span>
-            <span className="rounded-full bg-primary px-3 py-1.5 font-semibold text-fg-on-primary">
-              + New task
-            </span>
+            <span className="rounded-full bg-primary px-3 py-1.5 font-semibold text-fg-on-primary">+ New task</span>
           </div>
         </div>
 
@@ -88,12 +86,7 @@ export function BoardPreview() {
               <div className="flex flex-col gap-2.5">
                 {column.tasks.map((task) => (
                   <div key={task.title} className="rounded-xl bg-surface-page p-3.5">
-                    <p
-                      className={cn(
-                        "mb-2.5 text-sm font-semibold",
-                        task.isDone && "text-fg-muted line-through",
-                      )}
-                    >
+                    <p className={cn("mb-2.5 text-sm font-semibold", task.isDone && "text-fg-muted line-through")}>
                       {task.title}
                     </p>
                     <StatusChip status={task.status} />

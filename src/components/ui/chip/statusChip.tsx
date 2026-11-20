@@ -21,11 +21,7 @@ export function StatusChip({ status, label, className }: StatusChipProps) {
   const { className: colours, label: defaultLabel } = statuses[status];
   return (
     <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
-        colours,
-        className,
-      )}
+      className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold", colours, className)}
     >
       {label ?? defaultLabel}
     </span>

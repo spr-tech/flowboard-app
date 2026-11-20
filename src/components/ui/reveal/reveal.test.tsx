@@ -18,7 +18,7 @@ function stubBrowser({ prefersReducedMotion }: { prefersReducedMotion: boolean }
       media: query,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
-    })),
+    }))
   );
   vi.stubGlobal(
     "IntersectionObserver",
@@ -30,7 +30,7 @@ function stubBrowser({ prefersReducedMotion }: { prefersReducedMotion: boolean }
       unobserve = vi.fn();
       disconnect = vi.fn();
       takeRecords = () => [];
-    },
+    }
   );
 }
 
@@ -64,7 +64,7 @@ function renderList() {
     <Reveal effect="rise" stagger={80} data-testid="reveal">
       <p>First</p>
       <p>Second</p>
-    </Reveal>,
+    </Reveal>
   );
 }
 
@@ -77,7 +77,7 @@ describe("Reveal", () => {
     const html = renderToString(
       <Reveal effect="rise">
         <p>Server-rendered content</p>
-      </Reveal>,
+      </Reveal>
     );
 
     expect(html).toContain("Server-rendered content");

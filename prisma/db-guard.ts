@@ -22,8 +22,8 @@ export function assertDbResetAllowed(): void {
 
   if (process.env.ALLOW_DB_RESET !== "true") {
     console.error(
-      "Refusing to run: ALLOW_DB_RESET is not \"true\".\n" +
-        "Set ALLOW_DB_RESET=true in your local .env only if this is a database you are happy to wipe.",
+      'Refusing to run: ALLOW_DB_RESET is not "true".\n' +
+        "Set ALLOW_DB_RESET=true in your local .env only if this is a database you are happy to wipe."
     );
     process.exit(1);
   }

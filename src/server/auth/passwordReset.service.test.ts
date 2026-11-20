@@ -65,7 +65,7 @@ describe("requestPasswordReset", () => {
     await requestPasswordReset("  Ada@Example.COM ", BASE_URL);
 
     expect(prismaMock.user.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { email: "ada@example.com" } }),
+      expect.objectContaining({ where: { email: "ada@example.com" } })
     );
   });
 
@@ -180,7 +180,7 @@ describe("getResetTokenState", () => {
     await getResetTokenState("raw-token");
 
     expect(prismaMock.passwordResetToken.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { tokenHash: sha256("raw-token") } }),
+      expect.objectContaining({ where: { tokenHash: sha256("raw-token") } })
     );
   });
 
@@ -197,7 +197,12 @@ describe("getResetTokenState", () => {
 
   it("expires exactly 1 hour after the link was made", async () => {
     const expiresAt = new Date(NOW.getTime() + RESET_TOKEN_TTL_MS);
-    prismaMock.passwordResetToken.findUnique.mockResolvedValue({ id: "t", userId: "u", expiresAt, usedAt: null } as never);
+    prismaMock.passwordResetToken.findUnique.mockResolvedValue({
+      id: "t",
+      userId: "u",
+      expiresAt,
+      usedAt: null,
+    } as never);
 
     vi.setSystemTime(new Date(expiresAt.getTime() - 1));
     await expect(getResetTokenState("token")).resolves.toBe("valid");

@@ -13,15 +13,7 @@ export type ButtonLinkProps = Omit<ComponentProps<typeof Link>, "children"> &
   };
 
 /** Navigation that looks like a Button. Use this, not a Button with router.push, so it's a real link. */
-export function ButtonLink({
-  text,
-  variant,
-  size,
-  startIcon,
-  endIcon,
-  className,
-  ...rest
-}: ButtonLinkProps) {
+export function ButtonLink({ text, variant, size, startIcon, endIcon, className, ...rest }: ButtonLinkProps) {
   return (
     <Link className={cn(buttonVariants({ variant, size }), className)} {...rest}>
       {startIcon}

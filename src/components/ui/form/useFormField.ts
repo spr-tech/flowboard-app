@@ -17,10 +17,7 @@ export type FormFieldProps<TValues extends FieldValues> = {
  * The error waits until the field has been left or the form submitted, so nobody is told
  * "Email is required" while they are still typing their first letter.
  */
-export function useFormField<TValues extends FieldValues>({
-  control,
-  name,
-}: FormFieldProps<TValues>) {
+export function useFormField<TValues extends FieldValues>({ control, name }: FormFieldProps<TValues>) {
   // Destructured on purpose: the hooks lint rule treats an object holding a `ref` as a ref itself,
   // and would flag reading `field.value` during render.
   const {

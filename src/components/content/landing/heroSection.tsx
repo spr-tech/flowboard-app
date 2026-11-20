@@ -20,9 +20,7 @@ export function HeroSection() {
           className="load-in inline-flex items-center gap-2.5 rounded-full border border-line-subtle bg-surface-card py-1.5 pr-4 pl-1.5 text-sm text-fg-secondary"
           style={cssVars({ "--load-from-y": "-12px", "--load-duration": "500ms" })}
         >
-          <span className="rounded-full bg-surface-inverse px-2.5 py-1 text-xs font-semibold text-highlight">
-            New
-          </span>
+          <span className="rounded-full bg-surface-inverse px-2.5 py-1 text-xs font-semibold text-highlight">New</span>
           Due dates, assignees and a done column on every board
         </p>
 
@@ -30,21 +28,30 @@ export function HeroSection() {
             the badge, above the headline, so it never covers a word whatever the line wrapping. */}
         <span
           aria-hidden
-          className={cn(stickerBase, "top-30 left-[2%] size-16 items-center justify-center rounded-full bg-primary text-fg-on-primary")}
+          className={cn(
+            stickerBase,
+            "top-30 left-[2%] size-16 items-center justify-center rounded-full bg-primary text-fg-on-primary"
+          )}
           style={cssVars({ "--r": "-14deg", "--pop-delay": "700ms" })}
         >
           <Pin className="size-7.5" strokeWidth={2.2} />
         </span>
         <span
           aria-hidden
-          className={cn(stickerBase, "top-1 right-[3%] rounded-[14px] bg-surface-inverse px-3.5 py-2.5 text-sm font-semibold text-highlight")}
+          className={cn(
+            stickerBase,
+            "top-1 right-[3%] rounded-[14px] bg-surface-inverse px-3.5 py-2.5 text-sm font-semibold text-highlight"
+          )}
           style={cssVars({ "--r": "10deg", "--pop-delay": "800ms" })}
         >
           High priority
         </span>
         <span
           aria-hidden
-          className={cn(stickerBase, "top-75 left-[7%] size-14 items-center justify-center rounded-[18px] bg-highlight text-fg-on-highlight")}
+          className={cn(
+            stickerBase,
+            "top-75 left-[7%] size-14 items-center justify-center rounded-[18px] bg-highlight text-fg-on-highlight"
+          )}
           style={cssVars({ "--r": "8deg", "--pop-delay": "900ms" })}
         >
           <Check className="size-7" strokeWidth={2.6} />
@@ -66,9 +73,8 @@ export function HeroSection() {
         </span>
 
         <h1 className="mx-auto mt-7 max-w-265 text-display-hero leading-[0.98] font-extrabold tracking-[-0.045em]">
-          <Rise delay={0.05}>Move</Rise> <Rise delay={0.12}>your</Rise>{" "}
-          <Rise delay={0.19}>team&apos;s</Rise> <Rise delay={0.26}>work</Rise>{" "}
-          <Rise delay={0.33}>from</Rise>{" "}
+          <Rise delay={0.05}>Move</Rise> <Rise delay={0.12}>your</Rise> <Rise delay={0.19}>team&apos;s</Rise>{" "}
+          <Rise delay={0.26}>work</Rise> <Rise delay={0.33}>from</Rise>{" "}
           <Rise delay={0.45}>
             <Highlight className="px-[0.16em]">idea</Highlight>
           </Rise>{" "}
@@ -96,8 +102,8 @@ export function HeroSection() {
           className="load-in mx-auto mt-7 max-w-150 text-lg leading-relaxed text-fg-secondary"
           style={cssVars({ "--load-delay": "350ms" })}
         >
-          Flowboard is a Kanban workspace for small teams. Make a project, invite your people by
-          email, and drag tasks across the board until they&apos;re shipped.
+          Flowboard is a Kanban workspace for small teams. Make a project, invite your people by email, and drag tasks
+          across the board until they&apos;re shipped.
         </p>
         <div className="mt-9 flex flex-wrap justify-center gap-3">
           <ButtonLink

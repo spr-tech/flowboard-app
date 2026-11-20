@@ -9,11 +9,18 @@ import { POST } from "./route";
 vi.mock("@/auth", () => ({ auth: vi.fn() }));
 vi.mock("@/server/auth/auth.service", () => ({ register: vi.fn() }));
 
-const valid = { name: "Ada Okafor", email: "Ada@Example.com", password: "correct-horse", confirmPassword: "correct-horse" };
+const valid = {
+  name: "Ada Okafor",
+  email: "Ada@Example.com",
+  password: "correct-horse",
+  confirmPassword: "correct-horse",
+};
 
 function post(body: string) {
   // Next always passes a second argument with the (here empty) route params.
-  return POST(new Request("http://localhost/api/auth/register", { method: "POST", body }), { params: Promise.resolve({}) });
+  return POST(new Request("http://localhost/api/auth/register", { method: "POST", body }), {
+    params: Promise.resolve({}),
+  });
 }
 
 describe("POST /api/auth/register", () => {
@@ -28,7 +35,9 @@ describe("POST /api/auth/register", () => {
   });
 
   it("answers 409 in our error shape when the email is taken", async () => {
-    vi.mocked(register).mockRejectedValue(new ApiError(409, "EMAIL_TAKEN", "An account with this email already exists."));
+    vi.mocked(register).mockRejectedValue(
+      new ApiError(409, "EMAIL_TAKEN", "An account with this email already exists.")
+    );
 
     const response = await post(JSON.stringify(valid));
 
