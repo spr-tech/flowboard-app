@@ -11,7 +11,9 @@
 
 ## Environments
 - Neon: the rebuild uses a new Neon project (Frankfurt). Its **dev** branch is used locally and by the Vercel *preview* environment (`DATABASE_URL` pooled for the app, `DIRECT_URL` direct for migrations). Its **production** branch stays empty until cutover. Vercel *production* keeps using the old London database until then. Never run rebuild migrations against either production database.
-- GitHub sign-in on previews: a second GitHub OAuth app whose callback uses the fixed Vercel branch domain for `rebuild`; set `AUTH_TRUST_HOST=true`.
+- GitHub sign-in on previews: a second GitHub OAuth app whose callback uses the fixed Vercel branch domain for `rebuild`; set `AUTH_TRUST_HOST=true`. Preview sets `AUTH_GITHUB_ID`/`AUTH_GITHUB_SECRET` (the preview app), `AUTH_TRUST_HOST`, `EMAIL_USER` and `EMAIL_PASS` for all Preview deployments, so email and password work on every milestone preview; GitHub sign-in only works on the `rebuild` preview. Email links on previews use `VERCEL_BRANCH_URL` unless `APP_URL` is set.
+- Email: `EMAIL_USER` is the Gmail address and `EMAIL_PASS` a Google App Password (needs 2-Step Verification), sent over port 587 with STARTTLS. Antivirus "mail shields" that intercept SMTP on a laptop break local sending; fix that in the antivirus, never by turning off certificate checks.
+- Locally, `next start` (production mode) needs `APP_URL=http://localhost:3000` in `.env`; `pnpm dev` falls back to localhost by itself.
 
 ## Cutover day
 The rebuild starts from a fresh `init` migration on a new Neon project (Frankfurt). The old live database (London, separate Neon account) is never migrated in place; it stays untouched as the fallback.
@@ -19,7 +21,7 @@ The rebuild starts from a fresh `init` migration on a new Neon project (Frankfur
 1. Back up: create a Neon branch of the old London database (the restore point), and make no changes to it.
 2. `prisma migrate deploy` on the **empty Frankfurt production branch**. Never seed it.
 3. Copy data across, only if the old database has data worth keeping (skip if it only has test data). A one-off script reads London and writes Frankfurt: lowercase emails; password → passwordHash; ownerId → OWNER ProjectMember rows, old Member rows → MEMBER; hex colour → nearest colour key; the "Done" (or last) column gets isDone; re-space column and task positions; set Task.projectId and createdById (the project owner); set completedAt for tasks in the done column.
-4. Point Vercel's Production `DATABASE_URL` (pooled) and `DIRECT_URL` (direct) at the Frankfurt production branch.
+4. Point Vercel's Production `DATABASE_URL` (pooled) and `DIRECT_URL` (direct) at the Frankfurt production branch, and set `APP_URL` to the live domain (e.g. `https://flowboard.example`): links in emails are built from it, never from the request's Host header.
 5. Merge `rebuild` into `master` with a merge commit. Vercel deploys.
 6. Test on production: email sign in, GitHub sign in, open a board, drag a card.
 
