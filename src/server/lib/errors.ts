@@ -1,5 +1,5 @@
 // Turns anything a route handler throws into our error shape: { error: { code, message, fields? } }.
-// Milestone 4 wraps this in the full route-handler wrapper (session check included).
+// src/server/lib/route.ts wraps every handler with this (and adds the session check).
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
@@ -16,6 +16,11 @@ export class ApiError extends Error {
     super(message);
     this.name = "ApiError";
   }
+}
+
+/** 401: not signed in, or the session ended (expired, or the password changed since). */
+export function unauthenticated() {
+  return new ApiError(401, "UNAUTHENTICATED", "Your session has ended. Please sign in again.");
 }
 
 /** The first message for each field, keyed by its path ("email", "address.city"). */
