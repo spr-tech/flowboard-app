@@ -341,36 +341,6 @@
       transform: scale(1) rotate(var(--r, 0deg));
     }
   }
-  /* Scroll reveals (see src/components/ui/reveal/reveal.tsx). */
-  @keyframes reveal-rise {
-    from {
-      opacity: 0;
-      transform: translateY(32px);
-    }
-  }
-  @keyframes reveal-slide-left {
-    from {
-      opacity: 0;
-      transform: translateX(-48px);
-    }
-  }
-  @keyframes reveal-slide-right {
-    from {
-      opacity: 0;
-      transform: translateX(48px);
-    }
-  }
-  @keyframes reveal-scale {
-    from {
-      opacity: 0;
-      transform: scale(0.96);
-    }
-  }
-  @keyframes reveal-fade {
-    from {
-      opacity: 0;
-    }
-  }
 }
 
 /*
@@ -408,6 +378,43 @@
  * fold), then "shown" when it scrolls into view. With data-reveal-stagger the direct children
  * animate instead of the element, each delayed by its --i (set by Reveal) times the stagger.
  */
+/*
+ * Reveal keyframes. Deliberately NOT inside @theme: Tailwind only outputs @theme keyframes
+ * that some used CSS names directly, and the rules below name them through
+ * var(--reveal-name), which Tailwind can't see. Inside @theme they were silently dropped from
+ * the build, so sections appeared without animating. Top-level keyframes always ship.
+ * Guarded by src/app/globals.test.ts.
+ */
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+}
+@keyframes reveal-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(-48px);
+  }
+}
+@keyframes reveal-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+}
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes reveal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
 [data-reveal="rise"] {
   --reveal-name: reveal-rise;
 }
