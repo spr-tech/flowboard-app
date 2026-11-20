@@ -4,7 +4,10 @@ import { useCallback, useEffect, useRef, type HTMLAttributes, type ReactNode } f
 
 import { cssVars } from "@/utilities/helpers/cssVars";
 
-export type RevealEffect = "rise" | "slide-left" | "slide-right" | "scale" | "fan" | "fade";
+/** Every effect. Each one except "fan" needs a matching `@keyframes reveal-<effect>` in globals.css. */
+export const REVEAL_EFFECTS = ["rise", "slide-left", "slide-right", "scale", "fan", "fade"] as const;
+
+export type RevealEffect = (typeof REVEAL_EFFECTS)[number];
 
 type RevealTag = "div" | "section" | "header" | "footer" | "h2" | "p" | "ul" | "ol";
 
