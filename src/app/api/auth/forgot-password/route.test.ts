@@ -6,6 +6,8 @@ import { POST } from "./route";
 
 // `after` runs work once the response is sent; here we collect it and run it by hand.
 const afterCallbacks: (() => Promise<void>)[] = [];
+// route() imports Auth.js, which only loads inside Next; public routes never call it.
+vi.mock("@/auth", () => ({ auth: vi.fn() }));
 vi.mock("next/server", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/server")>()),
   after: (callback: () => Promise<void>) => afterCallbacks.push(callback),
@@ -19,6 +21,7 @@ function post(body: unknown) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     }),
+    { params: Promise.resolve({}) },
   );
 }
 

@@ -39,14 +39,14 @@ describe("route()", () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it("lets a public route run without a session, with user null", async () => {
-    mockAuth.mockResolvedValue(null);
+  it("runs a public route without reading the session, with user null", async () => {
     const handler = vi.fn(() => ({ ok: true }));
 
     const response = await route({ auth: false }, handler)(request(), segment());
 
     expect(response.status).toBe(200);
     expect(handler).toHaveBeenCalledWith(expect.objectContaining({ user: null }));
+    expect(mockAuth).not.toHaveBeenCalled();
   });
 
   it("passes the signed-in user and sends the result as JSON", async () => {

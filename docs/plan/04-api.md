@@ -15,7 +15,7 @@ export const PATCH = route({ auth: true, body: updateMeSchema }, ({ user, body }
 - The handler returns a plain value (sent as JSON, status 200 or `status`) or a `Response`. Anything thrown goes through `errorResponse`: an `ApiError` keeps its status and code; anything else is a logged 500 with no details sent.
 - Membership checks (404 for non-members) stay in the services; the wrapper never knows about projects.
 - The wrapper's second argument must stay required: `next build` checks it is assignable to `{ params: Promise<…> }`.
-- The milestone 3 auth routes (register, forgot and reset password) predate the wrapper and still use `errorResponse` directly; they move onto `route()` when next touched.
+- `auth: false` (public routes: register, forgot-password, reset-password, verify) never reads the session: no database work, the same timing for everyone, and `user` is `null`.
 
 ## Auth
 | Method | Path | Who | What |

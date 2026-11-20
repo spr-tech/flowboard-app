@@ -21,7 +21,11 @@ type Schemas = {
 };
 
 type RouteOptions<S extends Schemas, RequireAuth extends boolean> = S & {
-  /** true: answer 401 unless signed in. Every route says this explicitly in its first line. */
+  /**
+   * true: answer 401 unless signed in. false: a public route; the session isn't read at all
+   * (no database work, and the same timing for everyone), so `user` is null.
+   * Every route says this explicitly in its first line.
+   */
   auth: RequireAuth;
   /** Status for a successful answer. Default 200; creates use 201. */
   status?: number;
@@ -32,7 +36,7 @@ type Parsed<T> = T extends z.ZodType ? z.output<T> : undefined;
 
 export type RouteContext<S extends Schemas, RequireAuth extends boolean> = {
   request: Request;
-  user: RequireAuth extends true ? SessionUser : SessionUser | null;
+  user: RequireAuth extends true ? SessionUser : null;
   body: Parsed<S["body"]>;
   params: Parsed<S["params"]>;
   query: Parsed<S["query"]>;
@@ -54,11 +58,14 @@ export function route<const S extends Schemas, const RequireAuth extends boolean
   // assignable to { params: Promise<…> }, and an optional one (… | undefined) isn't.
   return async (request: Request, segment: SegmentData): Promise<Response> => {
     try {
-      // auth() also runs our jwt callback, which reloads the user and returns no session when
-      // the password changed after this session signed in. So "no user" covers that case too.
-      const session = await auth();
-      const user = session?.user?.id ? session.user : null;
-      if (options.auth && !user) throw unauthenticated();
+      let user: SessionUser | null = null;
+      if (options.auth) {
+        // auth() also runs our jwt callback, which reloads the user and returns no session when
+        // the password changed after this session signed in. So "no user" covers that case too.
+        const session = await auth();
+        user = session?.user?.id ? session.user : null;
+        if (!user) throw unauthenticated();
+      }
 
       const rawParams = await segment.params;
       const rawQuery = Object.fromEntries(new URL(request.url).searchParams);
