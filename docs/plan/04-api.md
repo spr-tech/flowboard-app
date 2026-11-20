@@ -2,6 +2,21 @@
 
 Every handler: check the session → validate with Zod → call the service → return. "Who" is enforced inside the service.
 
+## The route-handler wrapper (built in milestone 4)
+Every handler goes through `route(options, handler)` in `src/server/lib/route.ts`, so none of the steps can be forgotten:
+
+```ts
+export const GET = route({ auth: true }, ({ user }) => getMe(user.id));
+export const PATCH = route({ auth: true, body: updateMeSchema }, ({ user, body }) => updateMe(user.id, body));
+```
+
+- `auth: true` → 401 `UNAUTHENTICATED` ("Your session has ended. Please sign in again.") without a signed-in user. `auth()` runs our jwt callback, which also ends sessions older than `passwordChangedAt`, so one check covers both. Every route states `auth` explicitly in its first line.
+- `params`, `query` and `body` schemas (Zod) → typed values for the handler, or 400 `VALIDATION_FAILED` with `fields`. Next 15's `params` Promise is awaited by the wrapper. The body is only read when a `body` schema is given.
+- The handler returns a plain value (sent as JSON, status 200 or `status`) or a `Response`. Anything thrown goes through `errorResponse`: an `ApiError` keeps its status and code; anything else is a logged 500 with no details sent.
+- Membership checks (404 for non-members) stay in the services; the wrapper never knows about projects.
+- The wrapper's second argument must stay required: `next build` checks it is assignable to `{ params: Promise<…> }`.
+- The milestone 3 auth routes (register, forgot and reset password) predate the wrapper and still use `errorResponse` directly; they move onto `route()` when next touched.
+
 ## Auth
 | Method | Path | Who | What |
 |---|---|---|---|
@@ -10,7 +25,7 @@ Every handler: check the session → validate with Zod → call the service → 
 | POST | /api/auth/forgot-password | Anyone | Send the reset email; same response always (the work runs after the response, so timing is the same too); rate limited |
 | POST | /api/auth/reset-password/verify | Anyone | `{ token }` → `{ state: valid \| expired \| used \| invalid }`. Checks a link without using it, so the page can show the state before anyone types |
 | POST | /api/auth/reset-password | Valid token | Set password, update passwordChangedAt, mark token used, cancel the user's other links (one transaction). 400 `TOKEN_INVALID` / `TOKEN_USED` / `TOKEN_EXPIRED` |
-| GET | /auth/session-ended | Anyone | Not an API route: clears a session cookie the server no longer accepts (password changed, user gone) and redirects to `/login?reason=signed-out` |
+| GET | /auth/session-ended | Anyone | Not an API route: clears a session cookie the server no longer accepts (password changed, user gone) and redirects to `/login?reason=signed-out`. Takes `?callbackUrl=` (the base query adds it on a 401) and passes it on to /login, same-site paths only |
 
 Auth notes:
 - Reset links last 1 hour and work once. Asking for a new link cancels the older ones.
@@ -22,7 +37,7 @@ Auth notes:
 ## Account
 | Method | Path | Who | What |
 |---|---|---|---|
-| GET | /api/me | Signed in | Current user |
+| GET | /api/me | Signed in | Current user: `{ id, name, email, image, hasPassword }` (`hasPassword` false for GitHub-only accounts). Built in milestone 4 |
 | PATCH | /api/me | Signed in | Update name |
 | PATCH | /api/me/password | Email users | Current + new password |
 
@@ -76,6 +91,7 @@ Auth notes:
 - Short paths for anything with an ID; the service finds its project and checks membership.
 - Non-members get 404, not 403.
 - Errors: `{ error: { code, message, fields? } }`. 400 bad input · 401 not signed in · 403 not allowed · 404 not found · 409 conflict · 429 too many requests.
+- The browser turns these into one `AppError` and decides toasts and the 401 redirect in one place: see "Errors" in `05-state.md`.
 - Every write returns the updated object.
 
 ## Moving a task (server side, one transaction)
