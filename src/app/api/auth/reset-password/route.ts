@@ -1,15 +1,8 @@
-import { NextResponse } from "next/server";
-
 import { resetPasswordSchema } from "@/models/validations/authValidation";
 import { resetPassword } from "@/server/auth/passwordReset.service";
-import { errorResponse, readJson } from "@/server/lib/errors";
+import { route } from "@/server/lib/route";
 
 /** Set a new password with a reset link. 400 TOKEN_INVALID / TOKEN_USED / TOKEN_EXPIRED otherwise. */
-export async function POST(request: Request) {
-  try {
-    const { token, password } = resetPasswordSchema.parse(await readJson(request));
-    return NextResponse.json(await resetPassword(token, password));
-  } catch (error) {
-    return errorResponse(error);
-  }
-}
+export const POST = route({ auth: false, body: resetPasswordSchema }, ({ body: { token, password } }) =>
+  resetPassword(token, password),
+);

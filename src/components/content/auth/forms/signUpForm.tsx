@@ -11,10 +11,10 @@ import { Button } from "@/components/ui/button/button";
 import { FormInput } from "@/components/ui/form/formInput";
 import { FormPasswordInput } from "@/components/ui/form/formPasswordInput";
 import { registerSchema, type RegisterFormValues } from "@/models/validations/authValidation";
-import { ApiRequestError, authService } from "@/services/authService";
+import { useRegisterMutation } from "@/services/authService";
 import { safeCallbackUrl } from "@/utilities/helpers/safeCallbackUrl";
 import { getPasswordChecks, PasswordChecks } from "../passwordChecks";
-import { applyApiError } from "./applyApiError";
+import { applyApiError, isAppError } from "./applyApiError";
 
 const FIELDS = ["name", "email", "password", "confirmPassword"] as const;
 
@@ -26,6 +26,7 @@ type SignUpFormProps = {
 /** Creates the account through POST /api/auth/register, then signs straight in (product flow 1). */
 export function SignUpForm({ callbackUrl }: SignUpFormProps) {
   const router = useRouter();
+  const [registerAccount] = useRegisterMutation();
   const [formError, setFormError] = useState<string | null>(null);
   // One toggle reveals both password fields, as in the design.
   const [isPasswordRevealed, setIsPasswordRevealed] = useState(false);
@@ -45,9 +46,10 @@ export function SignUpForm({ callbackUrl }: SignUpFormProps) {
   const onSubmit = async (values: RegisterFormValues) => {
     setFormError(null);
     try {
-      await authService.register(values);
+      // unwrap() turns RTK Query's { data } / { error } result into a value or a thrown AppError.
+      await registerAccount(values).unwrap();
     } catch (error) {
-      if (error instanceof ApiRequestError && error.code === "EMAIL_TAKEN") {
+      if (isAppError(error) && error.code === "EMAIL_TAKEN") {
         setError("email", { message: error.message }, { shouldFocus: true });
         return;
       }

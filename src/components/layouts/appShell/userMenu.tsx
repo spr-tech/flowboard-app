@@ -14,11 +14,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownmenu/dropdownMenu";
+import { useMe } from "@/services/accountService";
 import type { AppShellUser } from "./appShell";
 
-type UserMenuProps = { user: AppShellUser };
+type UserMenuProps = {
+  /** From the server session, so the first paint already has a name (no loading flash). */
+  user: AppShellUser;
+};
 
-export function UserMenu({ user }: UserMenuProps) {
+export function UserMenu({ user: sessionUser }: UserMenuProps) {
+  // Read straight from the RTK Query cache on every render (never copied into state). Once
+  // /api/me answers, it wins: a later rename invalidates the Me tag and this updates by itself.
+  const { data: me } = useMe();
+  const user = me
+    ? { name: me.name || me.email, email: me.email, imageUrl: me.image }
+    : sessionUser;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

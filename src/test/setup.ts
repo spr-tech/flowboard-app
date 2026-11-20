@@ -18,6 +18,18 @@ globalThis.fetch = (input: RequestInfo | URL) => {
   throw new Error(`Tests must not use the network (fetch ${String(input)}). Mock it in the test.`);
 };
 
+// In a browser, new Request("/api/me") resolves against the page address. Node's Request (which
+// jsdom tests use) can't, so RTK Query's relative base URL "/api" would fail before reaching the
+// mocked fetch. Resolve relative URLs against window.location, as a browser does.
+if (typeof window !== "undefined") {
+  const NodeRequest = globalThis.Request;
+  globalThis.Request = class BrowserLikeRequest extends NodeRequest {
+    constructor(input: RequestInfo | URL, init?: RequestInit) {
+      super(typeof input === "string" ? new URL(input, window.location.href) : input, init);
+    }
+  };
+}
+
 // Catches everything below fetch too, including a real Postgres driver opening a socket.
 net.Socket.prototype.connect = function blockedConnect(): never {
   throw new Error("Tests must not open network connections. Mock the module that tried to.");

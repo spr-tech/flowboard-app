@@ -5,12 +5,15 @@ import { register } from "@/server/auth/auth.service";
 import { ApiError } from "@/server/lib/errors";
 import { POST } from "./route";
 
+// route() imports Auth.js, which only loads inside Next; public routes never call it.
+vi.mock("@/auth", () => ({ auth: vi.fn() }));
 vi.mock("@/server/auth/auth.service", () => ({ register: vi.fn() }));
 
 const valid = { name: "Ada Okafor", email: "Ada@Example.com", password: "correct-horse", confirmPassword: "correct-horse" };
 
 function post(body: string) {
-  return POST(new Request("http://localhost/api/auth/register", { method: "POST", body }));
+  // Next always passes a second argument with the (here empty) route params.
+  return POST(new Request("http://localhost/api/auth/register", { method: "POST", body }), { params: Promise.resolve({}) });
 }
 
 describe("POST /api/auth/register", () => {

@@ -1,6 +1,19 @@
 import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
 
-import { ApiRequestError, NETWORK_ERROR_MESSAGE } from "@/services/authService";
+import type { AppError } from "@/models/responses/apiError";
+import { NETWORK_ERROR_MESSAGE } from "@/utilities/constants/errorMessages";
+
+/** What `.unwrap()` throws for a failed RTK Query call: the base query's AppError. */
+export function isAppError(error: unknown): error is AppError {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof error.code === "string" &&
+    "message" in error &&
+    typeof error.message === "string"
+  );
+}
 
 /**
  * Puts a failed request's per-field messages on the matching form fields.
@@ -11,7 +24,7 @@ export function applyApiError<TValues extends FieldValues>(
   fieldNames: readonly Path<TValues>[],
   setError: UseFormSetError<TValues>,
 ): string | null {
-  if (!(error instanceof ApiRequestError)) return NETWORK_ERROR_MESSAGE;
+  if (!isAppError(error)) return NETWORK_ERROR_MESSAGE;
 
   let isOnAField = false;
   for (const name of fieldNames) {

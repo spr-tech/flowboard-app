@@ -9,9 +9,9 @@ import { FormInput } from "@/components/ui/form/formInput";
 import { FormPasswordInput } from "@/components/ui/form/formPasswordInput";
 import type { ResetTokenState } from "@/models/responses/authResponses";
 import { resetPasswordFormSchema, type ResetPasswordFormValues } from "@/models/validations/authValidation";
-import { ApiRequestError, authService } from "@/services/authService";
+import { useResetPasswordMutation } from "@/services/authService";
 import { getPasswordChecks, PasswordChecks } from "../passwordChecks";
-import { applyApiError } from "./applyApiError";
+import { applyApiError, isAppError } from "./applyApiError";
 
 /** The server's error codes for a link that stopped working while the form was open. */
 const TOKEN_ERROR_STATES: Record<string, Exclude<ResetTokenState, "valid">> = {
@@ -29,6 +29,7 @@ type ResetPasswordFormProps = {
 
 /** New password + confirm, with the same live checks as sign-up. */
 export function ResetPasswordForm({ token, onDone, onTokenRejected }: ResetPasswordFormProps) {
+  const [resetPassword] = useResetPasswordMutation();
   const [formError, setFormError] = useState<string | null>(null);
   const [isPasswordRevealed, setIsPasswordRevealed] = useState(false);
   const {
@@ -46,10 +47,10 @@ export function ResetPasswordForm({ token, onDone, onTokenRejected }: ResetPassw
   const onSubmit = async (values: ResetPasswordFormValues) => {
     setFormError(null);
     try {
-      await authService.resetPassword({ ...values, token });
+      await resetPassword({ ...values, token }).unwrap();
       onDone();
     } catch (error) {
-      const rejectedState = error instanceof ApiRequestError ? TOKEN_ERROR_STATES[error.code] : undefined;
+      const rejectedState = isAppError(error) ? TOKEN_ERROR_STATES[error.code] : undefined;
       if (rejectedState) {
         onTokenRejected(rejectedState);
         return;

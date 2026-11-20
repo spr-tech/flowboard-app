@@ -21,6 +21,10 @@ describe("test environment", () => {
     expect(() => fetch("https://example.com")).toThrow("Tests must not use the network");
   });
 
+  it("resolves relative Request URLs against the page, as a browser does", () => {
+    expect(new Request("/api/me").url).toBe(new URL("/api/me", window.location.href).href);
+  });
+
   it("makes raw socket connections fail loudly", () => {
     expect(() => net.connect({ host: "example.com", port: 5432 })).toThrow("Tests must not open network connections");
   });
