@@ -50,7 +50,9 @@ export function route<const S extends Schemas, const RequireAuth extends boolean
   options: RouteOptions<S, RequireAuth>,
   handler: (context: RouteContext<S, RequireAuth>) => unknown,
 ) {
-  return async (request: Request, segment?: SegmentData): Promise<Response> => {
+  // `segment` must be required: Next's build checks the handler's second argument is
+  // assignable to { params: Promise<…> }, and an optional one (… | undefined) isn't.
+  return async (request: Request, segment: SegmentData): Promise<Response> => {
     try {
       // auth() also runs our jwt callback, which reloads the user and returns no session when
       // the password changed after this session signed in. So "no user" covers that case too.
@@ -58,7 +60,7 @@ export function route<const S extends Schemas, const RequireAuth extends boolean
       const user = session?.user?.id ? session.user : null;
       if (options.auth && !user) throw unauthenticated();
 
-      const rawParams = (await segment?.params) ?? {};
+      const rawParams = await segment.params;
       const rawQuery = Object.fromEntries(new URL(request.url).searchParams);
 
       const context = {
