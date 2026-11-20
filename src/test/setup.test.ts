@@ -26,7 +26,7 @@ describe("test environment", () => {
   });
 
   it("makes the shared Prisma client fail loudly", async () => {
-    const { prisma } = await import("@/lib/prisma");
+    const { prisma } = await import("@/server/lib/prisma");
     expect(() => prisma.user).toThrow("Tests must not use the database (prisma.user)");
   });
 

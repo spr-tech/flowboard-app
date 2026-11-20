@@ -1,4 +1,4 @@
-import { PrismaClient } from "../lib/generated/prisma";
+import { PrismaClient } from "@/lib/generated/prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
@@ -69,7 +69,7 @@ if (process.env.NODE_ENV !== "production") {
 // export
 //    — makes the prisma instance available to every other file in your app
 //    — any file that needs to talk to the database imports it like this:
-//      import { prisma } from "@/lib/prisma"
+//      import { prisma } from "@/server/lib/prisma"
 //
 // globalForPrisma.prisma ?? new PrismaClient({ adapter })
 //    — the ?? is the nullish coalescing operator
