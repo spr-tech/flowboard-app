@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toast/toaster";
+import { StoreProvider } from "@/stores/storeProvider";
 
 // Both are variable fonts, so one file covers every weight the designs use
 // (Inter 400–600, Bricolage 500–800). `opsz` lets large headings use the tighter display cut.
@@ -31,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${bricolage.variable}`}>
       <body>
-        {children}
+        <StoreProvider>{children}</StoreProvider>
         <Toaster />
       </body>
     </html>

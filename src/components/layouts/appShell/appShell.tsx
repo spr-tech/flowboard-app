@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { Drawer } from "@/components/ui/drawer/drawer";
 import { Logo } from "@/components/ui/logo/logo";
+import { useAppDispatch, useAppSelector } from "@/stores/hooks";
+import { mobileMenuClosed, mobileMenuOpened, selectIsMobileMenuOpen } from "@/stores/uiSlice";
 import { SidebarNav } from "./sidebarNav";
 import { TopBar } from "./topBar";
 
@@ -24,9 +26,10 @@ type AppShellProps = {
  * Layout switches on CSS breakpoints, never on window width, so the first paint is already right.
  */
 export function AppShell({ user, children }: AppShellProps) {
-  // Local for now; moves to the UI slice in src/stores when the Redux store exists (milestone 4).
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const closeMenu = () => setIsMenuOpen(false);
+  // UI state in the store's ui slice (src/stores/uiSlice.ts), not useState.
+  const dispatch = useAppDispatch();
+  const isMenuOpen = useAppSelector(selectIsMobileMenuOpen);
+  const closeMenu = () => dispatch(mobileMenuClosed());
 
   return (
     <div className="min-h-dvh">
@@ -51,7 +54,7 @@ export function AppShell({ user, children }: AppShellProps) {
       </Drawer>
 
       <div className="flex min-h-dvh flex-col md:pl-60">
-        <TopBar user={user} onOpenMenu={() => setIsMenuOpen(true)} />
+        <TopBar user={user} onOpenMenu={() => dispatch(mobileMenuOpened())} />
         <main className="flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
     </div>
