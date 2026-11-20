@@ -4,25 +4,27 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
 
-import { registerNewUser } from "@/app/actions/auth";
 import { ArrowBadge } from "@/components/ui/button/arrowBadge";
 import { Button } from "@/components/ui/button/button";
 import { FormInput } from "@/components/ui/form/formInput";
 import { FormPasswordInput } from "@/components/ui/form/formPasswordInput";
-import { toast } from "@/components/ui/toast/toast";
-import {
-  PASSWORD_MIN_LENGTH,
-  registerSchema,
-  type RegisterFormValues,
-} from "@/models/validations/authValidation";
-import { PasswordChecks } from "./passwordChecks";
+import { registerSchema, type RegisterFormValues } from "@/models/validations/authValidation";
+import { ApiRequestError, authService } from "@/services/authService";
+import { safeCallbackUrl } from "@/utilities/helpers/safeCallbackUrl";
+import { getPasswordChecks, PasswordChecks } from "../passwordChecks";
+import { applyApiError } from "./applyApiError";
 
-/**
- * Email sign-up through the existing registerNewUser server action.
- * The logic is the pre-rebuild one, kept as is; milestone 3 replaces it.
- */
-export function SignUpForm() {
+const FIELDS = ["name", "email", "password", "confirmPassword"] as const;
+
+type SignUpFormProps = {
+  /** Where to go once the account exists, straight from the URL; checked before use. */
+  callbackUrl?: string;
+};
+
+/** Creates the account through POST /api/auth/register, then signs straight in (product flow 1). */
+export function SignUpForm({ callbackUrl }: SignUpFormProps) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   // One toggle reveals both password fields, as in the design.
@@ -30,6 +32,7 @@ export function SignUpForm() {
   const {
     control,
     handleSubmit,
+    setError,
     formState: { isSubmitting },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -38,21 +41,29 @@ export function SignUpForm() {
 
   // Worked out from the typed values on each render, so there's no state to keep in sync.
   const [password, confirmPassword] = useWatch({ control, name: ["password", "confirmPassword"] });
-  const checks = [
-    { label: `At least ${PASSWORD_MIN_LENGTH} characters`, isMet: password.length >= PASSWORD_MIN_LENGTH },
-    { label: "Passwords match", isMet: password.length > 0 && password === confirmPassword },
-  ];
 
-  const onSubmit = async ({ name, email, password }: RegisterFormValues) => {
+  const onSubmit = async (values: RegisterFormValues) => {
     setFormError(null);
-    const result = await registerNewUser({ name, email, password });
-
-    if (!result.success) {
-      setFormError(result.error?.trim() || "Something went wrong. Please try again.");
+    try {
+      await authService.register(values);
+    } catch (error) {
+      if (error instanceof ApiRequestError && error.code === "EMAIL_TAKEN") {
+        setError("email", { message: error.message }, { shouldFocus: true });
+        return;
+      }
+      setFormError(applyApiError(error, FIELDS, setError));
       return;
     }
-    toast({ type: "success", message: "Account created. Sign in to continue." });
-    router.push("/login");
+
+    // The account exists; sign in with the same details. values.email is already lowercased by the schema.
+    const result = await signIn("credentials", { email: values.email, password: values.password, redirect: false });
+    if (result?.error) {
+      // Very unlikely, but the account is there, so send them to sign in by hand.
+      router.push("/login");
+      return;
+    }
+    router.push(safeCallbackUrl(callbackUrl, window.location.origin));
+    router.refresh();
   };
 
   return (
@@ -91,7 +102,7 @@ export function SignUpForm() {
         />
       </div>
 
-      <PasswordChecks checks={checks} />
+      <PasswordChecks checks={getPasswordChecks(password, confirmPassword)} />
 
       {formError && (
         <p role="alert" className="mt-5 text-center text-sm font-medium text-danger">

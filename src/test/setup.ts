@@ -25,8 +25,7 @@ net.Socket.prototype.connect = function blockedConnect(): never {
 
 // ─── No database ─────────────────────────────────────────────────────────────
 // Any use of the shared client throws. A test that needs data mocks this module itself.
-// (When the client moves to src/server/lib/prisma.ts in milestone 3, move this mock with it.)
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/server/lib/prisma", () => ({
   prisma: new Proxy(
     {},
     {
@@ -34,7 +33,7 @@ vi.mock("@/lib/prisma", () => ({
         // Let Vitest and Promise checks inspect the object without tripping the guard.
         if (typeof property === "symbol" || property === "then") return undefined;
         throw new Error(
-          `Tests must not use the database (prisma.${String(property)}). Mock "@/lib/prisma" in the test.`,
+          `Tests must not use the database (prisma.${String(property)}). Mock "@/server/lib/prisma" in the test.`,
         );
       },
     },

@@ -1,131 +1,58 @@
+// The Node half of the Auth.js setup: the Prisma adapter, the providers and the session callbacks.
+// Middleware uses the Edge-safe src/auth.config.ts instead, because it can't load Prisma.
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
+import type { Adapter } from "next-auth/adapters";
 import Credentials from "next-auth/providers/credentials";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
-import { authConfig } from "./auth.config";
 import GitHub from "next-auth/providers/github";
+
+import { loginSchema } from "@/models/validations/authValidation";
+import { verifyCredentials } from "@/server/auth/auth.service";
+import { updateSessionToken } from "@/server/auth/sessionToken";
+import { prisma } from "@/server/lib/prisma";
+import { normaliseEmail } from "@/utilities/helpers/normaliseEmail";
+import { authConfig } from "./auth.config";
+
+/**
+ * The Prisma adapter with emails lowercased. Without this, a GitHub email like "Ada@x.com"
+ * wouldn't match the existing "ada@x.com" row, and Auth.js would create a duplicate user.
+ */
+function createAdapter(): Adapter {
+  const adapter = PrismaAdapter(prisma);
+  return {
+    ...adapter,
+    createUser: (user) => adapter.createUser!({ ...user, email: normaliseEmail(user.email) }),
+    getUserByEmail: (email) => adapter.getUserByEmail!(normaliseEmail(email)),
+  };
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
+  adapter: createAdapter(),
   providers: [
-    GitHub({
-      clientId: process.env.AUTH_GITHUB_ID,
-      clientSecret: process.env.AUTH_GITHUB_SECRET,
-    }),
-
+    // Reads AUTH_GITHUB_ID and AUTH_GITHUB_SECRET. If the GitHub email already belongs to a
+    // password account, Auth.js refuses to link them (OAuthAccountNotLinked) and /login explains why.
+    GitHub,
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        //checks if the email or password is provided
-        if (!credentials?.email || !credentials?.password) return null;
-
-        //find the user by email
-        const user = await prisma.user.findUnique({
-          // Emails are stored lowercase.
-          where: { email: (credentials.email as string).trim().toLowerCase() },
-        });
-
-        //user not found , reject login
-        if (!user || !user.passwordHash) return null;
-
-        //comparing the password typed with the hashed version in the databse
-        const passwordMatch = await bcrypt.compare(
-          credentials.password as string,
-          user.passwordHash
-        );
-
-        if (!passwordMatch) return null;
-
-        return user;
+        const parsed = loginSchema.safeParse(credentials);
+        if (!parsed.success) return null;
+        // null tells Auth.js the sign-in failed; the form shows "Invalid email or password".
+        return verifyCredentials(parsed.data.email, parsed.data.password);
       },
     }),
   ],
-
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) token.id = user.id;
-      return token;
-    },
-
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-      }
+    ...authConfig.callbacks,
+    // `user` is only set at sign-in. The passwordChangedAt check happens in updateSessionToken.
+    jwt: ({ token, user }) => updateSessionToken(token, user?.id),
+    session: ({ session, token }) => {
+      if (token.id) session.user.id = token.id;
       return session;
     },
   },
-
-  pages: {
-    signIn: "/login",
-  },
 });
-
-
-// NextAuth
-//    the main function from the next-auth library that sets up
-//    everything authentication related in one place. it returns
-//    four things we export and use across the app.
-//
-// handlers
-//    the GET and POST functions that power the /api/auth routes.
-//    when the browser sends a login or logout request, these
-//    handle it automatically without us writing any route logic.
-//
-// signIn / signOut
-//    functions we call in our components to trigger login and logout.
-//
-// auth
-//    the function we call anywhere in the app to get the current
-//    session. returns the logged in user or null if nobody is logged in.
-//
-// ...authConfig
-//    spreads in the lightweight config from auth.config.ts.
-//    that file holds the route protection rules and is kept
-//    separate because middleware runs on the edge runtime which
-//    cannot use Prisma or bcrypt. this file adds the heavy stuff
-//    on top of that base config.
-//
-// providers
-//    the list of ways a user can log in.
-//    GitHub handles the OAuth flow entirely on their end.
-//    Credentials handles email and password login manually.
-//
-// authorize
-//    runs when a user submits the login form.
-//    looks the user up in the database by email, compares the
-//    typed password against the bcrypt hash stored in the database,
-//    and returns the user object if everything matches or null if not.
-//    returning null tells Auth.js the login failed.
-//
-// callbacks
-//    functions Auth.js calls automatically at key points in the
-//    auth flow. we use them to pass the database id into the session
-//    because Auth.js does not include it by default.
-//
-// jwt callback
-//    runs when a session token is first created at login.
-//    the user object returned from authorize is available here.
-//    we grab the database id and attach it to the token before
-//    it gets encrypted and stored as a cookie in the browser.
-//    on future requests this callback still runs but user is
-//    undefined, so the if check protects against overwriting.
-//
-// what is a JWT token
-//    a small encrypted package stored as a cookie in the browser.
-//    it holds information about the logged in user so the server
-//    can identify who is making each request without hitting the
-//    database every time. JWT stands for JSON Web Token.
-//
-// session callback
-//    runs every time auth() is called anywhere in the app.
-//    takes the id we stored in the token and copies it onto
-//    session.user.id so our app code can actually read it.
-//    without this callback the id sits in the token but never
-//    reaches the session object our code works with.
-//
-// pages
-//    overrides Auth.js defaults. tells it to use our custom
-//    /login page instead of its own built in login screen.

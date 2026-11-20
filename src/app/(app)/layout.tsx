@@ -5,12 +5,13 @@ import { auth } from "@/auth";
 import { AppShell } from "@/components/layouts/appShell/appShell";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
+  // Middleware has already sent signed-out visitors to /login. A null here means the token looked
+  // valid to middleware but not to the server (password changed since, or the user is gone).
   const session = await auth();
-  // Middleware only guards /dashboard until milestone 3; this stops the shell rendering for nobody.
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect("/auth/session-ended");
 
   const { name, email, image } = session.user;
-  const user = { name: name || email || "Account", email: email ?? "", imageUrl: image };
+  const user = { name: name || email || "Account", email, imageUrl: image };
 
   return <AppShell user={user}>{children}</AppShell>;
 }

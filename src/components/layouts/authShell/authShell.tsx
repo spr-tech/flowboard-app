@@ -15,17 +15,24 @@ type AuthShellProps = {
   tone: keyof typeof tones;
   /** The form column. */
   children: ReactNode;
+  /** Extra classes for the outer wrapper. */
+  className?: string;
 };
 
-/** Split screen for sign in and sign up: a coloured story panel on the left, the form on the right. */
-export function AuthShell({ panel, tone, children }: AuthShellProps) {
+/**
+ * Split screen for sign in and sign up: a coloured story panel on the left, the form on the right.
+ * From md up, the panel is sticky: it stays pinned to the screen while a long form scrolls.
+ */
+export function AuthShell({ panel, tone, children, className }: AuthShellProps) {
   const colours = tones[tone];
 
   return (
-    <div className="flex min-h-dvh flex-wrap bg-surface-page">
+    <div className={cn("flex min-h-dvh flex-wrap bg-surface-page md:flex-nowrap", className)}>
       <aside
         className={cn(
-          "relative hidden flex-[1_1_520px] flex-col justify-between gap-12 overflow-hidden rounded-r-[40px] px-12 py-10 md:flex",
+          "relative hidden flex-[1_1_520px] flex-col justify-between gap-12 overflow-hidden rounded-r-[40px] px-12 py-10",
+          // Sticky needs a fixed height and no stretching, or it has nowhere to stick.
+          "md:sticky md:top-0 md:flex md:h-dvh md:self-start",
           colours.panel,
         )}
       >

@@ -5,10 +5,19 @@ Every handler: check the session → validate with Zod → call the service → 
 ## Auth
 | Method | Path | Who | What |
 |---|---|---|---|
-| POST | /api/auth/register | Anyone | Create an email account |
+| POST | /api/auth/register | Anyone | Create an email account. 201 with `{ id, name, email }`; 409 `EMAIL_TAKEN`. The form then signs in and goes to /dashboard |
 | GET/POST | /api/auth/[...nextauth] | Anyone | Auth.js: sign in/out, GitHub callback, session |
-| POST | /api/auth/forgot-password | Anyone | Send the reset email; same response always; rate limited |
-| POST | /api/auth/reset-password | Valid token | Set password, update passwordChangedAt, mark token used |
+| POST | /api/auth/forgot-password | Anyone | Send the reset email; same response always (the work runs after the response, so timing is the same too); rate limited |
+| POST | /api/auth/reset-password/verify | Anyone | `{ token }` → `{ state: valid \| expired \| used \| invalid }`. Checks a link without using it, so the page can show the state before anyone types |
+| POST | /api/auth/reset-password | Valid token | Set password, update passwordChangedAt, mark token used, cancel the user's other links (one transaction). 400 `TOKEN_INVALID` / `TOKEN_USED` / `TOKEN_EXPIRED` |
+| GET | /auth/session-ended | Anyone | Not an API route: clears a session cookie the server no longer accepts (password changed, user gone) and redirects to `/login?reason=signed-out` |
+
+Auth notes:
+- Reset links last 1 hour and work once. Asking for a new link cancels the older ones.
+- The forgot-password rate limit (3 per address per hour) is silent: the answer is the same 200, because a 429 would reveal that the address has an account. Over the limit, nothing is sent.
+- Reset emails go through `sendEmail` (`src/server/lib/email.ts`): Nodemailer, `smtp.gmail.com` port 587, STARTTLS with `requireTLS`. It logs `[email] sent` with the messageId, or `[email] NOT sent` with the full error, because the work runs after the response and nobody else would see a failure.
+- GitHub sign-in with an email that already has a password account is refused (no automatic linking): Auth.js redirects to `/login?error=OAuthAccountNotLinked`, which shows "This email already has a Flowboard account. Sign in with your email and password."
+- Middleware protects `/dashboard`, `/projects` and `/settings` (with `callbackUrl`), and sends signed-in users from `/login`, `/register` and `/forgot-password` to `/dashboard`. `callbackUrl` only ever leads to a path on our own site.
 
 ## Account
 | Method | Path | Who | What |
