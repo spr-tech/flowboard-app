@@ -11,12 +11,15 @@ import { FormInput } from "@/components/ui/form/formInput";
 import { FormPasswordInput } from "@/components/ui/form/formPasswordInput";
 import { TextLink } from "@/components/ui/link/textLink";
 import { loginSchema, type LoginFormValues } from "@/models/validations/authValidation";
+import { safeCallbackUrl } from "@/utilities/helpers/safeCallbackUrl";
 
-/**
- * Email and password sign-in through the Auth.js Credentials provider.
- * The logic is the pre-rebuild one, kept as is; milestone 3 replaces it.
- */
-export function SignInForm() {
+type SignInFormProps = {
+  /** Where to go after signing in, straight from the URL; checked before use. */
+  callbackUrl?: string;
+};
+
+/** Email and password sign-in through the Auth.js Credentials provider. */
+export function SignInForm({ callbackUrl }: SignInFormProps) {
   const router = useRouter();
   // A wrong password isn't a field error and isn't a request failure, so it lives here,
   // shown above the button, rather than in a toast.
@@ -38,7 +41,8 @@ export function SignInForm() {
       setFormError("Invalid email or password");
       return;
     }
-    router.push("/dashboard");
+    router.push(safeCallbackUrl(callbackUrl, window.location.origin));
+    router.refresh();
   };
 
   return (
