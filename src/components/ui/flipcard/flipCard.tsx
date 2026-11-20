@@ -11,8 +11,7 @@ type FlipCardProps = {
   backClassName?: string;
 };
 
-const faceClasses =
-  "absolute inset-0 flex items-center justify-center gap-[0.4em] rounded-[0.22em] backface-hidden";
+const faceClasses = "absolute inset-0 flex items-center justify-center gap-[0.4em] rounded-[0.22em] backface-hidden";
 
 /** Decorative card that turns over and back on a loop. Hidden from screen readers. */
 export function FlipCard({ front, back, className, frontClassName, backClassName }: FlipCardProps) {

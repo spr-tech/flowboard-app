@@ -23,7 +23,7 @@ export function Highlight({ children, tone = "highlight", isTilted = true, class
         "inline-block rounded-[0.14em] px-[0.14em]",
         tones[tone],
         isTilted && "-rotate-[2.5deg]",
-        className,
+        className
       )}
     >
       {children}

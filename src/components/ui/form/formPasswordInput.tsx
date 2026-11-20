@@ -2,16 +2,10 @@
 
 import type { FieldValues } from "react-hook-form";
 
-import {
-  PasswordInput,
-  type PasswordInputProps,
-} from "@/components/ui/input/passwordInput";
+import { PasswordInput, type PasswordInputProps } from "@/components/ui/input/passwordInput";
 import { useFormField, type ControlledKeys, type FormFieldProps } from "./useFormField";
 
-export type FormPasswordInputProps<TValues extends FieldValues> = Omit<
-  PasswordInputProps,
-  ControlledKeys
-> &
+export type FormPasswordInputProps<TValues extends FieldValues> = Omit<PasswordInputProps, ControlledKeys> &
   FormFieldProps<TValues>;
 
 /** PasswordInput bound to React Hook Form. */

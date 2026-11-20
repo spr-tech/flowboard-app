@@ -8,6 +8,8 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/db-guard.ts && prisma db seed",
     "db:reset": "tsx prisma/db-guard.ts && prisma migrate reset --force && prisma db seed",

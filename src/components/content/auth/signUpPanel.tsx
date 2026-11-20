@@ -44,16 +44,14 @@ export function SignUpPanel() {
               aria-current={isCurrent ? "step" : undefined}
               className={cn(
                 "flex animate-rise items-center gap-3.5 rounded-card px-4 py-3.5",
-                isCurrent ? "bg-surface-page text-fg-primary" : "bg-surface-inverse/20",
+                isCurrent ? "bg-surface-page text-fg-primary" : "bg-surface-inverse/20"
               )}
               style={{ animationDelay: `${0.5 + index * 0.1}s` }}
             >
               <span
                 className={cn(
                   "inline-flex size-9 shrink-0 items-center justify-center rounded-xl font-bold",
-                  isCurrent
-                    ? "bg-highlight text-fg-on-highlight"
-                    : "border-[1.5px] border-fg-on-primary/60",
+                  isCurrent ? "bg-highlight text-fg-on-highlight" : "border-[1.5px] border-fg-on-primary/60"
                 )}
               >
                 {index + 1}

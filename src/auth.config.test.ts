@@ -20,7 +20,7 @@ describe("route protection", () => {
     "sends signed-out visitors from %s to sign in",
     (path) => {
       expect(decide(path, false)).toBe(false);
-    },
+    }
   );
 
   it.each(["/dashboard", "/projects/abc", "/settings"])("lets signed-in users into %s", (path) => {
@@ -38,7 +38,7 @@ describe("route protection", () => {
     "lets signed-out visitors open %s",
     (path) => {
       expect(decide(path, false)).toBe(true);
-    },
+    }
   );
 
   it("keeps the reset page open to signed-in users too", () => {

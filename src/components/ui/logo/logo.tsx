@@ -45,24 +45,10 @@ export function Logo({ variant = "onLight", isMarkOnly = false, className }: Log
       <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden className="shrink-0">
         <rect width="30" height="30" rx="9" className={colours.tile} />
         {bars.map((bar, index) => (
-          <rect
-            key={bar.x}
-            x={bar.x}
-            y="7"
-            width="4"
-            height={bar.height}
-            rx="2"
-            className={colours.bars[index]}
-          />
+          <rect key={bar.x} x={bar.x} y="7" width="4" height={bar.height} rx="2" className={colours.bars[index]} />
         ))}
       </svg>
-      <span
-        className={cn(
-          "font-heading text-xl font-bold tracking-tight",
-          colours.text,
-          isMarkOnly && "sr-only",
-        )}
-      >
+      <span className={cn("font-heading text-xl font-bold tracking-tight", colours.text, isMarkOnly && "sr-only")}>
         Flowboard
       </span>
     </span>

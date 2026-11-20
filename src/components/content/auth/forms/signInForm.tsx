@@ -75,13 +75,7 @@ export function SignInForm({ callbackUrl }: SignInFormProps) {
         </p>
       )}
 
-      <Button
-        text="Sign in"
-        type="submit"
-        size="xl"
-        className="mt-7 w-full"
-        isLoading={isSubmitting}
-      />
+      <Button text="Sign in" type="submit" size="xl" className="mt-7 w-full" isLoading={isSubmitting} />
     </form>
   );
 }

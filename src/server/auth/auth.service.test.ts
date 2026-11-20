@@ -21,7 +21,7 @@ describe("register", () => {
     await expect(register(input)).resolves.toEqual({ id: "u1", name: "Ada Okafor", email: "ada@example.com" });
 
     expect(prismaMock.user.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { email: "ada@example.com" } }),
+      expect.objectContaining({ where: { email: "ada@example.com" } })
     );
     const { data } = prismaMock.user.create.mock.calls[0][0];
     expect(data).toMatchObject({ name: "Ada Okafor", email: "ada@example.com" });
@@ -72,7 +72,7 @@ describe("verifyCredentials", () => {
     await verifyCredentials("  ADA@example.com ", "correct-horse");
 
     expect(prismaMock.user.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { email: "ada@example.com" } }),
+      expect.objectContaining({ where: { email: "ada@example.com" } })
     );
   });
 

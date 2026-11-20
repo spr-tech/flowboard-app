@@ -62,7 +62,7 @@ export function Input({
             "h-13 rounded-input border-[1.5px] border-line-strong bg-surface-card px-4 text-[15px] text-fg-primary placeholder:text-fg-muted md:text-[15px]",
             "focus-visible:border-line-focus focus-visible:ring-4 focus-visible:ring-focus",
             endAdornment && "pr-14",
-            className,
+            className
           )}
           {...rest}
         />

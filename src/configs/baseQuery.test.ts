@@ -48,7 +48,9 @@ describe("baseQuery", () => {
   });
 
   it("leaves field errors to the form: normalised, and no toast", async () => {
-    const body = { error: { code: "VALIDATION_FAILED", message: "Some fields need fixing.", fields: { name: "Too short" } } };
+    const body = {
+      error: { code: "VALIDATION_FAILED", message: "Some fields need fixing.", fields: { name: "Too short" } },
+    };
     fetchFn.mockResolvedValue(json(400, body));
 
     const result = await send();
@@ -58,16 +60,24 @@ describe("baseQuery", () => {
   });
 
   it("toasts the server's own message for other errors, once per code", async () => {
-    fetchFn.mockResolvedValue(json(404, { error: { code: "PROJECT_NOT_FOUND", message: "We couldn't find that project." } }));
+    fetchFn.mockResolvedValue(
+      json(404, { error: { code: "PROJECT_NOT_FOUND", message: "We couldn't find that project." } })
+    );
 
     const result = await send();
 
     expect(result.error).toEqual({ status: 404, code: "PROJECT_NOT_FOUND", message: "We couldn't find that project." });
-    expect(toast).toHaveBeenCalledWith({ type: "error", message: "We couldn't find that project.", id: "error:PROJECT_NOT_FOUND" });
+    expect(toast).toHaveBeenCalledWith({
+      type: "error",
+      message: "We couldn't find that project.",
+      id: "error:PROJECT_NOT_FOUND",
+    });
   });
 
   it("doesn't toast when the endpoint opts out", async () => {
-    fetchFn.mockResolvedValue(json(409, { error: { code: "EMAIL_TAKEN", message: "An account with this email already exists." } }));
+    fetchFn.mockResolvedValue(
+      json(409, { error: { code: "EMAIL_TAKEN", message: "An account with this email already exists." } })
+    );
 
     const result = await send({ toast: false });
 
@@ -76,10 +86,16 @@ describe("baseQuery", () => {
   });
 
   it("on 401, leaves once through /auth/session-ended with the current page, and doesn't toast", async () => {
-    fetchFn.mockImplementation(async () => json(401, { error: { code: "UNAUTHENTICATED", message: "Your session has ended." } }));
+    fetchFn.mockImplementation(async () =>
+      json(401, { error: { code: "UNAUTHENTICATED", message: "Your session has ended." } })
+    );
     const baseQuery = createBaseQuery({ baseUrl: "http://localhost/api", fetchFn }, leave);
 
-    const results = await Promise.all([baseQuery("/me", api, {}), baseQuery("/projects", api, {}), baseQuery("/me", api, {})]);
+    const results = await Promise.all([
+      baseQuery("/me", api, {}),
+      baseQuery("/projects", api, {}),
+      baseQuery("/me", api, {}),
+    ]);
 
     expect(results.every((result) => result.error?.status === 401)).toBe(true);
     expect(leave).toHaveBeenCalledTimes(1);

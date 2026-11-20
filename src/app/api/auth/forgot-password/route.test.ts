@@ -21,7 +21,7 @@ function post(body: unknown) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     }),
-    { params: Promise.resolve({}) },
+    { params: Promise.resolve({}) }
   );
 }
 

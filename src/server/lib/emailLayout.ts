@@ -32,7 +32,9 @@ type EmailLayout = {
 export function renderEmailHtml({ preview, heading, paragraphs, button, footnote }: EmailLayout): string {
   const c = EMAIL_COLOURS;
   const body = paragraphs
-    .map((text) => `<p style="margin:0 0 16px;font-size:16px;line-height:24px;color:${c.text};">${escapeHtml(text)}</p>`)
+    .map(
+      (text) => `<p style="margin:0 0 16px;font-size:16px;line-height:24px;color:${c.text};">${escapeHtml(text)}</p>`
+    )
     .join("");
   const buttonHtml = button
     ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px;"><tr><td style="border-radius:999px;background:${c.button};">

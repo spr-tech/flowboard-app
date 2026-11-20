@@ -11,7 +11,7 @@ vi.mock("@/server/auth/passwordReset.service", () => ({ getResetTokenState: vi.f
 function post(body: unknown) {
   return POST(
     new Request("http://localhost/api/auth/reset-password/verify", { method: "POST", body: JSON.stringify(body) }),
-    { params: Promise.resolve({}) },
+    { params: Promise.resolve({}) }
   );
 }
 

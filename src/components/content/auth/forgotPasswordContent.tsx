@@ -28,7 +28,13 @@ export default function ForgotPasswordContent() {
             sent a link to reset the password. It works once and expires in 1 hour.
           </p>
           <p className="mt-3 mb-8 text-fg-secondary">Nothing there? Check your spam folder, or try again.</p>
-          <Button text="Try a different email" variant="secondary" size="lg" className="w-full" onClick={() => setSentTo(null)} />
+          <Button
+            text="Try a different email"
+            variant="secondary"
+            size="lg"
+            className="w-full"
+            onClick={() => setSentTo(null)}
+          />
         </>
       ) : (
         <>

@@ -17,7 +17,7 @@ export function AuthNotice({ tone, children }: AuthNoticeProps) {
         "mb-6 rounded-card px-4 py-3 text-sm font-medium",
         tone === "error"
           ? "border-[1.5px] border-danger bg-surface-card text-danger"
-          : "bg-surface-sunken text-fg-primary",
+          : "bg-surface-sunken text-fg-primary"
       )}
     >
       {children}

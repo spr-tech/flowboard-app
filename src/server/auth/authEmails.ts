@@ -20,7 +20,12 @@ export function resetPasswordEmail(to: Recipient, resetUrl: string): EmailMessag
     button: { label: "Choose a new password", url: resetUrl },
     footnote: "If you didn't ask for this, ignore this email. Your password stays the same.",
   };
-  return { to: to.email, subject: "Reset your Flowboard password", html: renderEmailHtml(content), text: renderEmailText(content) };
+  return {
+    to: to.email,
+    subject: "Reset your Flowboard password",
+    html: renderEmailHtml(content),
+    text: renderEmailText(content),
+  };
 }
 
 /** For accounts with no password: they sign in with GitHub, so there's nothing to reset. */
@@ -31,10 +36,15 @@ export function githubSignInEmail(to: Recipient, loginUrl: string): EmailMessage
     paragraphs: [
       greeting(to.name),
       "Someone asked to reset the password for your Flowboard account, but your account doesn't have a password: you sign in with GitHub.",
-      "Use \"Continue with GitHub\" on the sign-in page.",
+      'Use "Continue with GitHub" on the sign-in page.',
     ],
     button: { label: "Go to sign in", url: loginUrl },
     footnote: "If you didn't ask for this, you can ignore this email.",
   };
-  return { to: to.email, subject: "How to sign in to Flowboard", html: renderEmailHtml(content), text: renderEmailText(content) };
+  return {
+    to: to.email,
+    subject: "How to sign in to Flowboard",
+    html: renderEmailHtml(content),
+    text: renderEmailText(content),
+  };
 }

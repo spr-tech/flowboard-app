@@ -10,12 +10,54 @@ import { cssVars } from "@/utilities/helpers/cssVars";
  * The movement itself is the `deck-card` utility in globals.css.
  */
 const cards = [
-  { label: "Board", name: "Drag and drop", pile: ["-99px", "18px", "-18deg"], fan: ["-270px", "40px", "-14deg"], colours: "bg-surface-page text-fg-primary", labelColour: "text-fg-muted" },
-  { label: "Focus", name: "Priority labels", pile: ["-59px", "6px", "-11deg"], fan: ["-162px", "8px", "-8deg"], colours: "bg-surface-sunken text-fg-primary", labelColour: "text-fg-muted" },
-  { label: "Deadlines", name: "Due dates", pile: ["-20px", "0px", "-4deg"], fan: ["-54px", "-6px", "-3deg"], colours: "border border-fg-on-inverse/15 bg-surface-inverse-raised text-fg-on-inverse", labelColour: "text-fg-muted-on-inverse" },
-  { label: "Team", name: "Owners and members", pile: ["20px", "0px", "4deg"], fan: ["54px", "-6px", "3deg"], colours: "bg-surface-card text-fg-primary", labelColour: "text-fg-muted" },
-  { label: "Invites", name: "Email invites", pile: ["59px", "6px", "11deg"], fan: ["162px", "8px", "8deg"], colours: "bg-highlight text-fg-on-highlight", labelColour: "text-fg-on-highlight-secondary" },
-  { label: "Progress", name: "A real done column", pile: ["99px", "18px", "18deg"], fan: ["270px", "40px", "14deg"], colours: "bg-primary text-fg-on-primary", labelColour: "text-fg-on-primary" },
+  {
+    label: "Board",
+    name: "Drag and drop",
+    pile: ["-99px", "18px", "-18deg"],
+    fan: ["-270px", "40px", "-14deg"],
+    colours: "bg-surface-page text-fg-primary",
+    labelColour: "text-fg-muted",
+  },
+  {
+    label: "Focus",
+    name: "Priority labels",
+    pile: ["-59px", "6px", "-11deg"],
+    fan: ["-162px", "8px", "-8deg"],
+    colours: "bg-surface-sunken text-fg-primary",
+    labelColour: "text-fg-muted",
+  },
+  {
+    label: "Deadlines",
+    name: "Due dates",
+    pile: ["-20px", "0px", "-4deg"],
+    fan: ["-54px", "-6px", "-3deg"],
+    colours: "border border-fg-on-inverse/15 bg-surface-inverse-raised text-fg-on-inverse",
+    labelColour: "text-fg-muted-on-inverse",
+  },
+  {
+    label: "Team",
+    name: "Owners and members",
+    pile: ["20px", "0px", "4deg"],
+    fan: ["54px", "-6px", "3deg"],
+    colours: "bg-surface-card text-fg-primary",
+    labelColour: "text-fg-muted",
+  },
+  {
+    label: "Invites",
+    name: "Email invites",
+    pile: ["59px", "6px", "11deg"],
+    fan: ["162px", "8px", "8deg"],
+    colours: "bg-highlight text-fg-on-highlight",
+    labelColour: "text-fg-on-highlight-secondary",
+  },
+  {
+    label: "Progress",
+    name: "A real done column",
+    pile: ["99px", "18px", "18deg"],
+    fan: ["270px", "40px", "14deg"],
+    colours: "bg-primary text-fg-on-primary",
+    labelColour: "text-fg-on-primary",
+  },
 ];
 
 export function WhySection() {
@@ -38,8 +80,8 @@ export function WhySection() {
             </span>
           </Reveal>
           <p className="mt-7 mb-8 max-w-115 text-[17px] leading-relaxed text-fg-muted-on-inverse">
-            Everything lives on one board your whole team can see. No setup call, no training, no
-            clutter. Just the work, who owns it and where it stands.
+            Everything lives on one board your whole team can see. No setup call, no training, no clutter. Just the
+            work, who owns it and where it stands.
           </p>
           <ButtonLink href="/register" text="Start your first board" variant="highlight" size="lg" />
         </div>
@@ -62,7 +104,7 @@ export function WhySection() {
                   role="listitem"
                   className={cn(
                     "deck-card absolute top-1/2 left-1/2 -mt-28 -ml-21.25 flex h-56 w-42.5 flex-col justify-between rounded-[22px] p-5 shadow-2xl",
-                    card.colours,
+                    card.colours
                   )}
                   style={cssVars({
                     "--x0": card.pile[0],

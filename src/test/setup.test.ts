@@ -37,7 +37,7 @@ describe("test environment", () => {
   it("makes building any other Prisma client fail loudly", async () => {
     const { PrismaPg } = await import("@prisma/adapter-pg");
     expect(() => new PrismaPg({ connectionString: process.env.DATABASE_URL })).toThrow(
-      "Tests must not connect to a database",
+      "Tests must not connect to a database"
     );
   });
 });

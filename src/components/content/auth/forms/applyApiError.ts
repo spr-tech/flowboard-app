@@ -22,7 +22,7 @@ export function isAppError(error: unknown): error is AppError {
 export function applyApiError<TValues extends FieldValues>(
   error: unknown,
   fieldNames: readonly Path<TValues>[],
-  setError: UseFormSetError<TValues>,
+  setError: UseFormSetError<TValues>
 ): string | null {
   if (!isAppError(error)) return NETWORK_ERROR_MESSAGE;
 

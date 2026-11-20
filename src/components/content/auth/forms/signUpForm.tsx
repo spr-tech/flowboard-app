@@ -71,13 +71,7 @@ export function SignUpForm({ callbackUrl }: SignUpFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
       <div className="flex flex-col gap-4">
-        <FormInput
-          control={control}
-          name="name"
-          label="Full name"
-          autoComplete="name"
-          placeholder="Ada Okafor"
-        />
+        <FormInput control={control} name="name" label="Full name" autoComplete="name" placeholder="Ada Okafor" />
         <FormInput
           control={control}
           name="email"

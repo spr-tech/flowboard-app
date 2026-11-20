@@ -73,11 +73,14 @@ describe("route()", () => {
 
   it("answers 400 with per-field messages when the body fails its schema", async () => {
     const handler = vi.fn();
-    const createRoute = route({ auth: true, body: z.object({ name: z.string().min(3, "Name is too short") }) }, handler);
+    const createRoute = route(
+      { auth: true, body: z.object({ name: z.string().min(3, "Name is too short") }) },
+      handler
+    );
 
     const response = await createRoute(
       request("/api/thing", { method: "POST", body: JSON.stringify({ name: "x" }) }),
-      segment(),
+      segment()
     );
 
     expect(response.status).toBe(400);
@@ -88,7 +91,10 @@ describe("route()", () => {
   });
 
   it("validates the query string", async () => {
-    const listRoute = route({ auth: true, query: z.object({ group: z.enum(["due", "project"]) }) }, ({ query }) => query);
+    const listRoute = route(
+      { auth: true, query: z.object({ group: z.enum(["due", "project"]) }) },
+      ({ query }) => query
+    );
 
     expect((await listRoute(request("/api/me/tasks?group=due"), segment())).status).toBe(200);
     expect((await listRoute(request("/api/me/tasks?group=nope"), segment())).status).toBe(400);

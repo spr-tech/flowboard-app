@@ -30,7 +30,11 @@ export function FeaturesSection() {
   return (
     <section id="features" className="px-6 pt-10 pb-28">
       <div className="mx-auto max-w-300">
-        <Reveal as="h2" effect="rise" className="mx-auto mb-14 max-w-190 text-center text-display-section leading-none font-extrabold tracking-[-0.04em]">
+        <Reveal
+          as="h2"
+          effect="rise"
+          className="mx-auto mb-14 max-w-190 text-center text-display-section leading-none font-extrabold tracking-[-0.04em]"
+        >
           Everything a small team{" "}
           <span className="relative inline-block">
             actually
@@ -49,8 +53,7 @@ export function FeaturesSection() {
             <div className="flex-[1_1_260px]">
               <h3 className="mb-2.5 text-[26px] font-bold tracking-[-0.02em]">A board you can grab</h3>
               <p className="text-base leading-relaxed text-fg-secondary">
-                Drag and drop between columns or reorder inside one. Every move lands exactly where
-                you dropped it.
+                Drag and drop between columns or reorder inside one. Every move lands exactly where you dropped it.
               </p>
             </div>
             <div aria-hidden className="flex flex-[1_1_280px] gap-2.5 rounded-[20px] bg-surface-page p-4">
@@ -109,9 +112,7 @@ export function FeaturesSection() {
                   </span>
                   Ada
                 </span>
-                <span className="rounded-full border border-fg-on-inverse/25 px-2.5 py-0.5 text-xs">
-                  Member
-                </span>
+                <span className="rounded-full border border-fg-on-inverse/25 px-2.5 py-0.5 text-xs">Member</span>
               </div>
             </div>
           </FeatureCard>
@@ -136,12 +137,7 @@ export function FeaturesSection() {
           >
             {/* Real links rather than the design's look-alike buttons, so nothing here is a dead end. */}
             <div className="flex flex-col gap-2.5">
-              <ButtonLink
-                href="/login"
-                text="Continue with GitHub"
-                variant="inverse"
-                startIcon={<GithubIcon />}
-              />
+              <ButtonLink href="/login" text="Continue with GitHub" variant="inverse" startIcon={<GithubIcon />} />
               <ButtonLink href="/register" text="Use email instead" variant="secondary" />
             </div>
           </FeatureCard>

@@ -20,7 +20,7 @@ export function jsonResponse(status: number, body: unknown) {
 /** Replaces fetch for one test; the setup file's "no network" fetch comes back afterwards. */
 export function mockFetch(handler: (request: Request) => Response | Promise<Response>) {
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) =>
-    handler(input instanceof Request ? input : new Request(input, init)),
+    handler(input instanceof Request ? input : new Request(input, init))
   );
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
