@@ -27,6 +27,14 @@ const controller = "projects";
 /** The whole list, as opposed to one project's id. */
 const LIST = { type: ApiTag.Project, id: "LIST" } as const;
 
+/** Writes the server's view of my membership onto a cached one (an Immer draft). */
+function copyMembership(me: MyMembership, from: MyMembership) {
+  me.role = from.role;
+  me.pinnedAt = from.pinnedAt;
+  me.lastOpenedAt = from.lastOpenedAt;
+  me.joinedAt = from.joinedAt;
+}
+
 /** Changes my membership in every cached copy of a project; returns a function that undoes it. */
 type PatchMembership = (projectId: string, change: (me: MyMembership) => void) => () => void;
 
@@ -44,12 +52,7 @@ async function updateOptimistically(
   const undo = patch(projectId, change);
   try {
     const { data } = await queryFulfilled;
-    patch(projectId, (me) => {
-      me.role = data.role;
-      me.pinnedAt = data.pinnedAt;
-      me.lastOpenedAt = data.lastOpenedAt;
-      me.joinedAt = data.joinedAt;
-    });
+    patch(projectId, (me) => copyMembership(me, data));
   } catch {
     undo();
   }
@@ -68,6 +71,16 @@ export const projectsService = baseApi.injectEndpoints({
       query: (projectId) => `/${controller}/${projectId}`,
       providesTags: (_result, _error, projectId) => [{ type: ApiTag.Project, id: projectId }],
       ...CACHE.projects.endpoint,
+      // Opening a project records the visit first, so `me.lastOpenedAt` here is fresh. Copying it
+      // into the cached list keeps the sidebar's "recently opened" right without a refetch.
+      onQueryStarted: async (projectId, { dispatch, getState, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          membershipPatcher(dispatch, getState)(projectId, (me) => copyMembership(me, data.me));
+        } catch {
+          // A failed load changes nothing in the list.
+        }
+      },
     }),
 
     createProject: builder.mutation<ProjectDetail, CreateProjectRequest>({
@@ -77,7 +90,19 @@ export const projectsService = baseApi.injectEndpoints({
 
     updateProject: builder.mutation<ProjectDetail, UpdateProjectRequest>({
       query: ({ projectId, ...body }) => ({ url: `/${controller}/${projectId}`, method: "PATCH", body }),
-      invalidatesTags: (_result, _error, { projectId }) => [{ type: ApiTag.Project, id: projectId }, ApiTag.Dashboard],
+      // The write returns the updated project: put it straight into that project's cache entry,
+      // and refetch only the list (its cards carry counts the response doesn't have).
+      invalidatesTags: [LIST, ApiTag.Dashboard],
+      onQueryStarted: async ({ projectId }, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            projectsService.util.updateQueryData("getProject", projectId, (project) => Object.assign(project, data))
+          );
+        } catch {
+          // The base query has shown the error; the cache is unchanged.
+        }
+      },
     }),
 
     // Not the project's own tag: refetching a deleted (or left) project would be a 404 toast.

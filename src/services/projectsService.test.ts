@@ -64,6 +64,35 @@ describe("projectsService", () => {
     list.unsubscribe();
   });
 
+  it("copies the fresh lastOpenedAt from opening a project into the cached list", async () => {
+    const opened = "2026-11-21T15:00:00.000Z";
+    mockFetch((request) =>
+      new URL(request.url).pathname === "/api/projects"
+        ? jsonResponse(200, [project("a"), project("b")])
+        : jsonResponse(200, { id: "a", name: "A", columns: [], me: member({ lastOpenedAt: opened }) })
+    );
+    const store = makeStore();
+    await store.dispatch(listProjects.initiate({ today }));
+
+    await store.dispatch(projectsService.endpoints.getProject.initiate("a"));
+
+    expect(cachedList(store)?.map((p) => p.me.lastOpenedAt)).toEqual([opened, null]);
+  });
+
+  it("puts the updated project from PATCH straight into its cache entry", async () => {
+    const before = { id: "a", name: "Old", colour: "vermilion", columns: [], me: member() };
+    const after = { ...before, name: "New" };
+    mockFetch((request) => jsonResponse(200, request.method === "PATCH" ? after : before));
+    const store = makeStore();
+    const subscription = store.dispatch(projectsService.endpoints.getProject.initiate("a"));
+    await subscription;
+
+    await store.dispatch(projectsService.endpoints.updateProject.initiate({ projectId: "a", name: "New" }));
+
+    expect(projectsService.endpoints.getProject.select("a")(store.getState()).data?.name).toBe("New");
+    subscription.unsubscribe();
+  });
+
   describe("pin and unpin (optimistic)", () => {
     async function storeWithList(projects: ProjectSummary[], pinResponse: Promise<Response>) {
       mockFetch((request) => (request.method === "GET" ? jsonResponse(200, projects) : pinResponse));

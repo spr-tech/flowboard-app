@@ -6,14 +6,21 @@ import {
   mobileMenuOpened,
   newProjectDialogClosed,
   newProjectDialogOpened,
+  projectDangerDialogClosed,
+  projectDangerDialogOpened,
   selectIsMobileMenuOpen,
   selectIsNewProjectDialogOpen,
+  selectProjectDangerDialog,
   uiSlice,
 } from "./uiSlice";
 
 describe("uiSlice", () => {
   it("starts with the mobile menu and the New project dialog closed", () => {
-    expect(uiSlice.getInitialState()).toEqual({ isMobileMenuOpen: false, isNewProjectDialogOpen: false });
+    expect(uiSlice.getInitialState()).toEqual({
+      isMobileMenuOpen: false,
+      isNewProjectDialogOpen: false,
+      projectDangerDialog: null,
+    });
   });
 
   it("opens and closes the New project dialog", () => {
@@ -31,6 +38,19 @@ describe("uiSlice", () => {
     expect(opened.isMobileMenuOpen).toBe(true);
 
     expect(uiSlice.reducer(opened, mobileMenuClosed()).isMobileMenuOpen).toBe(false);
+  });
+
+  it("opens one Danger zone dialog at a time and closes it", () => {
+    const store = makeStore();
+
+    store.dispatch(projectDangerDialogOpened("delete"));
+    expect(selectProjectDangerDialog(store.getState())).toBe("delete");
+
+    store.dispatch(projectDangerDialogOpened("leave"));
+    expect(selectProjectDangerDialog(store.getState())).toBe("leave");
+
+    store.dispatch(projectDangerDialogClosed());
+    expect(selectProjectDangerDialog(store.getState())).toBeNull();
   });
 
   it("is wired into the store, with a selector that reads it", () => {
