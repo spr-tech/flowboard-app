@@ -3,22 +3,14 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ProjectDetail } from "@/models/responses/projectResponses";
-import { myMembership } from "@/test/projectFixtures";
+import { boardMembership, projectDetail } from "@/test/projectFixtures";
 import { jsonResponse, mockFetch, renderWithStore } from "@/test/renderWithStore";
 import ProjectSettingsContent from "./projectSettingsContent";
 
 vi.mock("@/components/ui/toast/toast", () => ({ toast: vi.fn() }));
 
-const detail = (role: "OWNER" | "MEMBER"): ProjectDetail => ({
-  id: "p1",
-  name: "Website relaunch",
-  colour: "blue",
-  createdAt: "2026-11-01T10:00:00.000Z",
-  updatedAt: "2026-11-20T10:00:00.000Z",
-  taskCount: 3,
-  columns: [],
-  me: myMembership({ role }),
-});
+const detail = (role: "OWNER" | "MEMBER"): ProjectDetail =>
+  projectDetail({ colour: "blue", taskCount: 3, me: boardMembership({ role }) });
 
 describe("ProjectSettingsContent", () => {
   it("gives the owner editable General settings and Delete in the Danger zone", async () => {

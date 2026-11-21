@@ -1,5 +1,6 @@
 // Projects (docs/plan/04-api.md, "Projects"). Every write runs in one transaction with its
 // Activity row, and returns the updated object.
+import type { Prisma } from "@/lib/generated/prisma";
 import type {
   DeleteProjectResponse,
   LeaveProjectResponse,
@@ -18,6 +19,7 @@ import {
   toMyMembership,
   type Db,
 } from "./projectAccess";
+import { taskSelect, toBoardTask } from "@/server/tasks/taskShape";
 import { recordVisit } from "./projectPins.service";
 
 /** Every new board starts with these, Done last and marked as the done column. */
@@ -48,6 +50,7 @@ export async function listProjects(userId: string, today: string): Promise<Proje
         select: {
           id: true,
           name: true,
+          description: true,
           colour: true,
           updatedAt: true,
           _count: { select: { members: true } },
@@ -96,6 +99,7 @@ export async function listProjects(userId: string, today: string): Promise<Proje
       return {
         id: project.id,
         name: project.name,
+        description: project.description,
         colour: project.colour,
         updatedAt: updatedAt.toISOString(),
         taskCount: countOf(totals, project.id),
@@ -110,36 +114,82 @@ export async function listProjects(userId: string, today: string): Promise<Proje
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
-/** The project with its columns and my membership, or 404 if I'm not a member. */
+/** A stored personal column order, or null if there is none (or it is not a list of ids). */
+export function toColumnOrder(value: Prisma.JsonValue | null | undefined): string[] | null {
+  return Array.isArray(value) && value.every((id) => typeof id === "string") ? (value as string[]) : null;
+}
+
+/**
+ * The whole board: the project, its columns (team order) with who added them, every task, the
+ * members (owner first), who may add columns, and my membership with my own column order.
+ * 404 if I am not a member.
+ */
 async function loadDetail(db: Db, userId: string, projectId: string): Promise<ProjectDetail> {
   const project = await db.project.findUnique({
     where: { id: projectId },
     select: {
       id: true,
       name: true,
+      description: true,
       colour: true,
+      membersCanAddColumns: true,
+      memberColumnLimit: true,
       createdAt: true,
       updatedAt: true,
       columns: {
         orderBy: { position: "asc" },
-        select: { id: true, name: true, position: true, isDone: true, _count: { select: { tasks: true } } },
+        select: {
+          id: true,
+          name: true,
+          position: true,
+          isDone: true,
+          createdAt: true,
+          createdBy: { select: { id: true, name: true } },
+          _count: { select: { tasks: true } },
+        },
       },
-      members: { where: { userId }, select: membershipSelect },
+      // Everyone, owner first then by joining; mine is picked out below.
+      members: {
+        orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
+        select: { ...membershipSelect, columnOrder: true, user: { select: { id: true, name: true, image: true } } },
+      },
     },
   });
-  const membership = project?.members[0];
+  const membership = project?.members.find((member) => member.user.id === userId);
   if (!project || !membership) throw projectNotFound();
+  const tasks = await db.task.findMany({
+    where: { projectId },
+    orderBy: [{ columnId: "asc" }, { position: "asc" }],
+    select: taskSelect,
+  });
 
-  const columns = project.columns.map(({ _count, ...column }) => ({ ...column, taskCount: _count.tasks }));
+  const ownerId = project.members.find((member) => member.role === "OWNER")?.user.id;
+  const columns = project.columns.map(({ _count, createdAt, ...column }) => ({
+    ...column,
+    createdAt: createdAt.toISOString(),
+    taskCount: _count.tasks,
+  }));
   return {
     id: project.id,
     name: project.name,
+    description: project.description,
     colour: project.colour,
     createdAt: project.createdAt.toISOString(),
     updatedAt: project.updatedAt.toISOString(),
     taskCount: columns.reduce((sum, column) => sum + column.taskCount, 0),
     columns,
-    me: toMyMembership(membership),
+    tasks: tasks.map(toBoardTask),
+    members: project.members.map(({ role, user }) => ({ ...user, role })),
+    columnPermissions: {
+      membersCanAddColumns: project.membersCanAddColumns,
+      memberColumnLimit: project.memberColumnLimit,
+      memberColumnCount: columns.filter((column) => column.createdBy.id !== ownerId).length,
+    },
+    me: {
+      ...toMyMembership(membership),
+      // The owner has no personal order: the owner's drags change the team order.
+      columnOrder: membership.role === "OWNER" ? null : toColumnOrder(membership.columnOrder),
+    },
   };
 }
 
@@ -151,15 +201,16 @@ export async function getProject(userId: string, projectId: string, now = new Da
 
 export async function createProject(
   userId: string,
-  input: { name: string; colour: ProjectColour }
+  input: { name: string; colour: ProjectColour; description?: string | null }
 ): Promise<ProjectDetail> {
   return prisma.$transaction(async (tx) => {
     const project = await tx.project.create({
       data: {
         name: input.name,
+        description: input.description ?? null,
         colour: input.colour,
         members: { create: { userId, role: "OWNER" } },
-        columns: { create: DEFAULT_COLUMNS.map((column) => ({ ...column })) },
+        columns: { create: DEFAULT_COLUMNS.map((column) => ({ ...column, createdById: userId })) },
       },
       select: { id: true },
     });
@@ -175,34 +226,68 @@ export async function createProject(
   });
 }
 
-/** Owner only. Writes only what really changed, with the before and after in the Activity row. */
+export type ProjectChanges = {
+  name?: string;
+  colour?: ProjectColour;
+  description?: string | null;
+  membersCanAddColumns?: boolean;
+  memberColumnLimit?: number;
+};
+
+/**
+ * Owner only. Writes only what really changed. General settings (name, colour, description) get a
+ * project.updated row with the before and after; column permissions get their own
+ * project.column_permissions_changed row with the new switch and limit. Turning the switch off or
+ * lowering the limit never deletes columns; it only blocks new ones.
+ */
 export async function updateProject(
   userId: string,
   projectId: string,
-  changes: { name?: string; colour?: ProjectColour }
+  changes: ProjectChanges
 ): Promise<ProjectDetail> {
   return prisma.$transaction(async (tx) => {
     await requireOwner(tx, userId, projectId);
     const before = await tx.project.findUniqueOrThrow({
       where: { id: projectId },
-      select: { name: true, colour: true },
+      select: { name: true, colour: true, description: true, membersCanAddColumns: true, memberColumnLimit: true },
     });
 
-    const from: { name?: string; colour?: ProjectColour } = {};
-    const to: { name?: string; colour?: ProjectColour } = {};
-    if (changes.name !== undefined && changes.name !== before.name) {
-      from.name = before.name;
-      to.name = changes.name;
+    const from: Record<string, string | null> = {};
+    const to: Record<string, string | null> = {};
+    for (const key of ["name", "colour", "description"] as const) {
+      const next = changes[key];
+      if (next !== undefined && next !== before[key]) {
+        from[key] = before[key];
+        to[key] = next;
+      }
     }
-    if (changes.colour !== undefined && changes.colour !== before.colour) {
-      from.colour = before.colour;
-      to.colour = changes.colour;
+    const permissions: { membersCanAddColumns?: boolean; memberColumnLimit?: number } = {};
+    if (changes.membersCanAddColumns !== undefined && changes.membersCanAddColumns !== before.membersCanAddColumns) {
+      permissions.membersCanAddColumns = changes.membersCanAddColumns;
+    }
+    if (changes.memberColumnLimit !== undefined && changes.memberColumnLimit !== before.memberColumnLimit) {
+      permissions.memberColumnLimit = changes.memberColumnLimit;
     }
 
+    if (Object.keys(to).length > 0 || Object.keys(permissions).length > 0) {
+      await tx.project.update({ where: { id: projectId }, data: { ...to, ...permissions } });
+    }
     if (Object.keys(to).length > 0) {
-      await tx.project.update({ where: { id: projectId }, data: to });
       await tx.activity.create({
         data: { projectId, actorId: userId, action: ActivityAction.ProjectUpdated, meta: { from, to } },
+      });
+    }
+    if (Object.keys(permissions).length > 0) {
+      await tx.activity.create({
+        data: {
+          projectId,
+          actorId: userId,
+          action: ActivityAction.ProjectColumnPermissionsChanged,
+          meta: {
+            membersCanAddColumns: permissions.membersCanAddColumns ?? before.membersCanAddColumns,
+            memberColumnLimit: permissions.memberColumnLimit ?? before.memberColumnLimit,
+          },
+        },
       });
     }
     return loadDetail(tx, userId, projectId);

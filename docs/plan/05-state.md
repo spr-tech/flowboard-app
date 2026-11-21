@@ -4,7 +4,7 @@
 |---|---|
 | Server data | RTK Query cache |
 | Shareable/bookmarkable (open task, filters) | URL |
-| UI only (mobile menu; board filters later) | `src/stores/uiSlice.ts` |
+| UI only (menus, the open dialog, board filters, deletes in their Undo window) | `src/stores/uiSlice.ts` |
 | Form input | React Hook Form |
 | Who is signed in | Auth.js session |
 
@@ -40,9 +40,9 @@ A query *provides* tags; a mutation *invalidates* them; RTK Query refetches ever
 | Leave project | Project list, Dashboard, Activity, Member |
 | Pin / unpin | nothing: optimistic (below) |
 | Open a project (getProject) | not a mutation: its fresh `me.lastOpenedAt` is copied into the cached list, so the sidebar's recents update without a refetch |
-| Add / edit / delete task | that Board, Dashboard, Activity |
-| Move task | optimistic (below), then Dashboard, Activity |
-| Column changes | that Board |
+| Add / edit / delete task | the returned task is written into the board (getProject) cache; then Project list, Dashboard, Activity |
+| Move task | optimistic (below), then Project list, Dashboard, Activity |
+| Column changes | that project (the board refetches: a done-column switch or a delete also changes tasks), Project list, Dashboard, Activity |
 | Invite / cancel / resend | that project's Invite list |
 | Remove member / leave | Member, Board, Project list, Activity |
 | Rename me (settings) | Me |
@@ -63,12 +63,17 @@ In `src/utilities/constants/cacheTimes.ts` as `CACHE.<kind>`. RTK Query accepts 
 - `keepUnusedDataFor`: how long data stays cached after the last component using it unmounts.
 - `refetchOnMountOrArgChange`: when a component mounts and cached data is older than this, refetch in the background while the cached data shows.
 
-## Optimistic updates (only three)
-- **Move task:** in `onQueryStarted`, `updateQueryData` on the board to move the card instantly → `await queryFulfilled` → on success, write the server's position and completedAt into the cache → on failure, `patch.undo()` and show why.
+## Optimistic updates (only three, plus delete with Undo)
+- **Move task:** in `onQueryStarted`, `updateQueryData` on the board (the getProject entry) to move the card instantly, with a temporary position from its cached neighbours (only for ordering in the cache; never sent) and a guessed completedAt → `await queryFulfilled` → on success, write the server's task (position, completedAt) into the cache → on failure, `patch.undo()`; the base query shows why.
 - **Tick a task done on the dashboard:** same pattern.
 - **Pin / unpin a project (milestone 5):** same pattern, applied to every cached copy of the project list (it is cached per `?today=`) and to the project itself if cached. On success the server's membership replaces the guess, so the server's clock decides pin order. The success toast waits for the server; a failure only shows the base query's error toast.
 
 Everything else waits for the server, with a loading state on the button.
+
+**Delete task with Undo** (`src/utilities/hooks/useDeleteTask.ts`): the task's id goes into `uiSlice.pendingDeleteTaskIds` and a toast offers Undo for 5 seconds. The board and drawer hide pending ids, so a refetch during the window can't bring the task back. Undo removes the id; the toast closing otherwise sends the DELETE, and the id is removed when it finishes (the task leaves the cache) or fails (it comes back, with the error toast). Leaving the board sends waiting deletes at once; `pagehide` sends them with `fetch(..., { keepalive: true })`.
+
+## Dialogs
+One typed slot, `uiSlice.openDialog` (`{ kind: "newProject" }`, `{ kind: "deleteColumn", columnId }`, …), rather than a boolean per dialog: one dialog at a time and everything serializable. Radix does the focus trap, Escape and overlay. No modal library: it would add a dependency and keep promises or components in state. The task drawer is not in the slot; it lives in the URL (`?task=<id>`) because it's shareable.
 
 ## Testing the data layer
 - `src/test/renderWithStore.tsx`: `renderWithStore(ui)` (a fresh store per test, so no cached query leaks), `mockFetch(handler)` and `jsonResponse(status, body)`.

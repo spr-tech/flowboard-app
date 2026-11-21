@@ -42,6 +42,9 @@ export function ProjectCard({ project, today, pinnedCount }: ProjectCardProps) {
         </div>
 
         <h2 className="mt-[18px] mb-1 text-2xl font-bold tracking-tight wrap-break-word">{name}</h2>
+        {project.description && (
+          <p className="mb-1 line-clamp-2 text-sm text-fg-secondary wrap-break-word">{project.description}</p>
+        )}
         <p className="text-sm text-fg-muted">Updated {formatRelativeTime(project.updatedAt)}</p>
 
         <div className="mt-auto pt-[22px]">

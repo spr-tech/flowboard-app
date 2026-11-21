@@ -53,10 +53,10 @@ Auth notes:
 ## Projects
 | Method | Path | Who | What |
 |---|---|---|---|
-| GET | /api/projects?today=YYYY-MM-DD | Signed in | My projects as cards: done/total, overdue count and next due date (against `today`), up to 4 member avatars (owner first), "updated", and `me: { role, pinnedAt, lastOpenedAt, joinedAt }`. Newest "updated" first; the browser applies pin order |
-| POST | /api/projects | Signed in | Project + OWNER membership + 3 default columns (To do / In progress / Done) + `project.created`, one transaction |
-| GET | /api/projects/:projectId | Member | The project, its columns and `me` (milestone 6 adds the tasks). Also records my visit: `lastOpenedAt`, at most once a minute |
-| PATCH | /api/projects/:projectId | Owner | Rename / recolour. No write and no Activity row if nothing changed |
+| GET | /api/projects?today=YYYY-MM-DD | Signed in | My projects as cards (with `description`): done/total, overdue count and next due date (against `today`), up to 4 member avatars (owner first), "updated", and `me: { role, pinnedAt, lastOpenedAt, joinedAt }`. Newest "updated" first; the browser applies pin order |
+| POST | /api/projects | Signed in | `{ name, colour, description? }`. Project + OWNER membership + 3 default columns (To do / In progress / Done, created by the owner) + `project.created`, one transaction |
+| GET | /api/projects/:projectId | Member | The whole board: the project (with `description`), its columns in the team order (each with `createdBy { id, name }` and `createdAt`), every task (by column, then position), the members (owner first), `columnPermissions { membersCanAddColumns, memberColumnLimit, memberColumnCount }` and `me` (with my `columnOrder`). Also records my visit: `lastOpenedAt`, at most once a minute |
+| PATCH | /api/projects/:projectId | Owner | Any of `name`, `colour`, `description` (trimmed; empty → null; max 200), `membersCanAddColumns`, `memberColumnLimit` (1–10). Only what changed is written. General changes write `project.updated` (before/after); the column settings write `project.column_permissions_changed` |
 | DELETE | /api/projects/:projectId | Owner | Body has the typed project name; 400 `NAME_MISMATCH` if it differs. Returns `{ id }` |
 | POST | /api/projects/:projectId/leave | Member, not owner | Leave, unassign my tasks, `member.left`, one transaction |
 | POST | /api/projects/:projectId/pin | Member (any role) | Pin for me. Already pinned → unchanged (keeps the first pin's time). Returns my updated membership `{ projectId, role, pinnedAt, lastOpenedAt, joinedAt }` |
@@ -70,17 +70,24 @@ Projects notes:
 ## Columns
 | Method | Path | Who | What |
 |---|---|---|---|
-| POST | /api/projects/:projectId/columns | Owner | Add a column at the end |
-| PATCH | /api/columns/:columnId | Owner | Rename, reorder, set isDone |
-| DELETE | /api/columns/:columnId | Owner | Body has `moveTasksTo` or the typed column name; never the last column |
+| POST | /api/projects/:projectId/columns | Owner; members when allowed | `{ name }` (max 40). Inserted just before the done column; `createdById` is the caller. Members: 403 `COLUMNS_LOCKED` while the switch is off; 409 `COLUMN_LIMIT_REACHED` ("Column limit reached (3 of 3). The owner can raise it.") at the limit. 201 with the column |
+| PATCH | /api/columns/:columnId | Owner; creator to rename | `{ name?, isDone?: true }`. A member may rename only a column they added (else 403 `NOT_YOUR_COLUMN`); `isDone: true` (owner) makes this the done column (see 03-data-model). Returns the column |
+| PATCH | /api/columns/:columnId/move | Owner | The team order: `{ afterColumnId?, beforeColumnId? }`; the server computes the position (re-spacing all the project's columns if needed) and writes `column.moved`. Members get 403. Returns the column |
+| PUT | /api/projects/:projectId/column-order | Member, not owner | `{ columnIds }`: my own order (each id once, all this project's; else 400 `UNKNOWN_COLUMN`). The owner gets 400 `OWNER_USES_TEAM_ORDER`. No Activity row. Returns `{ projectId, columnOrder }` |
+| DELETE | /api/projects/:projectId/column-order | Member | Back to the team order (`columnOrder: null`) |
+| DELETE | /api/columns/:columnId | Owner | `{ moveTasksTo }` (tasks go to the bottom of that column, in order) or `{ confirmName }` (exact name, else 400 `NAME_MISMATCH`; deletes the tasks too). Never the last column (400 `LAST_COLUMN`). Returns `{ id }` |
+
+Column notes: members get 403 `OWNER_ONLY`; a column in a project I'm not in is 404 `COLUMN_NOT_FOUND`. The column writes return the column; the board refetches the project, because a done-column switch also changes tasks.
 
 ## Tasks
 | Method | Path | Who | What |
 |---|---|---|---|
-| POST | /api/projects/:projectId/tasks | Member | Title + column, added at the bottom |
-| PATCH | /api/tasks/:taskId | Member | Title, description, priority, assignee, due date |
-| PATCH | /api/tasks/:taskId/move | Member | `{ columnId, afterTaskId?, beforeTaskId? }`; the server computes the position |
-| DELETE | /api/tasks/:taskId | Member | Delete |
+| POST | /api/projects/:projectId/tasks | Member | `{ title, columnId }`. Added at the bottom, MEDIUM, unassigned, no due date. 201 with the task |
+| PATCH | /api/tasks/:taskId | Member | Any of `title`, `description`, `priority`, `assigneeId` (a project member, else 400 `ASSIGNEE_NOT_MEMBER`), `dueDate` (YYYY-MM-DD); `null` clears. Writes only what changed. Returns the task |
+| PATCH | /api/tasks/:taskId/move | Member | `{ columnId, afterTaskId?, beforeTaskId? }`; the server computes the position. Returns the task |
+| DELETE | /api/tasks/:taskId | Member | Delete; its activity stays. Returns `{ id }` |
+
+Task notes: a task in a project I'm not in is 404 `TASK_NOT_FOUND`, like the project. A task is `{ id, columnId, title, description, priority, position, dueDate, assignee, completedAt, createdAt }`, the same shape as in GET /api/projects/:projectId.
 
 ## Members and invites
 | Method | Path | Who | What |
@@ -102,9 +109,9 @@ Projects notes:
 - Every write returns the updated object.
 
 ## Moving a task (server side, one transaction)
-1. Check membership; the target column is in the same project; neighbours (if given) are in the target column. Otherwise 400.
-2. Position: between → midpoint; top → first − 1000; bottom → last + 1000; empty → 1000. Always use the neighbours' current positions from the database.
-3. Into the isDone column → set completedAt; out of it → clear it.
-4. Write an Activity row when the column changed (not for reorders within a column).
-5. Re-space the column if the gap is too small.
+1. Check membership (404 otherwise); the target column is in the same project (400 `COLUMN_NOT_FOUND`).
+2. Find the neighbours in the target column's current order, without the moved card. `afterTaskId` is the card it lands below, `beforeTaskId` the one it lands above; given one, the other side is whatever is next to it now; given none, the card goes to the bottom. A neighbour that isn't in that column, or two that aren't next to each other, is 400 `INVALID_POSITION` (the board changed under the user).
+3. Position: between → midpoint; top → first − 1000; bottom → last + 1000; empty → 1000. If the gap is too small, re-space the column first (03-data-model).
+4. Into the isDone column → set completedAt (reordering inside it keeps the original time); out of it → clear it.
+5. Write an Activity row when the column changed: `task.completed` into the done column, otherwise `task.moved`. Nothing for reorders within a column.
 6. Return the updated task.

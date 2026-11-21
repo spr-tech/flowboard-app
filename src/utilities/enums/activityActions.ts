@@ -3,11 +3,19 @@
 export const ActivityAction = {
   ProjectCreated: "project.created",
   ProjectUpdated: "project.updated",
+  ProjectColumnPermissionsChanged: "project.column_permissions_changed",
   MemberJoined: "member.joined",
   MemberLeft: "member.left",
   TaskCreated: "task.created",
   TaskMoved: "task.moved",
   TaskCompleted: "task.completed",
+  TaskUpdated: "task.updated",
+  TaskDeleted: "task.deleted",
+  ColumnCreated: "column.created",
+  ColumnRenamed: "column.renamed",
+  ColumnMoved: "column.moved",
+  ColumnDoneSet: "column.done_set",
+  ColumnDeleted: "column.deleted",
 } as const;
 
 export type ActivityAction = (typeof ActivityAction)[keyof typeof ActivityAction];

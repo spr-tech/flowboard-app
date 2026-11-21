@@ -6,7 +6,7 @@ import { Pin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { useProjects } from "@/services/projectsService";
 import { useAppDispatch } from "@/stores/hooks";
-import { newProjectDialogClosed, newProjectDialogOpened } from "@/stores/uiSlice";
+import { dialogClosed, dialogOpened } from "@/stores/uiSlice";
 import { localToday } from "@/utilities/helpers/localToday";
 import { countPinned, filterProjects, sortForProjectsPage, type ProjectFilter } from "@/utilities/helpers/projectOrder";
 import { NewProjectDialog } from "./modals/newProjectDialog";
@@ -24,9 +24,9 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 /** /projects: my projects as cards, pinned first, filtered by ?filter= (docs/designs/app-screens.md). */
 export default function ProjectsContent({ filter }: { filter: ProjectFilter }) {
   const dispatch = useAppDispatch();
-  const openNewProject = () => dispatch(newProjectDialogOpened());
+  const openNewProject = () => dispatch(dialogOpened({ kind: "newProject" }));
   // A dialog left open (say, by the browser's back button) mustn't reopen on the next visit.
-  useEffect(() => () => void dispatch(newProjectDialogClosed()), [dispatch]);
+  useEffect(() => () => void dispatch(dialogClosed()), [dispatch]);
   const { data: projects, isLoading, isError, refetch } = useProjects();
   const today = localToday();
 

@@ -5,26 +5,29 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button/button";
 import { ButtonLink } from "@/components/ui/button/buttonLink";
+import { useMe } from "@/services/accountService";
 import { useProject } from "@/services/projectsService";
 import { useAppDispatch } from "@/stores/hooks";
-import { projectDangerDialogClosed, projectDangerDialogOpened } from "@/stores/uiSlice";
+import { dialogClosed, dialogOpened } from "@/stores/uiSlice";
 import { ProjectGeneralForm } from "../forms/projectGeneralForm";
 import { DeleteProjectDialog } from "../modals/deleteProjectDialog";
 import { LeaveProjectDialog } from "../modals/leaveProjectDialog";
 import { ProjectLoadProblem } from "../projectLoadProblem";
 import { ProjectTile } from "../projectTile";
+import { ColumnsSection } from "./columnsSection";
 import { SettingsSection } from "./settingsSection";
 
 /**
- * /projects/[projectId]/settings: General and the Danger zone (docs/designs/project-settings.md).
- * Columns arrive with the board (milestone 6), members and invites in milestone 7.
+ * /projects/[projectId]/settings (docs/designs/project-settings.md).
+ * General, Columns and the Danger zone; members and invites arrive in milestone 7.
  */
 export default function ProjectSettingsContent({ projectId }: { projectId: string }) {
   const dispatch = useAppDispatch();
   const { data: project, error, isLoading, refetch } = useProject(projectId);
+  const { data: me } = useMe();
 
   // A dialog left open (say, by the browser's back button) mustn't reopen on the next visit.
-  useEffect(() => () => void dispatch(projectDangerDialogClosed()), [dispatch]);
+  useEffect(() => () => void dispatch(dialogClosed()), [dispatch]);
 
   if (isLoading) {
     return (
@@ -79,7 +82,19 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
         title="General"
         description="The name and colour everyone sees on the board, the projects list and the dashboard."
       >
-        <ProjectGeneralForm key={`${project.name}|${project.colour}`} project={project} canEdit={isOwner} />
+        <ProjectGeneralForm
+          key={`${project.name}|${project.colour}|${project.description ?? ""}`}
+          project={project}
+          canEdit={isOwner}
+        />
+      </SettingsSection>
+
+      <SettingsSection
+        id="settings-columns"
+        title="Columns"
+        description="The board's columns, left to right (the team order). Tasks in the done column count as finished on the dashboard."
+      >
+        <ColumnsSection project={project} meId={me?.id ?? null} />
       </SettingsSection>
 
       <SettingsSection
@@ -99,7 +114,7 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
           <Button
             text={isOwner ? "Delete project" : "Leave project"}
             variant="danger"
-            onClick={() => dispatch(projectDangerDialogOpened(isOwner ? "delete" : "leave"))}
+            onClick={() => dispatch(dialogOpened({ kind: isOwner ? "deleteProject" : "leaveProject" }))}
           />
         </div>
       </SettingsSection>

@@ -13,7 +13,7 @@ import type { ProjectDetail } from "@/models/responses/projectResponses";
 import { deleteProjectSchema } from "@/models/validations/projectValidation";
 import { useDeleteProjectMutation } from "@/services/projectsService";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { projectDangerDialogClosed, selectProjectDangerDialog } from "@/stores/uiSlice";
+import { dialogClosed, selectOpenDialog } from "@/stores/uiSlice";
 import { applyApiError } from "@/utilities/helpers/applyApiError";
 
 type DeleteProjectFormValues = z.infer<typeof deleteProjectSchema>;
@@ -24,8 +24,8 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 /** Owner only. Unlocked by typing the project name exactly; then back to /projects. */
 export function DeleteProjectDialog({ project }: DeleteProjectDialogProps) {
   const dispatch = useAppDispatch();
-  const isOpen = useAppSelector(selectProjectDangerDialog) === "delete";
-  const close = () => dispatch(projectDangerDialogClosed());
+  const isOpen = useAppSelector(selectOpenDialog)?.kind === "deleteProject";
+  const close = () => dispatch(dialogClosed());
 
   return (
     <Dialog isOpen={isOpen} onClose={close} title="Delete this project?">

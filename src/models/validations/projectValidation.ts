@@ -13,21 +13,56 @@ export const projectNameField = z
 
 export const projectColourField = z.enum(PROJECT_COLOURS, "Pick one of the 8 colours");
 
+export const PROJECT_DESCRIPTION_MAX = 200;
+
+/** Optional. Trimmed; empty becomes null, so "no description" is stored one way only. */
+export const projectDescriptionField = z
+  .string()
+  .trim()
+  .max(PROJECT_DESCRIPTION_MAX, `Keep the description to ${PROJECT_DESCRIPTION_MAX} characters or fewer`)
+  .transform((value) => (value === "" ? null : value))
+  .nullable();
+
+export const MEMBER_COLUMN_LIMIT_MIN = 1;
+export const MEMBER_COLUMN_LIMIT_MAX = 10;
+export const memberColumnLimitField = z
+  .number("Enter a number")
+  .int("Enter a whole number")
+  .min(MEMBER_COLUMN_LIMIT_MIN, `At least ${MEMBER_COLUMN_LIMIT_MIN}`)
+  .max(MEMBER_COLUMN_LIMIT_MAX, `At most ${MEMBER_COLUMN_LIMIT_MAX}`);
+
 /** New project dialog and POST /api/projects. */
 export const createProjectSchema = z.object({
   name: projectNameField,
   colour: projectColourField,
+  description: projectDescriptionField.optional(),
 });
-export type CreateProjectFormValues = z.infer<typeof createProjectSchema>;
+/** What the form holds (description is text) and what it submits (empty description → null). */
+export type CreateProjectFormInput = z.input<typeof createProjectSchema>;
+export type CreateProjectFormValues = z.output<typeof createProjectSchema>;
 
-/** Settings › General and PATCH /api/projects/:projectId. Send only what changed. */
+/**
+ * PATCH /api/projects/:projectId (owner): Settings › General (name, colour, description) and
+ * Settings › Columns (who may add columns, and how many). Send only what changed.
+ */
 export const updateProjectSchema = z
-  .object({ name: projectNameField.optional(), colour: projectColourField.optional() })
-  .refine((value) => value.name !== undefined || value.colour !== undefined, "Change the name or the colour");
+  .object({
+    name: projectNameField.optional(),
+    colour: projectColourField.optional(),
+    description: projectDescriptionField.optional(),
+    membersCanAddColumns: z.boolean().optional(),
+    memberColumnLimit: memberColumnLimitField.optional(),
+  })
+  .refine((value) => Object.values(value).some((field) => field !== undefined), "Change at least one setting");
 
-/** The General form always has both fields. */
-export const projectGeneralFormSchema = createProjectSchema;
-export type ProjectGeneralFormValues = z.infer<typeof projectGeneralFormSchema>;
+/** The General form always has all three fields. */
+export const projectGeneralFormSchema = z.object({
+  name: projectNameField,
+  colour: projectColourField,
+  description: projectDescriptionField,
+});
+export type ProjectGeneralFormInput = z.input<typeof projectGeneralFormSchema>;
+export type ProjectGeneralFormValues = z.output<typeof projectGeneralFormSchema>;
 
 /** DELETE /api/projects/:projectId: the project name, typed by the owner to confirm. */
 export const deleteProjectSchema = z.object({

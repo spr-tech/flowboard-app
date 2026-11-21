@@ -9,7 +9,8 @@ import { cn } from "@/utilities/helpers/cn";
 const widthClasses = {
   sm: "data-[side=left]:sm:max-w-xs data-[side=right]:sm:max-w-xs",
   md: "data-[side=left]:sm:max-w-md data-[side=right]:sm:max-w-md",
-  lg: "data-[side=left]:sm:max-w-xl data-[side=right]:sm:max-w-xl",
+  // The task drawer (460px, docs/designs/board.dc.html).
+  lg: "data-[side=left]:sm:max-w-[460px] data-[side=right]:sm:max-w-[460px]",
 } as const;
 
 export type DrawerProps = {

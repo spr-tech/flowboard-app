@@ -33,12 +33,15 @@ Reference files (open in a browser for layout only; they run inside the design t
 - Pin toggle: 44px, top-right of every card, outside the card's link (no button inside a link). `aria-pressed`, labelled "Pin <name>" / "Unpin <name>". Pinned: lime background, filled pin. Not pinned: white, outlined pin. Any member can pin; no cap.
 - Pinning is optimistic: the cached list changes straight away; if the request fails it is undone and an error toast shows.
 - Toasts: "<name> pinned to your sidebar" (pins 1–3), "<name> pinned (only your first 3 pins show in the sidebar)" (pin 4 and later), "<name> unpinned".
-- Card: colour tile with first letter, Owner (espresso + lime) or Member (outline) badge, "Updated ..." line, done/total + percentage + bar, member avatars, and either "N overdue" (red chip) or the next due date.
+- Card: colour tile with first letter, Owner (espresso + lime) or Member (outline) badge, the description under the name (clamped to 2 lines with an ellipsis; nothing when empty), "Updated ..." line, done/total + percentage + bar, member avatars, and either "N overdue" (red chip) or the next due date.
 - Dashed "New project" card at the end of the grid, plus the Create button, both open the dialog.
-- New project dialog: live preview, name (required, max 60), 8 colours; Create is disabled until the name has text. On success: toast "<name> created" and open the new board.
+- New project dialog: live preview (the description shows under the name as you type, instead of "Preview"), name (required, max 60), an optional Description (3 rows, placeholder "e.g. Rebuilding the marketing site before the January launch", counter "N / 200"), 8 colours; Create is disabled until the name has text. On success: toast "<name> created" and open the new board.
 
 ## Board (milestone 6)
-- Header: colour tile, name, "N tasks · N done · N members", member avatars, Invite button, settings button.
+- Header: colour tile, name, the description as a subtitle when set (the owner sees a quiet "+ Add a description" when it's empty, which opens an inline field: Enter or blur saves, Esc cancels; members see nothing), "N tasks · N done · N members", member avatars, settings button (Invite arrives in milestone 7).
+- Columns: each header has a grip handle ("Move column <name>"), for every member; columns are dragged only by it. The owner's drags change the team order; a member's change only their own view, shown as "Your order" with "Reset to team order" near the header. Keyboard: focus the handle, Space, left/right arrows, Space (Esc cancels). Both are optimistic.
+- Add column: the owner always; a member while "Members can add columns" is on, with "N of M member columns used", disabled with the limit message at the limit, and hidden when the switch is off.
+- Column menu: "Added by <name> · <date>" at the top; Rename for the owner and for the member who added that column; Set as done and Delete for the owner only.
 - Filters: priority pills (All/High/Medium/Low) and "Only my tasks" (UI slice).
 - Columns are 300px; the done column shows a "Done column" badge and its cards are struck through with a green date.
 - Due chips: "Nd late" in danger red, "Today" espresso, "Tomorrow", otherwise "20 Nov".
