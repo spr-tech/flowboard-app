@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { MIN_GAP, needsRespace, positionBetween, respacedPositions } from "./position";
+import { aboveIndexFor, MIN_GAP, needsRespace, placeAt, positionBetween, respacedPositions } from "./position";
 
 describe("positionBetween", () => {
   it("takes the midpoint between two neighbours", () => {
@@ -57,5 +57,36 @@ describe("respacedPositions", () => {
   it("spaces items evenly from 1000", () => {
     expect(respacedPositions(3)).toEqual([1000, 2000, 3000]);
     expect(respacedPositions(0)).toEqual([]);
+  });
+});
+
+describe("aboveIndexFor", () => {
+  const ids = ["a", "b", "c"];
+
+  it("finds the slot from either neighbour, or both, or neither (the bottom)", () => {
+    expect(aboveIndexFor(ids, "a", "b")).toBe(0);
+    expect(aboveIndexFor(ids, "b")).toBe(1);
+    expect(aboveIndexFor(ids, undefined, "a")).toBe(-1);
+    expect(aboveIndexFor(ids)).toBe(2);
+    expect(aboveIndexFor([])).toBe(-1);
+  });
+
+  it("refuses unknown neighbours, or neighbours that aren't next to each other", () => {
+    expect(aboveIndexFor(ids, "zzz")).toBeNull();
+    expect(aboveIndexFor(ids, undefined, "zzz")).toBeNull();
+    expect(aboveIndexFor(ids, "a", "c")).toBeNull();
+  });
+});
+
+describe("placeAt", () => {
+  it("takes the midpoint, the first − 1000 or the last + 1000", () => {
+    expect(placeAt([1000, 2000], 0)).toEqual({ position: 1500, respaced: null });
+    expect(placeAt([1000, 2000], -1)).toEqual({ position: 0, respaced: null });
+    expect(placeAt([1000, 2000], 1)).toEqual({ position: 3000, respaced: null });
+    expect(placeAt([], -1)).toEqual({ position: 1000, respaced: null });
+  });
+
+  it("re-spaces the whole list first when the gap is too small", () => {
+    expect(placeAt([1000, 1000.0001, 3000], 0)).toEqual({ position: 1500, respaced: [1000, 2000, 3000] });
   });
 });

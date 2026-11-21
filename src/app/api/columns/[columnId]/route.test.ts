@@ -14,14 +14,16 @@ const params = segment({ columnId: "c1" });
 beforeEach(() => signInAs("u1"));
 
 describe("/api/columns/:columnId", () => {
-  it("PATCH renames, moves or sets done", async () => {
+  it("PATCH renames or sets done; moving has its own route now", async () => {
     vi.mocked(updateColumn).mockResolvedValue({ id: "c1" } as never);
 
-    await PATCH(jsonRequest(path, "PATCH", { move: "left" }), params);
+    await PATCH(jsonRequest(path, "PATCH", { name: "QA" }), params);
     await PATCH(jsonRequest(path, "PATCH", { isDone: true }), params);
+    const oldMove = await PATCH(jsonRequest(path, "PATCH", { move: "left" }), params);
 
-    expect(updateColumn).toHaveBeenNthCalledWith(1, "u1", "c1", { move: "left" });
+    expect(updateColumn).toHaveBeenNthCalledWith(1, "u1", "c1", { name: "QA" });
     expect(updateColumn).toHaveBeenNthCalledWith(2, "u1", "c1", { isDone: true });
+    expect(oldMove.status).toBe(400);
   });
 
   it("PATCH refuses isDone false (a done column is replaced, never unset) and empty bodies", async () => {

@@ -59,17 +59,24 @@ export const moveTaskSchema = z.object({
 /** Add column and POST /api/projects/:projectId/columns. */
 export const createColumnSchema = z.object({ name: columnNameField });
 
-/** PATCH /api/columns/:columnId: rename, move one place left or right, or become the done column. */
+/** PATCH /api/columns/:columnId: rename, or become the done column. */
 export const updateColumnSchema = z
-  .object({
-    name: columnNameField.optional(),
-    isDone: z.literal(true).optional(),
-    move: z.enum(["left", "right"]).optional(),
-  })
-  .refine(
-    (value) => value.name !== undefined || value.isDone !== undefined || value.move !== undefined,
-    "Change the name, the position or the done column"
-  );
+  .object({ name: columnNameField.optional(), isDone: z.literal(true).optional() })
+  .refine((value) => value.name !== undefined || value.isDone !== undefined, "Change the name or the done column");
+
+/**
+ * PATCH /api/columns/:columnId/move (owner): the team order. `afterColumnId` is the column it
+ * lands to the right of, `beforeColumnId` the one it lands to the left of. No position.
+ */
+export const moveColumnSchema = z.object({ afterColumnId: idField.optional(), beforeColumnId: idField.optional() });
+
+/** PUT /api/projects/:projectId/column-order: my own left-to-right order, as column ids. */
+export const columnOrderSchema = z.object({
+  columnIds: z
+    .array(idField)
+    .max(100)
+    .refine((ids) => new Set(ids).size === ids.length, "Each column can appear only once"),
+});
 
 /** DELETE /api/columns/:columnId: move its tasks to another column, or confirm with its exact name. */
 export const deleteColumnSchema = z.union([

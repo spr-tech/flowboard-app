@@ -160,6 +160,7 @@ async function main() {
   const project = await prisma.project.create({
     data: {
       name: "Website relaunch",
+      description: "Rebuilding the marketing site before the January launch",
       colour: "vermilion",
       createdAt: daysAgo(14),
       members: {
@@ -174,7 +175,15 @@ async function main() {
   const columnIds = {} as Record<ColumnKey, string>;
   for (const [index, column] of COLUMNS.entries()) {
     const created = await prisma.column.create({
-      data: { projectId: project.id, name: column.name, isDone: column.isDone, position: (index + 1) * 1000 },
+      data: {
+        projectId: project.id,
+        name: column.name,
+        isDone: column.isDone,
+        position: (index + 1) * 1000,
+        // The owner set up the board when the project was created.
+        createdById: demo.id,
+        createdAt: daysAgo(14),
+      },
     });
     columnIds[column.key] = created.id;
   }

@@ -79,7 +79,11 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
         title="General"
         description="The name and colour everyone sees on the board, the projects list and the dashboard."
       >
-        <ProjectGeneralForm key={`${project.name}|${project.colour}`} project={project} canEdit={isOwner} />
+        <ProjectGeneralForm
+          key={`${project.name}|${project.colour}|${project.description ?? ""}`}
+          project={project}
+          canEdit={isOwner}
+        />
       </SettingsSection>
 
       <SettingsSection

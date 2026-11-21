@@ -6,7 +6,7 @@ import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
 import { requireMember, type Db } from "@/server/projects/projectAccess";
 import { ActivityAction } from "@/utilities/enums/activityActions";
-import { needsRespace, positionBetween, respacedPositions } from "@/utilities/helpers/position";
+import { aboveIndexFor, placeAt, positionBetween } from "@/utilities/helpers/position";
 import { dayToDate, requireTaskAccess, taskSelect, toBoardTask } from "./taskShape";
 
 const columnNotFound = () =>
@@ -127,35 +127,6 @@ const badNeighbour = () =>
   new ApiError(400, "INVALID_POSITION", "The board changed while you were moving that card. Refresh and try again.");
 
 /**
- * The card's new neighbours in the target column (excluding the card itself), from the database's
- * current order. Given one neighbour, the other side is whatever is next to it right now; given
- * none, the card goes to the bottom.
- */
-async function findNeighbours(db: Db, taskId: string, columnId: string, input: MoveInput) {
-  const others = await db.task.findMany({
-    where: { columnId, id: { not: taskId } },
-    orderBy: { position: "asc" },
-    select: { id: true, position: true },
-  });
-  const indexOf = (id: string | undefined) => {
-    if (id === undefined) return undefined;
-    const index = others.findIndex((task) => task.id === id);
-    if (index < 0) throw badNeighbour();
-    return index;
-  };
-  const afterIndex = indexOf(input.afterTaskId);
-  const beforeIndex = indexOf(input.beforeTaskId);
-
-  let aboveIndex: number;
-  if (afterIndex !== undefined) aboveIndex = afterIndex;
-  else if (beforeIndex !== undefined) aboveIndex = beforeIndex - 1;
-  else aboveIndex = others.length - 1;
-  if (beforeIndex !== undefined && beforeIndex !== aboveIndex + 1) throw badNeighbour();
-
-  return { others, aboveIndex };
-}
-
-/**
  * Moves a card (one transaction): checks the column and neighbours, computes the position from
  * the neighbours' current positions, re-spaces the column if the gap is too small, sets or
  * clears completedAt, and writes one Activity row when the column changed.
@@ -164,19 +135,30 @@ export async function moveTask(userId: string, taskId: string, input: MoveInput,
   return prisma.$transaction(async (tx) => {
     const { task } = await requireTaskAccess(tx, userId, taskId);
     const target = await requireColumn(tx, task.projectId, input.columnId);
-    const { others, aboveIndex } = await findNeighbours(tx, taskId, target.id, input);
+    // The target column's other cards, in their current order.
+    const others = await tx.task.findMany({
+      where: { columnId: target.id, id: { not: taskId } },
+      orderBy: { position: "asc" },
+      select: { id: true, position: true },
+    });
+    const aboveIndex = aboveIndexFor(
+      others.map((other) => other.id),
+      input.afterTaskId,
+      input.beforeTaskId
+    );
+    if (aboveIndex === null) throw badNeighbour();
 
-    let positions = others.map((other) => other.position);
-    const at = (index: number) => (index >= 0 && index < positions.length ? positions[index] : null);
-    if (needsRespace(at(aboveIndex), at(aboveIndex + 1))) {
-      positions = respacedPositions(others.length);
+    const { position, respaced } = placeAt(
+      others.map((other) => other.position),
+      aboveIndex
+    );
+    if (respaced) {
       await Promise.all(
         others.map((other, index) =>
-          tx.task.update({ where: { id: other.id }, data: { position: positions[index] }, select: { id: true } })
+          tx.task.update({ where: { id: other.id }, data: { position: respaced[index] }, select: { id: true } })
         )
       );
     }
-    const position = positionBetween(at(aboveIndex), at(aboveIndex + 1));
 
     const columnChanged = target.id !== task.columnId;
     // In the done column: keep the original completion time when only reordering there.

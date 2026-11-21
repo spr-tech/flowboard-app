@@ -12,10 +12,13 @@ Layout: same two-column sections as account settings (title + description left, 
 - The page title line says "you're the owner" or "you're a member".
 
 ## General
-- Project name (required, max 60) and the 8 colour keys as a radio group.
-- Save is enabled only when something changed; Cancel restores the saved values. Toast: "Project updated".
+- Project name (required, max 60), an optional description (max 200, "N / 200"; read-only for members) and the 8 colour keys as a radio group.
+- Save is enabled only when the name, colour or description changed; Cancel restores the saved values. Toast: "Project updated".
 
-## Columns (owner only to change)
+## Columns (owner only to change, except members adding columns when allowed)
+- Owner: a switch "Members can add columns"; when it's on, a number input "Up to [3] columns" (1 to 10) with "N of M used" next to it. Saves on change, with a toast. Members see it as text: "Members can add up to 3 columns · 1 used", or "Only the owner can add columns".
+- Every column row shows "Added by <name> · <date>".
+- Move left / move right change the team order (PATCH /api/columns/:columnId/move).
 - Ordered list, left to right, each row: position number, inline-editable name (max 40), task count, "Done column" badge or "Set as done" button, move left / move right buttons (keyboard-accessible alternative to dragging), delete.
 - Delete is disabled on the last remaining column.
 - Delete dialog from settings: empty column → simple confirm. With tasks → move them to another column, then delete. (Deleting the tasks too is only offered from the board's column menu, with the typed confirmation.)

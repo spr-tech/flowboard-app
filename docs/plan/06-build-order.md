@@ -11,7 +11,7 @@ Each milestone is a branch off `rebuild` (for example `rebuild-m3-auth`) and end
 | 4 | API core + Redux base: route-handler wrapper, store, serviceConfig, setupListeners, /api/me | A component shows the user's name via RTK Query |
 | 5 | Projects: service, routes, projects page, create modal, settings (General, Danger zone) | Create, rename, recolour, delete with typed confirmation |
 | 6 | Board + tasks: columns, tasks, drag and drop, task drawer, column settings, delete-column dialog | Dragging is instant; a failed move snaps back with a toast; the done column sets completedAt |
-| 7 | Members + invites: invite, resend, cancel, accept page (4 states), remove, leave | A second account accepts an invite, sees the board, and is unassigned when removed |
+| 7 | Members + invites: invite, resend, cancel, accept page (4 states), remove, leave. The invite email includes the project's description when it has one | A second account accepts an invite, sees the board, and is unassigned when removed |
 | 8 | Dashboard: all sections, split endpoints, activity polling | Account B's move appears in account A's feed within about 30 s |
 | 9 | Account settings | Name and password changes work |
 | 10 | Polish + ship: skeletons, errors, phone pass, accessibility pass, landing/sign-in/sign-up from the designs, cutover | Live on `master` |

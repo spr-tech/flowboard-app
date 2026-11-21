@@ -18,19 +18,36 @@ const joinedAt = new Date("2026-11-01T09:00:00Z");
 const owner = { role: "OWNER", pinnedAt: null, lastOpenedAt: null, joinedAt } as const;
 const member = { ...owner, role: "MEMBER" } as const;
 
-/** What loadDetail reads: the project, its columns and my membership. */
+const column = (id: string, name: string, position: number, isDone: boolean, tasks: number, creator: string) => ({
+  id,
+  name,
+  position,
+  isDone,
+  createdAt: joinedAt,
+  createdBy: { id: creator, name: creator === "u1" ? "Ada" : "Sam" },
+  _count: { tasks },
+});
+
+/** What loadDetail reads: the project, its columns, its members and my membership. */
 function detailRow(overrides: Record<string, unknown> = {}) {
   return {
     id: "p1",
     name: "Website relaunch",
+    description: null,
     colour: "vermilion",
+    membersCanAddColumns: true,
+    memberColumnLimit: 3,
     createdAt: joinedAt,
     updatedAt: joinedAt,
     columns: [
-      { id: "c1", name: "To do", position: 1000, isDone: false, _count: { tasks: 2 } },
-      { id: "c3", name: "Done", position: 3000, isDone: true, _count: { tasks: 1 } },
+      column("c1", "To do", 1000, false, 2, "u1"),
+      column("c2", "Sam's", 2000, false, 0, "u2"),
+      column("c3", "Done", 3000, true, 1, "u1"),
     ],
-    members: [{ ...owner, user: { id: "u1", name: "Ada", image: null } }],
+    members: [
+      { ...owner, columnOrder: null, user: { id: "u1", name: "Ada", image: null } },
+      { ...member, columnOrder: ["c3", "c1"], user: { id: "u2", name: "Sam", image: null } },
+    ],
     ...overrides,
   };
 }
@@ -132,13 +149,27 @@ describe("getProject", () => {
     expect(detail).toMatchObject({
       id: "p1",
       taskCount: 3,
+      description: null,
       columns: [
-        { id: "c1", name: "To do", isDone: false, taskCount: 2 },
+        {
+          id: "c1",
+          name: "To do",
+          isDone: false,
+          taskCount: 2,
+          createdBy: { id: "u1" },
+          createdAt: joinedAt.toISOString(),
+        },
+        { id: "c2", createdBy: { id: "u2", name: "Sam" } },
         { id: "c3", name: "Done", isDone: true, taskCount: 1 },
       ],
       tasks: [],
-      members: [{ id: "u1", name: "Ada", image: null, role: "OWNER" }],
-      me: { role: "OWNER" },
+      members: [
+        { id: "u1", name: "Ada", image: null, role: "OWNER" },
+        { id: "u2", name: "Sam", image: null, role: "MEMBER" },
+      ],
+      // Only Sam's column counts toward the member limit.
+      columnPermissions: { membersCanAddColumns: true, memberColumnLimit: 3, memberColumnCount: 1 },
+      me: { role: "OWNER", columnOrder: null },
     });
   });
 
@@ -182,6 +213,15 @@ describe("getProject", () => {
     );
   });
 
+  it("returns a member's own column order", async () => {
+    prismaMock.projectMember.updateMany.mockResolvedValue({ count: 0 });
+    prismaMock.project.findUnique.mockResolvedValue(detailRow() as never);
+
+    const detail = await getProject("u2", "p1");
+
+    expect(detail.me).toMatchObject({ role: "MEMBER", columnOrder: ["c3", "c1"] });
+  });
+
   it("answers 404 to a non-member", async () => {
     prismaMock.projectMember.updateMany.mockResolvedValue({ count: 0 });
     prismaMock.project.findUnique.mockResolvedValue(detailRow({ members: [] }) as never);
@@ -201,13 +241,15 @@ describe("createProject", () => {
     expect(prismaMock.project.create).toHaveBeenCalledWith({
       data: {
         name: "Mobile app",
+        description: null,
         colour: "teal",
         members: { create: { userId: "u1", role: "OWNER" } },
+        // Every column has a creator: the owner made the default ones.
         columns: {
           create: [
-            { name: "To do", position: 1000, isDone: false },
-            { name: "In progress", position: 2000, isDone: false },
-            { name: "Done", position: 3000, isDone: true },
+            { name: "To do", position: 1000, isDone: false, createdById: "u1" },
+            { name: "In progress", position: 2000, isDone: false, createdById: "u1" },
+            { name: "Done", position: 3000, isDone: true, createdById: "u1" },
           ],
         },
       },
@@ -219,11 +261,27 @@ describe("createProject", () => {
     });
     expect(detail.id).toBe("p9");
   });
+
+  it("stores the description when there is one", async () => {
+    prismaMock.project.create.mockResolvedValue({ id: "p9" } as never);
+    prismaMock.project.findUnique.mockResolvedValue(detailRow({ id: "p9", description: "For the launch" }) as never);
+
+    const detail = await createProject("u1", { name: "Mobile app", colour: "teal", description: "For the launch" });
+
+    expect(prismaMock.project.create.mock.calls[0][0].data).toMatchObject({ description: "For the launch" });
+    expect(detail.description).toBe("For the launch");
+  });
 });
 
 describe("updateProject", () => {
   beforeEach(() => {
-    prismaMock.project.findUniqueOrThrow.mockResolvedValue({ name: "Old name", colour: "vermilion" } as never);
+    prismaMock.project.findUniqueOrThrow.mockResolvedValue({
+      name: "Old name",
+      colour: "vermilion",
+      description: null,
+      membersCanAddColumns: false,
+      memberColumnLimit: 3,
+    } as never);
     prismaMock.project.findUnique.mockResolvedValue(detailRow() as never);
   });
 
@@ -253,6 +311,54 @@ describe("updateProject", () => {
 
     expect(prismaMock.project.update).not.toHaveBeenCalled();
     expect(prismaMock.activity.create).not.toHaveBeenCalled();
+  });
+
+  it("adds, changes and clears the description, with it in the before and after", async () => {
+    prismaMock.projectMember.findUnique.mockResolvedValue(owner as never);
+
+    await updateProject("u1", "p1", { description: "For the launch" });
+
+    expect(prismaMock.project.update.mock.calls[0][0].data).toEqual({ description: "For the launch" });
+    expect(prismaMock.activity.create.mock.calls[0][0].data).toMatchObject({
+      action: "project.updated",
+      meta: { from: { description: null }, to: { description: "For the launch" } },
+    });
+  });
+
+  it("changes who may add columns with its own project.column_permissions_changed row", async () => {
+    prismaMock.projectMember.findUnique.mockResolvedValue(owner as never);
+
+    await updateProject("u1", "p1", { membersCanAddColumns: true, memberColumnLimit: 2 });
+
+    expect(prismaMock.project.update.mock.calls[0][0].data).toEqual({
+      membersCanAddColumns: true,
+      memberColumnLimit: 2,
+    });
+    expect(prismaMock.activity.create).toHaveBeenCalledTimes(1);
+    expect(prismaMock.activity.create.mock.calls[0][0].data).toMatchObject({
+      action: "project.column_permissions_changed",
+      meta: { membersCanAddColumns: true, memberColumnLimit: 2 },
+    });
+  });
+
+  it("switching it off never deletes columns, it only blocks new ones", async () => {
+    prismaMock.projectMember.findUnique.mockResolvedValue(owner as never);
+    prismaMock.project.findUniqueOrThrow.mockResolvedValue({
+      name: "Old name",
+      colour: "vermilion",
+      description: null,
+      membersCanAddColumns: true,
+      memberColumnLimit: 3,
+    } as never);
+
+    const detail = await updateProject("u1", "p1", { membersCanAddColumns: false });
+
+    expect(prismaMock.column.delete).not.toHaveBeenCalled();
+    expect(prismaMock.column.deleteMany).not.toHaveBeenCalled();
+    expect(detail.columns.map((c) => c.id)).toEqual(["c1", "c2", "c3"]);
+    expect(prismaMock.activity.create.mock.calls[0][0].data).toMatchObject({
+      meta: { membersCanAddColumns: false, memberColumnLimit: 3 },
+    });
   });
 
   it("answers 403 to a member and 404 to a non-member", async () => {

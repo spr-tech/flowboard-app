@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ProjectDetail } from "@/models/responses/projectResponses";
 import { projectsService } from "@/services/projectsService";
 import { taskDeletePending } from "@/stores/uiSlice";
-import { boardTask, myMembership, projectDetail } from "@/test/projectFixtures";
+import { boardMembership, boardTask, projectDetail } from "@/test/projectFixtures";
 import { jsonResponse, mockFetch, renderWithStore } from "@/test/renderWithStore";
 import BoardContent from "./boardContent";
 
@@ -89,7 +89,7 @@ describe("BoardContent", () => {
   });
 
   it("hides the column menu and Add column from members", async () => {
-    renderBoard(boardWith({ me: myMembership({ role: "MEMBER" }) }));
+    renderBoard(boardWith({ me: boardMembership({ role: "MEMBER" }) }));
     await screen.findByText("Fix login");
 
     expect(screen.queryByRole("button", { name: /Column options/ })).not.toBeInTheDocument();

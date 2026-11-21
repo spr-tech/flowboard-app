@@ -3,6 +3,7 @@
 export const ActivityAction = {
   ProjectCreated: "project.created",
   ProjectUpdated: "project.updated",
+  ProjectColumnPermissionsChanged: "project.column_permissions_changed",
   MemberJoined: "member.joined",
   MemberLeft: "member.left",
   TaskCreated: "task.created",

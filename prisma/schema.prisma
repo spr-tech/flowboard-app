@@ -57,6 +57,7 @@ model User {
   memberships         ProjectMember[]
   assignedTasks       Task[]               @relation("TaskAssignee")
   createdTasks        Task[]               @relation("TaskCreator")
+  createdColumns      Column[]             @relation("ColumnCreator")
   sentInvites         Invite[]
   passwordResetTokens PasswordResetToken[]
   activities          Activity[]
@@ -103,11 +104,17 @@ model PasswordResetToken {
 // ─── Projects ────────────────────────────────────────────────────────────────
 
 model Project {
-  id        String        @id @default(cuid())
-  name      String
-  colour    ProjectColour @default(vermilion)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id                   String        @id @default(cuid())
+  name                 String
+  // Optional, at most 200 characters (checked by the API); null when empty.
+  description          String?
+  colour               ProjectColour @default(vermilion)
+  // Whether members (not just the owner) may add columns, and how many member-created columns
+  // the project may have in total (1 to 10, checked by the API).
+  membersCanAddColumns Boolean       @default(false)
+  memberColumnLimit    Int           @default(3)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 
   members    ProjectMember[]
   columns    Column[]
@@ -127,6 +134,9 @@ model ProjectMember {
   // When this user last opened the project (written at most once a minute). Drives the
   // sidebar's "recent" slots; null falls back to joinedAt.
   lastOpenedAt DateTime?
+  // This member's own column order: a JSON list of column ids. Null = follow the team order
+  // (Column.position). The owner never has one: the owner's drags change the team order.
+  columnOrder  Json?
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -156,17 +166,21 @@ model Invite {
 // ─── Board ───────────────────────────────────────────────────────────────────
 
 model Column {
-  id        String  @id @default(cuid())
-  projectId String
-  name      String
+  id          String   @id @default(cuid())
+  projectId   String
+  name        String
   // Spaced floats (1000, 2000, ...), like tasks.
-  position  Float
+  position    Float
   // Exactly one per project. The index below guarantees "at most one";
   // services guarantee "at least one".
-  isDone    Boolean @default(false)
+  isDone      Boolean  @default(false)
+  // Who added it: the owner, or a member when members may add columns (counts toward the limit).
+  createdById String
+  createdAt   DateTime @default(now())
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  tasks   Task[]
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User    @relation("ColumnCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  tasks     Task[]
 
   @@unique([projectId], map: "Column_one_done_per_project", where: { isDone: true })
   @@index([projectId, position])

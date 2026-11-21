@@ -23,7 +23,15 @@ export type BoardTask = {
 export type BoardMember = BoardPerson & { role: "OWNER" | "MEMBER" };
 
 /** A column as the column endpoints return it. */
-export type BoardColumn = { id: string; name: string; position: number; isDone: boolean; taskCount: number };
+export type BoardColumn = {
+  id: string;
+  name: string;
+  position: number;
+  isDone: boolean;
+  taskCount: number;
+  createdBy: { id: string; name: string | null };
+  createdAt: string;
+};
 
 /** DELETE /api/tasks/:taskId and DELETE /api/columns/:columnId. */
 export type DeletedResponse = { id: string };

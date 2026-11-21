@@ -8,7 +8,7 @@ import { ProjectGeneralForm } from "./projectGeneralForm";
 
 vi.mock("@/components/ui/toast/toast", () => ({ toast: vi.fn() }));
 
-const project = { id: "p1", name: "Website", colour: "vermilion" as const };
+const project = { id: "p1", name: "Website", colour: "vermilion" as const, description: null };
 
 describe("ProjectGeneralForm", () => {
   beforeEach(() => {
@@ -46,10 +46,36 @@ describe("ProjectGeneralForm", () => {
     expect(await request.json()).toEqual({ colour: "teal" });
   });
 
+  it("enables Save when only the description changed, and sends just that", async () => {
+    const fetchMock = mockFetch(() => jsonResponse(200, { ...project, description: "For launch", columns: [] }));
+    renderWithStore(<ProjectGeneralForm project={project} canEdit />);
+    const save = screen.getByRole("button", { name: "Save changes" });
+
+    await userEvent.type(screen.getByLabelText("Description"), "  For launch ");
+    expect(screen.getByText("13 / 200")).toBeInTheDocument();
+    expect(save).toBeEnabled();
+    await userEvent.click(save);
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(await (fetchMock.mock.calls[0][0] as Request).json()).toEqual({ description: "For launch" });
+  });
+
+  it("clearing an existing description sends null", async () => {
+    const fetchMock = mockFetch(() => jsonResponse(200, { ...project, columns: [] }));
+    renderWithStore(<ProjectGeneralForm project={{ ...project, description: "Old" }} canEdit />);
+
+    await userEvent.clear(screen.getByLabelText("Description"));
+    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(await (fetchMock.mock.calls[0][0] as Request).json()).toEqual({ description: null });
+  });
+
   it("shows members the values, disabled, with no buttons", () => {
     renderWithStore(<ProjectGeneralForm project={project} canEdit={false} />);
 
     expect(screen.getByLabelText("Project name")).toBeDisabled();
+    expect(screen.getByLabelText("Description")).toBeDisabled();
     expect(screen.getByRole("radio", { name: "Teal" })).toBeDisabled();
     expect(screen.queryByRole("button", { name: "Save changes" })).not.toBeInTheDocument();
   });
