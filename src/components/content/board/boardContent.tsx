@@ -20,6 +20,7 @@ import { useTaskParam } from "@/utilities/hooks/useTaskParam";
 import { BoardColumns } from "./boardColumns";
 import { BoardFilters } from "./boardFilters";
 import { BoardHeader } from "./boardHeader";
+import { TaskDrawer } from "./drawer/taskDrawer";
 import { DeleteColumnDialog } from "./modals/deleteColumnDialog";
 
 /** /projects/[projectId]: the board (docs/designs/app-screens.md, "Board"). */
@@ -60,6 +61,7 @@ export default function BoardContent({ projectId }: { projectId: string }) {
       <BoardHeader project={project} />
       <BoardFilters />
       <BoardColumns project={project} filters={filters} today={localToday()} onOpenTask={openTask} />
+      <TaskDrawer project={project} meId={me?.id ?? null} />
       <DeleteColumnDialog project={project} />
     </div>
   );
