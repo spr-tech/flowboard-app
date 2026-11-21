@@ -3,6 +3,7 @@ import { Reveal } from "@/components/ui/reveal/reveal";
 import { Highlight } from "@/components/ui/typography/highlight";
 import { cn } from "@/utilities/helpers/cn";
 import { cssVars } from "@/utilities/helpers/cssVars";
+import { buttonLift } from "./landingMotion";
 
 /**
  * Each card's place in the tight pile (x0, y0, r0) and when fanned out (x1, y1, r1).
@@ -83,16 +84,21 @@ export function WhySection() {
             Everything lives on one board your whole team can see. No setup call, no training, no clutter. Just the
             work, who owns it and where it stands.
           </p>
-          <ButtonLink href="/register" text="Start your first board" variant="highlight" size="lg" />
+          <ButtonLink
+            href="/register"
+            text="Start your first board"
+            variant="highlight"
+            size="lg"
+            className={buttonLift}
+          />
         </div>
 
         <div className="min-w-0 flex-[1_1_420px]">
-          {/* Focusable so keyboard users can fan the deck too (it fans on :focus-within).
-              Scaled down on phones, where the pile is wider than the screen.
-              Starts stacked and spreads to its resting pile when it scrolls into view. */}
+          {/* Each card is focusable, so Tab (or a tap on a phone) brings it to the front and fans the
+              deck (it fans on :focus-within). Scaled down on phones, where the pile is wider than
+              the screen. Starts stacked and spreads to its resting pile when it scrolls into view. */}
           <Reveal
             effect="fan"
-            tabIndex={0}
             role="list"
             aria-label="What your team gets"
             className="deck relative h-[380px] rounded-card-lg max-sm:scale-75"
@@ -102,6 +108,7 @@ export function WhySection() {
                 <div
                   key={card.name}
                   role="listitem"
+                  tabIndex={0}
                   className={cn(
                     "deck-card absolute top-1/2 left-1/2 -mt-28 -ml-21.25 flex h-56 w-42.5 flex-col justify-between rounded-[22px] p-5 shadow-2xl",
                     card.colours

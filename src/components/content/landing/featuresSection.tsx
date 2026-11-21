@@ -4,6 +4,7 @@ import { ButtonLink } from "@/components/ui/button/buttonLink";
 import { GithubIcon } from "@/components/ui/icons/githubIcon";
 import { Reveal } from "@/components/ui/reveal/reveal";
 import { cn } from "@/utilities/helpers/cn";
+import { buttonLift, tileLift } from "./landingMotion";
 
 type FeatureCardProps = {
   title: string;
@@ -16,7 +17,7 @@ type FeatureCardProps = {
 
 function FeatureCard({ title, body, className, bodyClassName, children }: FeatureCardProps) {
   return (
-    <div className={cn("rounded-card-lg p-8", className)}>
+    <div className={cn("rounded-card-lg p-8", tileLift, className)}>
       <h3 className="mb-2.5 text-[26px] font-bold tracking-[-0.02em]">{title}</h3>
       <p className={cn("text-base leading-relaxed", bodyClassName)}>{body}</p>
       {children && <div className="mt-5.5">{children}</div>}
@@ -49,7 +50,12 @@ export function FeaturesSection() {
         </Reveal>
 
         <Reveal effect="rise" stagger={100} className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          <div className="flex flex-wrap items-center gap-7 rounded-card-lg border border-line-subtle bg-surface-card p-8 md:col-span-2">
+          <div
+            className={cn(
+              "flex flex-wrap items-center gap-7 rounded-card-lg border border-line-subtle bg-surface-card p-8 md:col-span-2",
+              tileLift
+            )}
+          >
             <div className="flex-[1_1_260px]">
               <h3 className="mb-2.5 text-[26px] font-bold tracking-[-0.02em]">A board you can grab</h3>
               <p className="text-base leading-relaxed text-fg-secondary">
@@ -137,8 +143,14 @@ export function FeaturesSection() {
           >
             {/* Real links rather than the design's look-alike buttons, so nothing here is a dead end. */}
             <div className="flex flex-col gap-2.5">
-              <ButtonLink href="/login" text="Continue with GitHub" variant="inverse" startIcon={<GithubIcon />} />
-              <ButtonLink href="/register" text="Use email instead" variant="secondary" />
+              <ButtonLink
+                href="/login"
+                text="Continue with GitHub"
+                variant="inverse"
+                startIcon={<GithubIcon />}
+                className={buttonLift}
+              />
+              <ButtonLink href="/register" text="Use email instead" variant="secondary" className={buttonLift} />
             </div>
           </FeatureCard>
         </Reveal>

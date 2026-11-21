@@ -1,6 +1,8 @@
 import { ButtonLink } from "@/components/ui/button/buttonLink";
 import { Reveal } from "@/components/ui/reveal/reveal";
+import { cn } from "@/utilities/helpers/cn";
 import { cssVars } from "@/utilities/helpers/cssVars";
+import { buttonLift } from "./landingMotion";
 
 export function CtaSection() {
   return (
@@ -20,13 +22,13 @@ export function CtaSection() {
           Your next sprint starts on a clean board.
         </h2>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <ButtonLink href="/register" text="Create a free board" variant="inverse" size="xl" />
+          <ButtonLink href="/register" text="Create a free board" variant="inverse" size="xl" className={buttonLift} />
           <ButtonLink
             href="/login"
             text="Sign in"
             variant="outline"
             size="xl"
-            className="border-fg-on-primary text-fg-on-primary hover:bg-fg-on-primary/10"
+            className={cn("border-fg-on-primary text-fg-on-primary hover:bg-fg-on-primary/10", buttonLift)}
           />
         </div>
       </Reveal>
