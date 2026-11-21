@@ -19,7 +19,7 @@
 ## Errors
 Every failed request becomes one `AppError` (`src/models/responses/apiError.ts`): `{ status: number | "NETWORK", code, message, fields? }`.
 - Our error body → copied across. No answer (offline, timeout) → `NETWORK_ERROR` with "We couldn't reach Flowboard…". Anything else (a hosting error page that isn't JSON) → `UNKNOWN_ERROR`.
-- `.unwrap()` throws the `AppError`, so forms check `error.code` and `error.fields` directly (`applyApiError`, `isAppError` in `src/components/content/auth/forms/applyApiError.ts`).
+- `.unwrap()` throws the `AppError`, so forms check `error.code` and `error.fields` directly (`applyApiError`, `isAppError` in `src/utilities/helpers/applyApiError.ts`).
 
 **Toasts:** the base query shows the error toast, with the server's own message and the id `error:<code>` (three failing requests show one toast). Components never catch-and-toast. No toast when:
 - the error has `fields`: it's about form fields, so the form shows it;
@@ -35,7 +35,11 @@ A query *provides* tags; a mutation *invalidates* them; RTK Query refetches ever
 
 | Mutation | Invalidates |
 |---|---|
-| Create / rename / delete project | Project list, Dashboard |
+| Create / delete project | Project list, Dashboard (delete also Activity; never the deleted project's own tag, which would refetch into a 404) |
+| Rename / recolour project | Project list, Dashboard; the response is written straight into that project's cache entry |
+| Leave project | Project list, Dashboard, Activity, Member |
+| Pin / unpin | nothing: optimistic (below) |
+| Open a project (getProject) | not a mutation: its fresh `me.lastOpenedAt` is copied into the cached list, so the sidebar's recents update without a refetch |
 | Add / edit / delete task | that Board, Dashboard, Activity |
 | Move task | optimistic (below), then Dashboard, Activity |
 | Column changes | that Board |
@@ -59,9 +63,10 @@ In `src/utilities/constants/cacheTimes.ts` as `CACHE.<kind>`. RTK Query accepts 
 - `keepUnusedDataFor`: how long data stays cached after the last component using it unmounts.
 - `refetchOnMountOrArgChange`: when a component mounts and cached data is older than this, refetch in the background while the cached data shows.
 
-## Optimistic updates (only two)
+## Optimistic updates (only three)
 - **Move task:** in `onQueryStarted`, `updateQueryData` on the board to move the card instantly → `await queryFulfilled` → on success, write the server's position and completedAt into the cache → on failure, `patch.undo()` and show why.
 - **Tick a task done on the dashboard:** same pattern.
+- **Pin / unpin a project (milestone 5):** same pattern, applied to every cached copy of the project list (it is cached per `?today=`) and to the project itself if cached. On success the server's membership replaces the guess, so the server's clock decides pin order. The success toast waits for the server; a failure only shows the base query's error toast.
 
 Everything else waits for the server, with a loading state on the button.
 

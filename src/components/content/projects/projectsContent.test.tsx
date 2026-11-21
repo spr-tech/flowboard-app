@@ -1,0 +1,54 @@
+import { screen, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+
+import { projectSummary } from "@/test/projectFixtures";
+import { jsonResponse, mockFetch, renderWithStore } from "@/test/renderWithStore";
+import ProjectsContent from "./projectsContent";
+
+vi.mock("@/components/ui/toast/toast", () => ({ toast: vi.fn() }));
+
+const projects = [
+  projectSummary("fresh", { name: "Fresh", updatedAt: "2026-11-21T10:00:00.000Z" }),
+  projectSummary("pin-2", { name: "Second pin", me: { pinnedAt: "2026-11-15T10:00:00.000Z" } }),
+  projectSummary("shared", { name: "Shared", me: { role: "MEMBER" }, updatedAt: "2026-11-21T11:00:00.000Z" }),
+  projectSummary("pin-1", { name: "First pin", me: { pinnedAt: "2026-11-10T10:00:00.000Z" } }),
+];
+
+const cardNames = () => screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
+
+describe("ProjectsContent", () => {
+  it("lists pinned projects first in pin order, then the rest newest-updated first", async () => {
+    mockFetch(() => jsonResponse(200, projects));
+    renderWithStore(<ProjectsContent filter="all" />);
+
+    await screen.findByText("First pin");
+    expect(cardNames()).toEqual(["First pin", "Second pin", "Shared", "Fresh"]);
+    expect(screen.getByText("4 projects · 3 you own")).toBeInTheDocument();
+    expect(screen.getByText("Pinned projects come first. Your first 3 pins show in the sidebar.")).toBeInTheDocument();
+  });
+
+  it("applies the filter tab, and marks the active tab", async () => {
+    mockFetch(() => jsonResponse(200, projects));
+    renderWithStore(<ProjectsContent filter="shared" />);
+
+    await screen.findByText("Shared");
+    expect(cardNames()).toEqual(["Shared"]);
+    const tabs = screen.getByRole("navigation", { name: "Filter projects" });
+    expect(within(tabs).getByRole("link", { name: "Shared with me" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("puts the pin toggle next to the card link, not inside it", async () => {
+    mockFetch(() => jsonResponse(200, [projectSummary("a", { name: "Alpha" })]));
+    renderWithStore(<ProjectsContent filter="all" />);
+
+    const toggle = await screen.findByRole("button", { name: "Pin Alpha" });
+    expect(toggle.closest("a")).toBeNull();
+  });
+
+  it("offers to create the first project when there are none", async () => {
+    mockFetch(() => jsonResponse(200, []));
+    renderWithStore(<ProjectsContent filter="all" />);
+
+    expect(await screen.findByRole("heading", { name: "Create your first project" })).toBeInTheDocument();
+  });
+});

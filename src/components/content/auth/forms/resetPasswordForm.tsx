@@ -11,7 +11,7 @@ import type { ResetTokenState } from "@/models/responses/authResponses";
 import { resetPasswordFormSchema, type ResetPasswordFormValues } from "@/models/validations/authValidation";
 import { useResetPasswordMutation } from "@/services/authService";
 import { getPasswordChecks, PasswordChecks } from "../passwordChecks";
-import { applyApiError, isAppError } from "./applyApiError";
+import { applyApiError, isAppError } from "@/utilities/helpers/applyApiError";
 
 /** The server's error codes for a link that stopped working while the form was open. */
 const TOKEN_ERROR_STATES: Record<string, Exclude<ResetTokenState, "valid">> = {

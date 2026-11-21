@@ -7,6 +7,7 @@ import { Logo } from "@/components/ui/logo/logo";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { mobileMenuClosed, mobileMenuOpened, selectIsMobileMenuOpen } from "@/stores/uiSlice";
 import { SidebarNav } from "./sidebarNav";
+import { SidebarProjects } from "./sidebarProjects";
 import { TopBar } from "./topBar";
 
 export type AppShellUser = {
@@ -36,6 +37,7 @@ export function AppShell({ user, children }: AppShellProps) {
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col gap-8 bg-surface-inverse px-4 py-5 md:flex">
         <Logo variant="onDark" className="px-2" />
         <SidebarNav />
+        <SidebarProjects />
       </aside>
 
       <Drawer
@@ -50,6 +52,7 @@ export function AppShell({ user, children }: AppShellProps) {
         <div className="flex flex-col gap-8 pt-5">
           <Logo variant="onDark" className="px-2" />
           <SidebarNav onNavigate={closeMenu} />
+          <SidebarProjects onNavigate={closeMenu} />
         </div>
       </Drawer>
 
