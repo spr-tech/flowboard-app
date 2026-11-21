@@ -5,10 +5,13 @@ import { createSlice } from "@reduxjs/toolkit";
 export type UiState = {
   /** The phone-sized navigation drawer (the sidebar is always visible on md and up). */
   isMobileMenuOpen: boolean;
+  /** The landing page's phone menu (under md). Separate from the app shell's drawer. */
+  isLandingMenuOpen: boolean;
 };
 
 const initialState: UiState = {
   isMobileMenuOpen: false,
+  isLandingMenuOpen: false,
 };
 
 export const uiSlice = createSlice({
@@ -22,11 +25,18 @@ export const uiSlice = createSlice({
     mobileMenuClosed(state) {
       state.isMobileMenuOpen = false;
     },
+    landingMenuToggled(state) {
+      state.isLandingMenuOpen = !state.isLandingMenuOpen;
+    },
+    landingMenuClosed(state) {
+      state.isLandingMenuOpen = false;
+    },
   },
   selectors: {
     selectIsMobileMenuOpen: (state) => state.isMobileMenuOpen,
+    selectIsLandingMenuOpen: (state) => state.isLandingMenuOpen,
   },
 });
 
-export const { mobileMenuOpened, mobileMenuClosed } = uiSlice.actions;
-export const { selectIsMobileMenuOpen } = uiSlice.selectors;
+export const { mobileMenuOpened, mobileMenuClosed, landingMenuToggled, landingMenuClosed } = uiSlice.actions;
+export const { selectIsMobileMenuOpen, selectIsLandingMenuOpen } = uiSlice.selectors;

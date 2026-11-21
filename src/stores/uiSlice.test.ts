@@ -1,11 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import { makeStore } from "./store";
-import { mobileMenuClosed, mobileMenuOpened, selectIsMobileMenuOpen, uiSlice } from "./uiSlice";
+import {
+  landingMenuClosed,
+  landingMenuToggled,
+  mobileMenuClosed,
+  mobileMenuOpened,
+  selectIsLandingMenuOpen,
+  selectIsMobileMenuOpen,
+  uiSlice,
+} from "./uiSlice";
 
 describe("uiSlice", () => {
   it("starts with the mobile menu closed", () => {
-    expect(uiSlice.getInitialState()).toEqual({ isMobileMenuOpen: false });
+    expect(uiSlice.getInitialState()).toEqual({ isMobileMenuOpen: false, isLandingMenuOpen: false });
   });
 
   it("opens and closes the mobile menu", () => {
@@ -13,6 +21,21 @@ describe("uiSlice", () => {
     expect(opened.isMobileMenuOpen).toBe(true);
 
     expect(uiSlice.reducer(opened, mobileMenuClosed()).isMobileMenuOpen).toBe(false);
+  });
+
+  it("toggles and closes the landing menu, separately from the app's drawer", () => {
+    const store = makeStore();
+
+    store.dispatch(landingMenuToggled());
+    expect(selectIsLandingMenuOpen(store.getState())).toBe(true);
+    expect(selectIsMobileMenuOpen(store.getState())).toBe(false);
+
+    store.dispatch(landingMenuToggled());
+    expect(selectIsLandingMenuOpen(store.getState())).toBe(false);
+
+    store.dispatch(landingMenuToggled());
+    store.dispatch(landingMenuClosed());
+    expect(selectIsLandingMenuOpen(store.getState())).toBe(false);
   });
 
   it("is wired into the store, with a selector that reads it", () => {

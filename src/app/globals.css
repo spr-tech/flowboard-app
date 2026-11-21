@@ -235,6 +235,8 @@
   --animate-float-slow: float 6s ease-in-out infinite reverse;
   --animate-sway: sway 7s ease-in-out infinite;
   --animate-flip: flip 6s cubic-bezier(0.6, 0, 0.2, 1) infinite;
+  /* The landing phone menu: fades in and drops 8px into place. */
+  --animate-menu-in: menu-in 0.25s var(--ease-entrance) both;
 
   /* Headline words come up from below with a slight twist. */
   @keyframes rise {
@@ -275,6 +277,12 @@
     }
   }
   /* A task card that turns over from "to do" to "done", rests, and turns back. */
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      translate: 0 -8px;
+    }
+  }
   @keyframes flip {
     0%,
     38% {
