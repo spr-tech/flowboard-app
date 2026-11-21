@@ -19,7 +19,7 @@
 ## Errors
 Every failed request becomes one `AppError` (`src/models/responses/apiError.ts`): `{ status: number | "NETWORK", code, message, fields? }`.
 - Our error body → copied across. No answer (offline, timeout) → `NETWORK_ERROR` with "We couldn't reach Flowboard…". Anything else (a hosting error page that isn't JSON) → `UNKNOWN_ERROR`.
-- `.unwrap()` throws the `AppError`, so forms check `error.code` and `error.fields` directly (`applyApiError`, `isAppError` in `src/components/content/auth/forms/applyApiError.ts`).
+- `.unwrap()` throws the `AppError`, so forms check `error.code` and `error.fields` directly (`applyApiError`, `isAppError` in `src/utilities/helpers/applyApiError.ts`).
 
 **Toasts:** the base query shows the error toast, with the server's own message and the id `error:<code>` (three failing requests show one toast). Components never catch-and-toast. No toast when:
 - the error has `fields`: it's about form fields, so the form shows it;

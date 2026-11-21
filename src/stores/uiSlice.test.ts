@@ -1,11 +1,29 @@
 import { describe, expect, it } from "vitest";
 
 import { makeStore } from "./store";
-import { mobileMenuClosed, mobileMenuOpened, selectIsMobileMenuOpen, uiSlice } from "./uiSlice";
+import {
+  mobileMenuClosed,
+  mobileMenuOpened,
+  newProjectDialogClosed,
+  newProjectDialogOpened,
+  selectIsMobileMenuOpen,
+  selectIsNewProjectDialogOpen,
+  uiSlice,
+} from "./uiSlice";
 
 describe("uiSlice", () => {
-  it("starts with the mobile menu closed", () => {
-    expect(uiSlice.getInitialState()).toEqual({ isMobileMenuOpen: false });
+  it("starts with the mobile menu and the New project dialog closed", () => {
+    expect(uiSlice.getInitialState()).toEqual({ isMobileMenuOpen: false, isNewProjectDialogOpen: false });
+  });
+
+  it("opens and closes the New project dialog", () => {
+    const store = makeStore();
+
+    store.dispatch(newProjectDialogOpened());
+    expect(selectIsNewProjectDialogOpen(store.getState())).toBe(true);
+
+    store.dispatch(newProjectDialogClosed());
+    expect(selectIsNewProjectDialogOpen(store.getState())).toBe(false);
   });
 
   it("opens and closes the mobile menu", () => {

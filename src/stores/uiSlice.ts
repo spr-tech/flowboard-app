@@ -5,10 +5,13 @@ import { createSlice } from "@reduxjs/toolkit";
 export type UiState = {
   /** The phone-sized navigation drawer (the sidebar is always visible on md and up). */
   isMobileMenuOpen: boolean;
+  /** The New project dialog (opened from the projects page; a modal library is revisited in milestone 6). */
+  isNewProjectDialogOpen: boolean;
 };
 
 const initialState: UiState = {
   isMobileMenuOpen: false,
+  isNewProjectDialogOpen: false,
 };
 
 export const uiSlice = createSlice({
@@ -22,11 +25,18 @@ export const uiSlice = createSlice({
     mobileMenuClosed(state) {
       state.isMobileMenuOpen = false;
     },
+    newProjectDialogOpened(state) {
+      state.isNewProjectDialogOpen = true;
+    },
+    newProjectDialogClosed(state) {
+      state.isNewProjectDialogOpen = false;
+    },
   },
   selectors: {
     selectIsMobileMenuOpen: (state) => state.isMobileMenuOpen,
+    selectIsNewProjectDialogOpen: (state) => state.isNewProjectDialogOpen,
   },
 });
 
-export const { mobileMenuOpened, mobileMenuClosed } = uiSlice.actions;
-export const { selectIsMobileMenuOpen } = uiSlice.selectors;
+export const { mobileMenuOpened, mobileMenuClosed, newProjectDialogOpened, newProjectDialogClosed } = uiSlice.actions;
+export const { selectIsMobileMenuOpen, selectIsNewProjectDialogOpen } = uiSlice.selectors;
