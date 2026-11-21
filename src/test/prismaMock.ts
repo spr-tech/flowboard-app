@@ -4,6 +4,7 @@
 //   import { prismaMock, resetPrismaMock } from "@/test/prismaMock";
 //
 // Every model method is a vi.fn() you can program with .mockResolvedValue(). Nothing touches a database.
+import type { Mock } from "vitest";
 import { mockDeep, mockReset, type DeepMockProxy } from "vitest-mock-extended";
 
 import type { PrismaClient } from "@/lib/generated/prisma";
@@ -23,4 +24,12 @@ export function resetPrismaMock() {
   mockReset(prismaMock);
   prismaMock.$transaction.mockImplementation(((arg: unknown) =>
     typeof arg === "function" ? arg(prismaMock) : Promise.all(arg as Promise<unknown>[])) as never);
+}
+
+/**
+ * groupBy's generic signature hides the mock methods from TypeScript. Wrap it to program it:
+ *   mockGroupBy(prismaMock.task.groupBy).mockResolvedValue([{ projectId: "p1", _count: { _all: 2 } }]);
+ */
+export function mockGroupBy(groupBy: unknown) {
+  return groupBy as Mock<(...args: unknown[]) => Promise<unknown>>;
 }

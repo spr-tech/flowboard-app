@@ -2,7 +2,7 @@ import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
 // The Prisma CLI (migrate, db seed, studio) uses the DIRECT connection.
-// The app itself uses the pooled DATABASE_URL through the adapter in src/lib/prisma.ts.
+// The app itself uses the pooled DATABASE_URL through the adapter in src/server/lib/prisma.ts.
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {

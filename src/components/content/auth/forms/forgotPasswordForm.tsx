@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button/button";
 import { FormInput } from "@/components/ui/form/formInput";
 import { forgotPasswordSchema, type ForgotPasswordFormValues } from "@/models/validations/authValidation";
 import { useForgotPasswordMutation } from "@/services/authService";
-import { applyApiError } from "./applyApiError";
+import { applyApiError } from "@/utilities/helpers/applyApiError";
 
 type ForgotPasswordFormProps = {
   /** Called with the (lowercased) email once the request has gone through. */

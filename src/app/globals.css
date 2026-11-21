@@ -40,6 +40,13 @@
   --brand-chip-low-text: #1d4e86;
   --brand-chip-done: #e2f3e6;
   --brand-chip-done-text: #1e5b30;
+
+  /* Project colours not already above (from docs/designs/projects.dc.html). */
+  --brand-blue: #4f8be0;
+  --brand-teal: #0f7b6c;
+  --brand-plum: #7c3a8e;
+  --brand-amber: #e8b931;
+  --brand-rose: #f28fad;
 }
 
 /* ─── 2. Role tokens ─────────────────────────────────────────────────────────────
@@ -91,6 +98,24 @@
   --status-low-fg: var(--brand-chip-low-text);
   --status-done: var(--brand-chip-done);
   --status-done-fg: var(--brand-chip-done-text);
+
+  /* Project colours (the 8 ProjectColour keys), then the readable text on each */
+  --project-vermilion: var(--brand-vermilion);
+  --project-vermilion-fg: var(--brand-white);
+  --project-espresso: var(--brand-espresso);
+  --project-espresso-fg: var(--brand-cream);
+  --project-lime: var(--brand-lime);
+  --project-lime-fg: var(--brand-espresso);
+  --project-blue: var(--brand-blue);
+  --project-blue-fg: var(--brand-espresso);
+  --project-teal: var(--brand-teal);
+  --project-teal-fg: var(--brand-white);
+  --project-plum: var(--brand-plum);
+  --project-plum-fg: var(--brand-white);
+  --project-amber: var(--brand-amber);
+  --project-amber-fg: var(--brand-espresso);
+  --project-rose: var(--brand-rose);
+  --project-rose-fg: var(--brand-espresso);
 }
 
 /* ─── 3. shadcn compatibility ───────────────────────────────────────────────────
@@ -162,6 +187,23 @@
   --color-status-low-fg: var(--status-low-fg);
   --color-status-done: var(--status-done);
   --color-status-done-fg: var(--status-done-fg);
+
+  --color-project-vermilion: var(--project-vermilion);
+  --color-project-vermilion-fg: var(--project-vermilion-fg);
+  --color-project-espresso: var(--project-espresso);
+  --color-project-espresso-fg: var(--project-espresso-fg);
+  --color-project-lime: var(--project-lime);
+  --color-project-lime-fg: var(--project-lime-fg);
+  --color-project-blue: var(--project-blue);
+  --color-project-blue-fg: var(--project-blue-fg);
+  --color-project-teal: var(--project-teal);
+  --color-project-teal-fg: var(--project-teal-fg);
+  --color-project-plum: var(--project-plum);
+  --color-project-plum-fg: var(--project-plum-fg);
+  --color-project-amber: var(--project-amber);
+  --color-project-amber-fg: var(--project-amber-fg);
+  --color-project-rose: var(--project-rose);
+  --color-project-rose-fg: var(--project-rose-fg);
 
   /* shadcn names (section 3) */
   --color-background: var(--background);

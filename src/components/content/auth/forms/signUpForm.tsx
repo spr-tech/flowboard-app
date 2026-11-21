@@ -14,7 +14,7 @@ import { registerSchema, type RegisterFormValues } from "@/models/validations/au
 import { useRegisterMutation } from "@/services/authService";
 import { safeCallbackUrl } from "@/utilities/helpers/safeCallbackUrl";
 import { getPasswordChecks, PasswordChecks } from "../passwordChecks";
-import { applyApiError, isAppError } from "./applyApiError";
+import { applyApiError, isAppError } from "@/utilities/helpers/applyApiError";
 
 const FIELDS = ["name", "email", "password", "confirmPassword"] as const;
 

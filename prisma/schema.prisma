@@ -118,10 +118,15 @@ model Project {
 
 // Ownership lives only here, in role.
 model ProjectMember {
-  userId    String
-  projectId String
-  role      ProjectRole @default(MEMBER)
-  joinedAt  DateTime    @default(now())
+  userId       String
+  projectId    String
+  role         ProjectRole @default(MEMBER)
+  joinedAt     DateTime    @default(now())
+  // Per user. Null = not pinned. Pinned projects sort by this, oldest pin first.
+  pinnedAt     DateTime?
+  // When this user last opened the project (written at most once a minute). Drives the
+  // sidebar's "recent" slots; null falls back to joinedAt.
+  lastOpenedAt DateTime?
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)

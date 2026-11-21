@@ -1,0 +1,5 @@
+# Commits that `git blame` (and GitHub's blame view) should skip: mechanical changes only.
+# Locally, turn it on once with: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Format the codebase with Prettier (printWidth 120)
+4d1896989e8d7293db50a3a1cc80715627a6351f

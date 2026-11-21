@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Flowboard project settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBF5EE}
+a{color:#D23F27}
+.fb-in{transition:border-color .2s,box-shadow .2s}
+.fb-in:focus{outline:none;border-color:#1E1512;box-shadow:0 0 0 4px rgba(212,240,74,.75)}
+.fb-sec{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:32px;padding:32px 0;border-top:1px solid #EADFD3}
+.fb-row{transition:background .15s}
+.fb-row:hover{background:#FBF5EE}
+.fb-icon{width:36px;height:36px;border-radius:10px;border:0;background:transparent;cursor:pointer;color:#5A4A42;display:inline-flex;align-items:center;justify-content:center}
+.fb-icon:hover{background:#F4EADF}
+.fb-icon:disabled{opacity:.3;cursor:not-allowed;background:transparent}
+.fb-pop{animation:fbPop .22s cubic-bezier(.2,.8,.2,1) both}
+@keyframes fbPop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.fb-show-sm{display:none !important}
+@media (max-width:960px){.fb-sec{grid-template-columns:minmax(0,1fr);gap:16px}}
+@media (max-width:860px){.fb-side{display:none !important}.fb-show-sm{display:inline-flex !important}.fb-hide-sm{display:none !important}}
+@media (prefers-reduced-motion:reduce){.fb-pop{animation:none}}
+</style>
+</helmet>
+<div style="font-family: Inter, system-ui, sans-serif; color: #1E1512; background: #FBF5EE; min-height: 100vh; display: flex">
+
+<div class="fb-side" style="flex: none; position: sticky; top: 0; height: 100vh">
+<dc-import name="Sidebar" active="projects" hint-size="240px,100vh"></dc-import>
+</div>
+
+<div style="flex: 1; min-width: 0">
+<header style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 32px; border-bottom: 1px solid #EADFD3; background: #FBF5EE; position: sticky; top: 0; z-index: 5">
+<nav aria-label="Breadcrumb" style="display: flex; align-items: center; gap: 8px; font-size: 14px">
+<button type="button" class="fb-show-sm" aria-label="Open menu" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #D9C8B8; background: #FFFFFF; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E1512" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
+<a href="Projects.dc.html" class="fb-hide-sm" style="color: #7A675D; text-decoration: none">Projects</a><span class="fb-hide-sm" aria-hidden="true" style="color: #D9C8B8">/</span>
+<a href="Board.dc.html" class="fb-hide-sm" style="color: #7A675D; text-decoration: none">{{savedName}}</a><span class="fb-hide-sm" aria-hidden="true" style="color: #D9C8B8">/</span>
+<span style="font-weight: 600">Settings</span>
+</nav>
+<div style="display: flex; align-items: center; gap: 10px">
+<a href="Projects.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; background: {{accent}}; color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Create</a>
+<button type="button" aria-label="Account menu" style="width: 44px; height: 44px; border-radius: 50%; border: 0; background: {{lime}}; color: #1E1512; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{meInitials}}</button>
+</div>
+</header>
+
+<main style="padding: 32px; max-width: 1080px; box-sizing: border-box">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<div style="display: flex; align-items: center; gap: 16px">
+<span style="width: 56px; height: 56px; border-radius: 18px; background: {{colHex}}; color: {{colOn}}; display: inline-flex; align-items: center; justify-content: center; font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 800">{{initial}}</span>
+<div>
+<h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(30px, 3.4vw, 44px); letter-spacing: -0.04em; line-height: 1; margin: 0">Project settings</h1>
+<p style="margin: 6px 0 0; font-size: 14px; color: #5A4A42">{{savedName}} · you're the {{roleWord}}</p>
+</div>
+</div>
+<a href="Board.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid #1E1512; color: #1E1512; text-decoration: none; font-size: 14px; font-weight: 600">Back to board</a>
+</div>
+<sc-if value="{{isMember}}" hint-placeholder-val="{{ false }}">
+<p role="note" style="margin: 20px 0 0; padding: 12px 16px; border-radius: 14px; background: #F4EADF; font-size: 14px; color: #5A4A42">Only the owner can change the name, colour, columns and members. You can see them here, and leave the project at the bottom.</p>
+</sc-if>
+
+<section class="fb-sec" aria-labelledby="ps-general" style="margin-top: 24px">
+<div>
+<h2 id="ps-general" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px">General</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #5A4A42">The name and colour everyone sees on the board, the projects list and the dashboard.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #EADFD3; border-radius: 24px; padding: 24px">
+<label for="ps-name" style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px">Project name</label>
+<input id="ps-name" class="fb-in" value="{{name}}" onChange="{{onName}}" disabled="{{isMember}}" maxlength="60" style="width: 100%; box-sizing: border-box; height: 52px; border: 1.5px solid #D9C8B8; border-radius: 14px; padding: 0 16px; font: inherit; font-size: 15px; background: {{fieldBg}}; color: #1E1512">
+<p id="ps-colour" style="font-size: 14px; font-weight: 600; margin: 20px 0 10px">Colour</p>
+<div role="radiogroup" aria-labelledby="ps-colour" style="display: flex; flex-wrap: wrap; gap: 10px">
+<sc-for list="{{swatches}}" as="sw" hint-placeholder-count="8">
+<button type="button" role="radio" aria-checked="{{sw.on}}" aria-label="{{sw.label}}" disabled="{{isMember}}" onClick="{{sw.pick}}" style="width: 40px; height: 40px; border-radius: 12px; border: 0; background: {{sw.hex}}; cursor: {{sw.cursor}}; outline: {{sw.ring}}; outline-offset: 3px"></button>
+</sc-for>
+</div>
+<sc-if value="{{isOwner}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px">
+<sc-if value="{{generalDirty}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{resetGeneral}}" style="min-height: 48px; padding: 0 20px; border-radius: 999px; border: 1.5px solid #1E1512; background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: #1E1512; cursor: pointer">Cancel</button>
+<button type="button" onClick="{{saveGeneral}}" style="min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #1E1512; font: inherit; font-size: 15px; font-weight: 600; color: #FBF5EE; cursor: pointer">Save changes</button>
+</sc-if>
+<sc-if value="{{generalClean}}" hint-placeholder-val="{{ true }}">
+<button type="button" disabled aria-disabled="true" style="min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #E2D4C6; font: inherit; font-size: 15px; font-weight: 600; color: #7A675D; cursor: not-allowed">Save changes</button>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</section>
+
+<section class="fb-sec" aria-labelledby="ps-columns">
+<div>
+<h2 id="ps-columns" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px">Columns</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #5A4A42">The board's columns, left to right. Tasks in the done column count as finished on the dashboard.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #EADFD3; border-radius: 24px; padding: 12px">
+<ol style="list-style: none; margin: 0; padding: 0">
+<sc-for list="{{cols}}" as="c" hint-placeholder-count="4">
+<li class="fb-row" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px">
+<span style="width: 26px; font-size: 13px; color: #7A675D; text-align: center">{{c.n}}</span>
+<input class="fb-in" aria-label="Column name" value="{{c.name}}" onChange="{{c.onName}}" disabled="{{isMember}}" maxlength="40" style="flex: 1; min-width: 0; height: 40px; border: 1.5px solid transparent; border-radius: 10px; padding: 0 10px; font: inherit; font-size: 15px; font-weight: 600; background: transparent; color: #1E1512">
+<span class="fb-hide-sm" style="font-size: 13px; color: #7A675D; white-space: nowrap">{{c.countLabel}}</span>
+<sc-if value="{{c.isDone}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 600; background: #E2F3E6; color: #1E5B30; padding: 4px 10px; border-radius: 999px; white-space: nowrap">Done column</span></sc-if>
+<sc-if value="{{c.canMakeDone}}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{c.makeDone}}" style="min-height: 32px; padding: 0 10px; border-radius: 999px; border: 1px solid #D9C8B8; background: #FFFFFF; font: inherit; font-size: 12px; font-weight: 600; color: #5A4A42; cursor: pointer; white-space: nowrap">Set as done</button></sc-if>
+<sc-if value="{{isOwner}}" hint-placeholder-val="{{ true }}">
+<button type="button" class="fb-icon" aria-label="Move {{c.name}} left" disabled="{{c.first}}" onClick="{{c.up}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button>
+<button type="button" class="fb-icon" aria-label="Move {{c.name}} right" disabled="{{c.last}}" onClick="{{c.down}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></button>
+<button type="button" class="fb-icon" aria-label="Delete {{c.name}}" disabled="{{onlyOne}}" onClick="{{c.askDelete}}" style="color: #B3261E"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"></path></svg></button>
+</sc-if>
+</li>
+</sc-for>
+</ol>
+<sc-if value="{{isOwner}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; gap: 8px; padding: 12px; border-top: 1px solid #F4EADF; margin-top: 6px">
+<input class="fb-in" aria-label="New column name" value="{{newCol}}" onChange="{{onNewCol}}" onKeyDown="{{newColKey}}" placeholder="New column, e.g. Blocked" maxlength="40" style="flex: 1; min-width: 0; height: 44px; border: 1.5px solid #D9C8B8; border-radius: 12px; padding: 0 12px; font: inherit; font-size: 15px; color: #1E1512">
+<button type="button" onClick="{{addCol}}" style="min-height: 44px; padding: 0 18px; border-radius: 999px; border: 0; background: #1E1512; color: #FBF5EE; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Add column</button>
+</div>
+<p style="margin: 0; padding: 0 12px 6px; font-size: 13px; color: #7A675D">New columns go just before the done column. Changes save as you make them.</p>
+</sc-if>
+</div>
+</section>
+
+<section class="fb-sec" aria-labelledby="ps-members">
+<div>
+<h2 id="ps-members" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px">Members</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #5A4A42">Everyone on this board. Invites are sent by email and the link works for 7 days.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px">
+<sc-if value="{{isOwner}}" hint-placeholder-val="{{ true }}">
+<div style="background: #1E1512; color: #F6EDE4; border-radius: 24px; padding: 20px">
+<label for="ps-invite" style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 10px">Invite by email</label>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<input id="ps-invite" class="fb-in" type="email" value="{{inviteEmail}}" onChange="{{onInvite}}" onKeyDown="{{inviteKey}}" placeholder="teammate@company.com" aria-describedby="ps-invite-msg" style="flex: 1 1 220px; min-width: 0; height: 48px; border: 1.5px solid rgba(255,255,255,.18); border-radius: 12px; padding: 0 14px; font: inherit; font-size: 15px; background: #2A1F1A; color: #F6EDE4">
+<button type="button" onClick="{{sendInvite}}" style="min-height: 48px; padding: 0 20px; border-radius: 999px; border: 0; background: {{lime}}; color: #1E1512; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Send invite</button>
+</div>
+<p id="ps-invite-msg" role="status" style="margin: 10px 0 0; min-height: 18px; font-size: 13px; color: {{inviteMsgColour}}">{{inviteMsg}}</p>
+</div>
+</sc-if>
+
+<div style="background: #FFFFFF; border: 1px solid #EADFD3; border-radius: 24px; padding: 8px">
+<ul style="list-style: none; margin: 0; padding: 0">
+<sc-for list="{{members}}" as="m" hint-placeholder-count="3">
+<li class="fb-row" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px; border-radius: 16px">
+<span style="flex: none; width: 40px; height: 40px; border-radius: 50%; background: {{m.bg}}; color: {{m.fg}}; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">{{m.initials}}</span>
+<span style="flex: 1 1 160px; min-width: 0"><span style="display: block; font-size: 15px; font-weight: 600">{{m.name}}</span><span style="display: block; font-size: 13px; color: #7A675D">{{m.email}} · {{m.tasks}}</span></span>
+<sc-if value="{{m.owner}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 600; background: #1E1512; color: {{lime}}; padding: 4px 10px; border-radius: 999px">Owner</span></sc-if>
+<sc-if value="{{m.member}}" hint-placeholder-val="{{ true }}"><span style="font-size: 12px; font-weight: 600; border: 1px solid #D9C8B8; color: #5A4A42; padding: 3px 10px; border-radius: 999px">Member</span></sc-if>
+<sc-if value="{{m.removable}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{m.confirming}}" hint-placeholder-val="{{ false }}">
+<span style="flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 4px; font-size: 13px; color: #5A4A42">Remove {{m.first}}? {{m.removeNote}}
+<button type="button" onClick="{{m.cancel}}" style="min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid #D9C8B8; background: #FFFFFF; font: inherit; font-size: 13px; font-weight: 600; color: #1E1512; cursor: pointer">Cancel</button>
+<button type="button" onClick="{{m.remove}}" style="min-height: 34px; padding: 0 12px; border-radius: 999px; border: 0; background: #B3261E; font: inherit; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer">Remove</button>
+</span>
+</sc-if>
+<sc-if value="{{m.idle}}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{m.ask}}" style="min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid #D9C8B8; background: #FFFFFF; font: inherit; font-size: 13px; font-weight: 600; color: #B3261E; cursor: pointer">Remove</button>
+</sc-if>
+</sc-if>
+</li>
+</sc-for>
+</ul>
+</div>
+
+<sc-if value="{{showInvites}}" hint-placeholder-val="{{ true }}">
+<div style="background: #FFFFFF; border: 1px solid #EADFD3; border-radius: 24px; padding: 8px">
+<p style="margin: 0; padding: 12px 12px 4px; font-size: 13px; font-weight: 600; color: #5A4A42">Pending invites</p>
+<ul style="list-style: none; margin: 0; padding: 0">
+<sc-for list="{{invites}}" as="iv" hint-placeholder-count="2">
+<li class="fb-row" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px; border-radius: 16px">
+<span style="flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1.5px dashed #D9C8B8; display: inline-flex; align-items: center; justify-content: center; color: #7A675D"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v12H4zM4 7l8 6 8-6"></path></svg></span>
+<span style="flex: 1 1 160px; min-width: 0"><span style="display: block; font-size: 15px; font-weight: 600">{{iv.email}}</span><span style="display: block; font-size: 13px; color: {{iv.noteColour}}">{{iv.note}}</span></span>
+<button type="button" onClick="{{iv.resend}}" style="min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid #D9C8B8; background: #FFFFFF; font: inherit; font-size: 13px; font-weight: 600; color: #1E1512; cursor: pointer">Resend</button>
+<button type="button" onClick="{{iv.cancel}}" style="min-height: 34px; padding: 0 12px; border-radius: 999px; border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 600; color: #B3261E; cursor: pointer">Cancel invite</button>
+</li>
+</sc-for>
+</ul>
+</div>
+</sc-if>
+</div>
+</section>
+
+<section class="fb-sec" aria-labelledby="ps-danger">
+<div>
+<h2 id="ps-danger" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; color: #B3261E">Danger zone</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #5A4A42">{{dangerIntro}}</p>
+</div>
+<div style="background: #FFFFFF; border: 1.5px solid #F2C9C3; border-radius: 24px; padding: 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<span style="flex: 1 1 260px"><span style="display: block; font-size: 16px; font-weight: 600">{{dangerTitle}}</span><span style="display: block; font-size: 14px; line-height: 1.5; color: #5A4A42">{{dangerText}}</span></span>
+<button type="button" onClick="{{openDanger}}" style="min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #B3261E; color: #FFFFFF; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">{{dangerButton}}</button>
+</div>
+</section>
+</main>
+</div>
+
+<sc-if value="{{dialog}}" hint-placeholder-val="{{ false }}">
+<div style="position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px">
+<div onClick="{{closeDialog}}" style="position: absolute; inset: 0; background: rgba(30,21,18,0.55)"></div>
+<div role="alertdialog" aria-modal="true" aria-labelledby="ps-dlg" class="fb-pop" style="position: relative; width: 100%; max-width: 500px; background: #FBF5EE; border-radius: 28px; padding: 28px; box-sizing: border-box">
+<h2 id="ps-dlg" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 10px">{{dlgTitle}}</h2>
+<p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #5A4A42">{{dlgText}}</p>
+<sc-if value="{{dlgMove}}" hint-placeholder-val="{{ false }}">
+<label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #5A4A42; margin-bottom: 14px">Move its tasks to
+<select aria-label="Target column" value="{{moveTo}}" onChange="{{onMoveTo}}" style="height: 40px; border: 1.5px solid #D9C8B8; border-radius: 10px; padding: 0 8px; font: inherit; font-size: 14px; background: #FFFFFF; color: #1E1512">
+<sc-for list="{{moveOptions}}" as="o" hint-placeholder-count="3"><option value="{{o.id}}">{{o.name}}</option></sc-for>
+</select>
+</label>
+<p style="margin: 0 0 14px; font-size: 13px; color: #7A675D">To delete the tasks too, use the column's menu on the board.</p>
+</sc-if>
+<sc-if value="{{dlgType}}" hint-placeholder-val="{{ false }}">
+<label for="ps-type" style="display: block; font-size: 13px; color: #5A4A42; margin-bottom: 6px">Type <strong style="color: #1E1512">{{dlgTarget}}</strong> to confirm. This can't be undone.</label>
+<input id="ps-type" class="fb-in" value="{{typed}}" onChange="{{onTyped}}" autocomplete="off" style="width: 100%; box-sizing: border-box; height: 48px; border: 1.5px solid #D9C8B8; border-radius: 12px; padding: 0 12px; font: inherit; font-size: 15px; background: #FFFFFF; color: #1E1512">
+</sc-if>
+<div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px">
+<button type="button" onClick="{{closeDialog}}" style="min-height: 48px; padding: 0 20px; border-radius: 999px; border: 1.5px solid #1E1512; background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: #1E1512; cursor: pointer">Cancel</button>
+<sc-if value="{{dlgCan}}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{confirmDialog}}" style="min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #B3261E; font: inherit; font-size: 15px; font-weight: 600; color: #FFFFFF; cursor: pointer">{{dlgButton}}</button></sc-if>
+<sc-if value="{{dlgCannot}}" hint-placeholder-val="{{ false }}"><button type="button" disabled aria-disabled="true" style="min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #E2D4C6; font: inherit; font-size: 15px; font-weight: 600; color: #7A675D; cursor: not-allowed">{{dlgButton}}</button></sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{toast}}" hint-placeholder-val="{{ false }}">
+<div role="status" class="fb-pop" style="position: fixed; right: 24px; bottom: 24px; z-index: 60; display: flex; align-items: center; gap: 10px; background: #1E1512; color: #FBF5EE; border-radius: 16px; padding: 14px 18px; font-size: 15px; font-weight: 500">
+<span style="width: 24px; height: 24px; border-radius: 8px; background: {{lime}}; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E1512" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></span>{{toastText}}
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"viewer":{"editor":"enum","options":["owner","member"],"default":"owner"},"accent":{"editor":"color","default":"#D23F27","options":["#D23F27","#E8552B","#C2352F"]},"lime":{"editor":"color","default":"#D4F04A","options":["#D4F04A","#C8F169","#E4F58A"]},"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: 'Website relaunch', savedName: 'Website relaunch', colour: 'vermilion', savedColour: 'vermilion',
+      columns: [
+        { id: 'c1', name: 'To do', isDone: false, tasks: 3 },
+        { id: 'c2', name: 'In progress', isDone: false, tasks: 2 },
+        { id: 'c3', name: 'Review', isDone: false, tasks: 1 },
+        { id: 'c4', name: 'Done', isDone: true, tasks: 2 }
+      ],
+      newCol: '',
+      members: [
+        { id: 'MJ', name: 'Muizz Jamiu', email: 'muizz@flowboard.app', role: 'OWNER', tasks: 4, bg: 'lime', fg: '#1E1512' },
+        { id: 'AO', name: 'Ada Okafor', email: 'ada@team.dev', role: 'MEMBER', tasks: 3, bg: '#FBE1DA', fg: '#8E2614' },
+        { id: 'TK', name: 'Tobi Kareem', email: 'tobi@team.dev', role: 'MEMBER', tasks: 1, bg: '#1E1512', fg: '#FBF5EE' }
+      ],
+      invites: [
+        { email: 'bisi@team.dev', state: 'pending', days: 2 },
+        { email: 'kemi@team.dev', state: 'expired', days: 9 }
+      ],
+      confirmRemove: '',
+      inviteEmail: '', inviteMsg: '', inviteOk: true,
+      dialog: '', delCol: '', moveTo: '', typed: '',
+      toast: ''
+    };
+  }
+  componentWillUnmount() { clearTimeout(this.t); }
+  flash(text) { clearTimeout(this.t); this.setState({ toast: text }); this.t = setTimeout(() => this.setState({ toast: '' }), 2800); }
+  renderVals() {
+    const s = this.state;
+    const accent = this.props.accent ?? '#D23F27';
+    const lime = this.props.lime ?? '#D4F04A';
+    const owner = (this.props.viewer ?? 'owner') === 'owner';
+    const palette = [
+      ['vermilion', 'Vermilion', accent, '#FFFFFF'], ['espresso', 'Espresso', '#1E1512', '#FBF5EE'],
+      ['lime', 'Lime', lime, '#1E1512'], ['blue', 'Blue', '#4F8BE0', '#1E1512'],
+      ['teal', 'Teal', '#0F7B6C', '#FFFFFF'], ['plum', 'Plum', '#7C3A8E', '#FFFFFF'],
+      ['amber', 'Amber', '#E8B931', '#1E1512'], ['rose', 'Rose', '#F28FAD', '#1E1512']
+    ];
+    const col = palette.find((p) => p[0] === s.colour);
+    const trimmed = s.name.trim();
+    const dirty = trimmed.length > 0 && (trimmed !== s.savedName || s.colour !== s.savedColour);
+    const meId = owner ? 'MJ' : 'AO';
+    const cols = s.columns;
+    const setCols = (next) => this.setState({ columns: next });
+    const move = (i, d) => { const n = cols.slice(); const x = n[i]; n.splice(i, 1); n.splice(i + d, 0, x); setCols(n); };
+    const addCol = () => {
+      const name = s.newCol.trim();
+      if (!name) return;
+      const n = cols.slice();
+      const di = n.findIndex((c) => c.isDone);
+      n.splice(di >= 0 ? di : n.length, 0, { id: 'c' + Date.now(), name: name, isDone: false, tasks: 0 });
+      this.setState({ columns: n, newCol: '' });
+      this.flash(name + ' column added');
+    };
+    const validEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    const sendInvite = () => {
+      const email = s.inviteEmail.trim().toLowerCase();
+      if (!validEmail(email)) { this.setState({ inviteMsg: 'Enter a valid email address.', inviteOk: false }); return; }
+      const m = s.members.find((x) => x.email === email);
+      if (m) { this.setState({ inviteMsg: m.name + ' is already a member.', inviteOk: false }); return; }
+      const existing = s.invites.find((x) => x.email === email);
+      if (existing) {
+        this.setState({ invites: s.invites.map((x) => (x.email === email ? { email: email, state: 'pending', days: 0 } : x)), inviteEmail: '', inviteMsg: 'There was already an invite for ' + email + ', so we sent it again.', inviteOk: true });
+        return;
+      }
+      this.setState({ invites: [{ email: email, state: 'pending', days: 0 }].concat(s.invites), inviteEmail: '', inviteMsg: 'Invite sent to ' + email + '.', inviteOk: true });
+    };
+    const delC = cols.find((c) => c.id === s.delCol);
+    const myTasks = (s.members.find((m) => m.id === meId) || { tasks: 0 }).tasks;
+    let dlg = { title: '', text: '', move: false, type: false, target: '', button: '', can: false };
+    if (s.dialog === 'column' && delC) {
+      dlg = delC.tasks > 0
+        ? { title: 'Delete “' + delC.name + '”?', text: 'This column has ' + delC.tasks + ' task' + (delC.tasks === 1 ? '' : 's') + '.', move: true, type: false, target: '', button: 'Move tasks and delete', can: true }
+        : { title: 'Delete “' + delC.name + '”?', text: 'This column is empty, so nothing else is affected.', move: false, type: false, target: '', button: 'Delete column', can: true };
+    }
+    if (s.dialog === 'project') dlg = { title: 'Delete this project?', text: 'This deletes the board, all ' + cols.reduce((a, c) => a + c.tasks, 0) + ' tasks, its columns, members and invites, for everyone. It can\'t be undone.', move: false, type: true, target: s.savedName, button: 'Delete project', can: s.typed.trim() === s.savedName };
+    if (s.dialog === 'leave') dlg = { title: 'Leave ' + s.savedName + '?', text: 'It disappears from your projects. Your ' + myTasks + ' task' + (myTasks === 1 ? '' : 's') + ' here become unassigned. The owner can invite you again later.', move: false, type: false, target: '', button: 'Leave project', can: true };
+    const confirmDialog = () => {
+      if (s.dialog === 'column' && delC) {
+        const rest = cols.filter((c) => c.id !== delC.id);
+        let next = rest.map((c) => (c.id === s.moveTo ? { ...c, tasks: c.tasks + delC.tasks } : c));
+        if (delC.isDone && !next.some((c) => c.isDone)) next = next.map((c) => ({ ...c, isDone: c.id === (delC.tasks > 0 ? s.moveTo : next[next.length - 1].id) }));
+        this.setState({ columns: next, dialog: '' });
+        this.flash(delC.name + ' deleted');
+        return;
+      }
+      this.setState({ dialog: '' });
+      this.flash(s.dialog === 'project' ? 'Project deleted (you would land on Projects)' : 'You left the project (you would land on Projects)');
+    };
+    return {
+      accent: accent, lime: lime,
+      isOwner: owner, isMember: !owner, roleWord: owner ? 'owner' : 'a member',
+      meInitials: meId,
+      savedName: s.savedName, initial: s.savedName.charAt(0).toUpperCase(),
+      colHex: col[2], colOn: col[3],
+      name: s.name, onName: (e) => this.setState({ name: e.target.value }),
+      fieldBg: owner ? '#FFFFFF' : '#F4EADF',
+      swatches: palette.map((p) => ({ label: p[1], hex: p[2], on: s.colour === p[0], ring: s.colour === p[0] ? '3px solid #1E1512' : 'none', cursor: owner ? 'pointer' : 'not-allowed', pick: () => this.setState({ colour: p[0] }) })),
+      generalDirty: dirty, generalClean: !dirty,
+      resetGeneral: () => this.setState({ name: s.savedName, colour: s.savedColour }),
+      saveGeneral: () => { this.setState({ savedName: trimmed, name: trimmed, savedColour: s.colour }); this.flash('Project updated'); },
+      onlyOne: cols.length === 1,
+      cols: cols.map((c, i) => ({
+        n: i + 1, name: c.name, isDone: c.isDone, canMakeDone: owner && !c.isDone,
+        countLabel: c.tasks + ' task' + (c.tasks === 1 ? '' : 's'),
+        first: i === 0, last: i === cols.length - 1,
+        onName: (e) => setCols(cols.map((x) => (x.id === c.id ? { ...x, name: e.target.value } : x))),
+        up: () => move(i, -1), down: () => move(i, 1),
+        makeDone: () => { setCols(cols.map((x) => ({ ...x, isDone: x.id === c.id }))); this.flash(c.name + ' is now the done column'); },
+        askDelete: () => { const other = cols.find((x) => x.id !== c.id); this.setState({ dialog: 'column', delCol: c.id, moveTo: other ? other.id : '' }); }
+      })),
+      newCol: s.newCol, onNewCol: (e) => this.setState({ newCol: e.target.value }),
+      newColKey: (e) => { if (e.key === 'Enter') addCol(); },
+      addCol: addCol,
+      inviteEmail: s.inviteEmail,
+      onInvite: (e) => this.setState({ inviteEmail: e.target.value, inviteMsg: '' }),
+      inviteKey: (e) => { if (e.key === 'Enter') sendInvite(); },
+      sendInvite: sendInvite,
+      inviteMsg: s.inviteMsg, inviteMsgColour: s.inviteOk ? lime : '#F6A595',
+      members: s.members.map((m) => {
+        const removable = owner && m.role !== 'OWNER';
+        const confirming = s.confirmRemove === m.id;
+        return {
+          initials: m.id, name: m.name + (m.id === meId ? ' (you)' : ''), first: m.name.split(' ')[0], email: m.email,
+          tasks: m.tasks + ' task' + (m.tasks === 1 ? '' : 's'),
+          bg: m.bg === 'lime' ? lime : m.bg, fg: m.fg,
+          owner: m.role === 'OWNER', member: m.role !== 'OWNER',
+          removable: removable, confirming: confirming, idle: !confirming,
+          removeNote: m.tasks ? 'Their ' + m.tasks + ' task' + (m.tasks === 1 ? '' : 's') + ' will be unassigned.' : '',
+          ask: () => this.setState({ confirmRemove: m.id }),
+          cancel: () => this.setState({ confirmRemove: '' }),
+          remove: () => { this.setState({ members: s.members.filter((x) => x.id !== m.id), confirmRemove: '' }); this.flash(m.name + ' removed'); }
+        };
+      }),
+      showInvites: owner && s.invites.length > 0,
+      invites: s.invites.map((iv) => ({
+        email: iv.email,
+        note: iv.state === 'expired' ? 'Expired. Resend to send a fresh link.' : (iv.days === 0 ? 'Sent just now · expires in 7 days' : 'Sent ' + iv.days + ' days ago · expires in ' + (7 - iv.days) + ' days'),
+        noteColour: iv.state === 'expired' ? '#B3261E' : '#7A675D',
+        resend: () => { this.setState({ invites: s.invites.map((x) => (x.email === iv.email ? { email: iv.email, state: 'pending', days: 0 } : x)) }); this.flash('Invite resent to ' + iv.email); },
+        cancel: () => { this.setState({ invites: s.invites.filter((x) => x.email !== iv.email) }); this.flash('Invite cancelled'); }
+      })),
+      dangerIntro: owner ? 'Permanent actions. They affect everyone on this board.' : 'Leaving only affects you.',
+      dangerTitle: owner ? 'Delete this project' : 'Leave this project',
+      dangerText: owner ? 'Deletes the board, its tasks, columns, members and invites for everyone.' : 'It disappears from your projects, and your tasks here become unassigned.',
+      dangerButton: owner ? 'Delete project' : 'Leave project',
+      openDanger: () => this.setState({ dialog: owner ? 'project' : 'leave', typed: '' }),
+      dialog: s.dialog !== '',
+      closeDialog: () => this.setState({ dialog: '' }),
+      dlgTitle: dlg.title, dlgText: dlg.text, dlgMove: dlg.move, dlgType: dlg.type, dlgTarget: dlg.target, dlgButton: dlg.button,
+      dlgCan: dlg.can, dlgCannot: !dlg.can,
+      moveTo: s.moveTo, onMoveTo: (e) => this.setState({ moveTo: e.target.value }),
+      moveOptions: cols.filter((c) => c.id !== s.delCol).map((c) => ({ id: c.id, name: c.name })),
+      typed: s.typed, onTyped: (e) => this.setState({ typed: e.target.value }),
+      confirmDialog: confirmDialog,
+      toast: s.toast !== '', toastText: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>
