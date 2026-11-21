@@ -6,15 +6,15 @@ import { Dialog } from "@/components/ui/dialog/dialog";
 import { toast } from "@/components/ui/toast/toast";
 import type { ProjectDetail } from "@/models/responses/projectResponses";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { newProjectDialogClosed, selectIsNewProjectDialogOpen } from "@/stores/uiSlice";
+import { dialogClosed, selectOpenDialog } from "@/stores/uiSlice";
 import { NewProjectForm } from "../forms/newProjectForm";
 
 /** Open/closed lives in the UI slice; the form inside unmounts on close, so it starts fresh each time. */
 export function NewProjectDialog() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const isOpen = useAppSelector(selectIsNewProjectDialogOpen);
-  const close = () => dispatch(newProjectDialogClosed());
+  const isOpen = useAppSelector(selectOpenDialog)?.kind === "newProject";
+  const close = () => dispatch(dialogClosed());
 
   const onCreated = (project: ProjectDetail) => {
     close();

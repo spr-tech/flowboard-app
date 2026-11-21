@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button/button";
 import { ButtonLink } from "@/components/ui/button/buttonLink";
 import { useProject } from "@/services/projectsService";
 import { useAppDispatch } from "@/stores/hooks";
-import { projectDangerDialogClosed, projectDangerDialogOpened } from "@/stores/uiSlice";
+import { dialogClosed, dialogOpened } from "@/stores/uiSlice";
 import { ProjectGeneralForm } from "../forms/projectGeneralForm";
 import { DeleteProjectDialog } from "../modals/deleteProjectDialog";
 import { LeaveProjectDialog } from "../modals/leaveProjectDialog";
@@ -24,7 +24,7 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
   const { data: project, error, isLoading, refetch } = useProject(projectId);
 
   // A dialog left open (say, by the browser's back button) mustn't reopen on the next visit.
-  useEffect(() => () => void dispatch(projectDangerDialogClosed()), [dispatch]);
+  useEffect(() => () => void dispatch(dialogClosed()), [dispatch]);
 
   if (isLoading) {
     return (
@@ -99,7 +99,7 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
           <Button
             text={isOwner ? "Delete project" : "Leave project"}
             variant="danger"
-            onClick={() => dispatch(projectDangerDialogOpened(isOwner ? "delete" : "leave"))}
+            onClick={() => dispatch(dialogOpened({ kind: isOwner ? "deleteProject" : "leaveProject" }))}
           />
         </div>
       </SettingsSection>

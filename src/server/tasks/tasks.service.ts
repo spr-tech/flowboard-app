@@ -6,7 +6,7 @@ import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
 import { requireMember, type Db } from "@/server/projects/projectAccess";
 import { ActivityAction } from "@/utilities/enums/activityActions";
-import { needsRespace, positionBetween, respacedPositions } from "./position";
+import { needsRespace, positionBetween, respacedPositions } from "@/utilities/helpers/position";
 import { dayToDate, requireTaskAccess, taskSelect, toBoardTask } from "./taskShape";
 
 const columnNotFound = () =>

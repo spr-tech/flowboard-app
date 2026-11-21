@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { toast } from "@/components/ui/toast/toast";
-import { projectDangerDialogOpened, selectProjectDangerDialog } from "@/stores/uiSlice";
+import { dialogOpened, selectOpenDialog } from "@/stores/uiSlice";
 import { jsonResponse, mockFetch, renderWithStore } from "@/test/renderWithStore";
 import { DeleteProjectDialog } from "./deleteProjectDialog";
 import { LeaveProjectDialog } from "./leaveProjectDialog";
@@ -22,7 +22,7 @@ describe("DeleteProjectDialog", () => {
 
   function open() {
     const result = renderWithStore(<DeleteProjectDialog project={project} />);
-    result.store.dispatch(projectDangerDialogOpened("delete"));
+    result.store.dispatch(dialogOpened({ kind: "deleteProject" }));
     return result;
   }
 
@@ -52,7 +52,7 @@ describe("DeleteProjectDialog", () => {
     expect(request.method).toBe("DELETE");
     expect(await request.json()).toEqual({ name: "Website relaunch" });
     expect(toast).toHaveBeenCalledWith({ type: "success", message: "Website relaunch deleted" });
-    expect(selectProjectDangerDialog(store.getState())).toBeNull();
+    expect(selectOpenDialog(store.getState())).toBeNull();
   });
 
   it("shows the server's NAME_MISMATCH on the field", async () => {
@@ -96,7 +96,7 @@ describe("LeaveProjectDialog", () => {
       return jsonResponse(200, { projectId: "p1", unassignedTaskCount: 1 });
     });
     const { store } = renderWithStore(<LeaveProjectDialog project={project} />);
-    store.dispatch(projectDangerDialogOpened("leave"));
+    store.dispatch(dialogOpened({ kind: "leaveProject" }));
 
     expect(await screen.findByText(/Your 1 task here becomes unassigned\./)).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Leave project" }));

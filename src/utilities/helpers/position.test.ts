@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { describe, expect, it } from "vitest";
 
 import { MIN_GAP, needsRespace, positionBetween, respacedPositions } from "./position";

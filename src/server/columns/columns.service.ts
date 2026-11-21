@@ -6,7 +6,7 @@ import type { BoardColumn, DeletedResponse } from "@/models/responses/boardRespo
 import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
 import { requireOwner, type Db } from "@/server/projects/projectAccess";
-import { needsRespace, positionBetween, respacedPositions } from "@/server/tasks/position";
+import { needsRespace, positionBetween, respacedPositions } from "@/utilities/helpers/position";
 import { ActivityAction } from "@/utilities/enums/activityActions";
 
 const columnSelect = { id: true, projectId: true, name: true, position: true, isDone: true } as const;

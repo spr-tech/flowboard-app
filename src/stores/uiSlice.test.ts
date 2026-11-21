@@ -2,39 +2,74 @@ import { describe, expect, it } from "vitest";
 
 import { makeStore } from "./store";
 import {
+  boardFiltersReset,
+  boardPriorityFilterChanged,
+  dialogClosed,
+  dialogOpened,
   landingMenuClosed,
   landingMenuToggled,
   mobileMenuClosed,
   mobileMenuOpened,
-  newProjectDialogClosed,
-  newProjectDialogOpened,
-  projectDangerDialogClosed,
-  projectDangerDialogOpened,
+  onlyMyTasksToggled,
+  selectBoardPriorityFilter,
   selectIsLandingMenuOpen,
   selectIsMobileMenuOpen,
-  selectIsNewProjectDialogOpen,
-  selectProjectDangerDialog,
+  selectOnlyMyTasks,
+  selectOpenDialog,
+  selectPendingDeleteTaskIds,
+  taskDeletePending,
+  taskDeleteSettled,
   uiSlice,
 } from "./uiSlice";
 
 describe("uiSlice", () => {
-  it("starts with every menu and dialog closed", () => {
+  it("starts with every menu and dialog closed, no filters and nothing pending", () => {
     expect(uiSlice.getInitialState()).toEqual({
       isMobileMenuOpen: false,
       isLandingMenuOpen: false,
-      isNewProjectDialogOpen: false,
-      projectDangerDialog: null,
+      openDialog: null,
+      boardPriorityFilter: "all",
+      onlyMyTasks: false,
+      pendingDeleteTaskIds: [],
     });
   });
 
-  it("opens and closes the New project dialog", () => {
+  it("opens one dialog at a time and closes it", () => {
     const store = makeStore();
 
-    store.dispatch(newProjectDialogOpened());
-    expect(selectIsNewProjectDialogOpen(store.getState())).toBe(true);
+    store.dispatch(dialogOpened({ kind: "newProject" }));
+    expect(selectOpenDialog(store.getState())).toEqual({ kind: "newProject" });
 
-    store.dispatch(newProjectDialogClosed());
-    expect(selectIsNewProjectDialogOpen(store.getState())).toBe(false);
+    store.dispatch(dialogOpened({ kind: "deleteColumn", columnId: "c1" }));
+    expect(selectOpenDialog(store.getState())).toEqual({ kind: "deleteColumn", columnId: "c1" });
+
+    store.dispatch(dialogClosed());
+    expect(selectOpenDialog(store.getState())).toBeNull();
+  });
+
+  it("sets the board filters and resets them together", () => {
+    const store = makeStore();
+
+    store.dispatch(boardPriorityFilterChanged("HIGH"));
+    store.dispatch(onlyMyTasksToggled());
+    expect(selectBoardPriorityFilter(store.getState())).toBe("HIGH");
+    expect(selectOnlyMyTasks(store.getState())).toBe(true);
+
+    store.dispatch(boardFiltersReset());
+    expect(selectBoardPriorityFilter(store.getState())).toBe("all");
+    expect(selectOnlyMyTasks(store.getState())).toBe(false);
+  });
+
+  it("keeps each pending delete once, and drops it when settled", () => {
+    const store = makeStore();
+
+    store.dispatch(taskDeletePending("t1"));
+    store.dispatch(taskDeletePending("t1"));
+    store.dispatch(taskDeletePending("t2"));
+    expect(selectPendingDeleteTaskIds(store.getState())).toEqual(["t1", "t2"]);
+
+    store.dispatch(taskDeleteSettled("t1"));
+    expect(selectPendingDeleteTaskIds(store.getState())).toEqual(["t2"]);
   });
 
   it("opens and closes the mobile menu", () => {
@@ -57,28 +92,6 @@ describe("uiSlice", () => {
     store.dispatch(landingMenuToggled());
     store.dispatch(landingMenuClosed());
     expect(selectIsLandingMenuOpen(store.getState())).toBe(false);
-  });
-
-  it("opens one Danger zone dialog at a time and closes it", () => {
-    const store = makeStore();
-
-    store.dispatch(projectDangerDialogOpened("delete"));
-    expect(selectProjectDangerDialog(store.getState())).toBe("delete");
-
-    store.dispatch(projectDangerDialogOpened("leave"));
-    expect(selectProjectDangerDialog(store.getState())).toBe("leave");
-
-    store.dispatch(projectDangerDialogClosed());
-    expect(selectProjectDangerDialog(store.getState())).toBeNull();
-  });
-
-  it("is wired into the store, with a selector that reads it", () => {
-    const store = makeStore();
-    expect(selectIsMobileMenuOpen(store.getState())).toBe(false);
-
-    store.dispatch(mobileMenuOpened());
-
-    expect(selectIsMobileMenuOpen(store.getState())).toBe(true);
   });
 
   it("gives every store its own state", () => {

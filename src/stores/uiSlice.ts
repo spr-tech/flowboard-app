@@ -2,25 +2,44 @@
 // Server data never goes here (it lives in the RTK Query cache); shareable state goes in the URL.
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-/** The project settings page's Danger zone dialogs. */
-export type ProjectDangerDialog = "delete" | "leave";
+/**
+ * The one dialog that's open, if any. A typed slot rather than a boolean per dialog: one dialog
+ * at a time, everything serializable, and a new dialog is one more line here. Radix does the
+ * focus trap, Escape and overlay; this only says which dialog is showing. (The task drawer lives
+ * in the URL instead, because it's shareable.)
+ */
+export type OpenDialog =
+  | { kind: "newProject" }
+  | { kind: "deleteProject" }
+  | { kind: "leaveProject" }
+  | { kind: "deleteColumn"; columnId: string };
+
+export type BoardPriorityFilter = "all" | "HIGH" | "MEDIUM" | "LOW";
 
 export type UiState = {
   /** The phone-sized navigation drawer (the sidebar is always visible on md and up). */
   isMobileMenuOpen: boolean;
   /** The landing page's phone menu (under md). Separate from the app shell's drawer. */
   isLandingMenuOpen: boolean;
-  /** The New project dialog (opened from the projects page; a modal library is revisited in milestone 6). */
-  isNewProjectDialogOpen: boolean;
-  /** Which Danger zone dialog is open on the project settings page, if any. */
-  projectDangerDialog: ProjectDangerDialog | null;
+  openDialog: OpenDialog | null;
+  /** Board filters: reset when the board is left, so another project never opens filtered. */
+  boardPriorityFilter: BoardPriorityFilter;
+  onlyMyTasks: boolean;
+  /**
+   * Tasks deleted but still inside their Undo window. The board and drawer hide them, so a
+   * refetch during the window (focus, mount) can't bring them back. Removed when the delete
+   * request finishes or fails, or Undo is clicked.
+   */
+  pendingDeleteTaskIds: string[];
 };
 
 const initialState: UiState = {
   isMobileMenuOpen: false,
   isLandingMenuOpen: false,
-  isNewProjectDialogOpen: false,
-  projectDangerDialog: null,
+  openDialog: null,
+  boardPriorityFilter: "all",
+  onlyMyTasks: false,
+  pendingDeleteTaskIds: [],
 };
 
 export const uiSlice = createSlice({
@@ -40,24 +59,36 @@ export const uiSlice = createSlice({
     landingMenuClosed(state) {
       state.isLandingMenuOpen = false;
     },
-    newProjectDialogOpened(state) {
-      state.isNewProjectDialogOpen = true;
+    dialogOpened(state, action: PayloadAction<OpenDialog>) {
+      state.openDialog = action.payload;
     },
-    newProjectDialogClosed(state) {
-      state.isNewProjectDialogOpen = false;
+    dialogClosed(state) {
+      state.openDialog = null;
     },
-    projectDangerDialogOpened(state, action: PayloadAction<ProjectDangerDialog>) {
-      state.projectDangerDialog = action.payload;
+    boardPriorityFilterChanged(state, action: PayloadAction<BoardPriorityFilter>) {
+      state.boardPriorityFilter = action.payload;
     },
-    projectDangerDialogClosed(state) {
-      state.projectDangerDialog = null;
+    onlyMyTasksToggled(state) {
+      state.onlyMyTasks = !state.onlyMyTasks;
+    },
+    boardFiltersReset(state) {
+      state.boardPriorityFilter = "all";
+      state.onlyMyTasks = false;
+    },
+    taskDeletePending(state, action: PayloadAction<string>) {
+      if (!state.pendingDeleteTaskIds.includes(action.payload)) state.pendingDeleteTaskIds.push(action.payload);
+    },
+    taskDeleteSettled(state, action: PayloadAction<string>) {
+      state.pendingDeleteTaskIds = state.pendingDeleteTaskIds.filter((id) => id !== action.payload);
     },
   },
   selectors: {
     selectIsMobileMenuOpen: (state) => state.isMobileMenuOpen,
     selectIsLandingMenuOpen: (state) => state.isLandingMenuOpen,
-    selectIsNewProjectDialogOpen: (state) => state.isNewProjectDialogOpen,
-    selectProjectDangerDialog: (state) => state.projectDangerDialog,
+    selectOpenDialog: (state) => state.openDialog,
+    selectBoardPriorityFilter: (state) => state.boardPriorityFilter,
+    selectOnlyMyTasks: (state) => state.onlyMyTasks,
+    selectPendingDeleteTaskIds: (state) => state.pendingDeleteTaskIds,
   },
 });
 
@@ -66,14 +97,19 @@ export const {
   mobileMenuClosed,
   landingMenuToggled,
   landingMenuClosed,
-  newProjectDialogOpened,
-  newProjectDialogClosed,
-  projectDangerDialogOpened,
-  projectDangerDialogClosed,
+  dialogOpened,
+  dialogClosed,
+  boardPriorityFilterChanged,
+  onlyMyTasksToggled,
+  boardFiltersReset,
+  taskDeletePending,
+  taskDeleteSettled,
 } = uiSlice.actions;
 export const {
   selectIsMobileMenuOpen,
   selectIsLandingMenuOpen,
-  selectIsNewProjectDialogOpen,
-  selectProjectDangerDialog,
+  selectOpenDialog,
+  selectBoardPriorityFilter,
+  selectOnlyMyTasks,
+  selectPendingDeleteTaskIds,
 } = uiSlice.selectors;

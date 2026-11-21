@@ -10,7 +10,7 @@ import { useMe } from "@/services/accountService";
 import { useMembers } from "@/services/membersService";
 import { useLeaveProjectMutation } from "@/services/projectsService";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { projectDangerDialogClosed, selectProjectDangerDialog } from "@/stores/uiSlice";
+import { dialogClosed, selectOpenDialog } from "@/stores/uiSlice";
 
 type LeaveProjectDialogProps = { project: Pick<ProjectDetail, "id" | "name"> };
 
@@ -18,8 +18,8 @@ type LeaveProjectDialogProps = { project: Pick<ProjectDetail, "id" | "name"> };
 export function LeaveProjectDialog({ project }: LeaveProjectDialogProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const isOpen = useAppSelector(selectProjectDangerDialog) === "leave";
-  const close = () => dispatch(projectDangerDialogClosed());
+  const isOpen = useAppSelector(selectOpenDialog)?.kind === "leaveProject";
+  const close = () => dispatch(dialogClosed());
   const [leaveProject, { isLoading }] = useLeaveProjectMutation();
   const { data: me } = useMe();
   const { data: members } = useMembers(project.id, { skip: !isOpen });
