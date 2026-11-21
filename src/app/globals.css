@@ -31,6 +31,8 @@
   --brand-vermilion-dark: #8e2614;
   --brand-danger: #b3261e;
   --brand-lime: #d4f04a;
+  /* Deep plum: the sign-up story panel. White text on it is 12.6:1 (WCAG AA and AAA). */
+  --brand-plum-deep: #4b2740;
   --brand-olive: #2e3a00;
 
   --brand-chip-high: #fbe1da;
@@ -53,6 +55,8 @@
   --surface-card: var(--brand-white);
   --surface-inverse: var(--brand-espresso);
   --surface-inverse-raised: var(--brand-espresso-2);
+  /* A deep brand surface for story panels (sign-up), with white text */
+  --surface-brand-deep: var(--brand-plum-deep);
 
   /* Foreground (text and icons) */
   --fg-primary: var(--brand-espresso);
@@ -131,6 +135,7 @@
   --color-surface-card: var(--surface-card);
   --color-surface-inverse: var(--surface-inverse);
   --color-surface-inverse-raised: var(--surface-inverse-raised);
+  --color-surface-brand-deep: var(--surface-brand-deep);
 
   --color-fg-primary: var(--fg-primary);
   --color-fg-secondary: var(--fg-secondary);
