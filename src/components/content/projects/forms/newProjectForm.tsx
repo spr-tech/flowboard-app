@@ -6,15 +6,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button/button";
 import { FormInput } from "@/components/ui/form/formInput";
 import type { ProjectDetail } from "@/models/responses/projectResponses";
+import { FormTextarea } from "@/components/ui/form/formTextarea";
 import {
   createProjectSchema,
+  PROJECT_DESCRIPTION_MAX,
   PROJECT_NAME_MAX,
+  type CreateProjectFormInput,
   type CreateProjectFormValues,
 } from "@/models/validations/projectValidation";
 import { useCreateProjectMutation } from "@/services/projectsService";
 import { applyApiError } from "@/utilities/helpers/applyApiError";
 import { ProjectTile } from "../projectTile";
 import { ColourPicker } from "./colourPicker";
+import { DESCRIPTION_PLACEHOLDER } from "./projectGeneralForm";
 
 type NewProjectFormProps = {
   onCreated: (project: ProjectDetail) => void;
@@ -32,19 +36,20 @@ export function NewProjectForm({ onCreated, onCancel }: NewProjectFormProps) {
     handleSubmit,
     setError,
     formState: { isSubmitting },
-  } = useForm<CreateProjectFormValues>({
+  } = useForm<CreateProjectFormInput, unknown, CreateProjectFormValues>({
     resolver: zodResolver(createProjectSchema),
-    defaultValues: { name: "", colour: "vermilion" },
+    defaultValues: { name: "", colour: "vermilion", description: "" },
   });
-  const [name, colour] = useWatch({ control, name: ["name", "colour"] });
+  const [name, colour, description] = useWatch({ control, name: ["name", "colour", "description"] });
   const trimmedName = name.trim();
+  const trimmedDescription = (description ?? "").trim();
 
   const onSubmit = async (values: CreateProjectFormValues) => {
     try {
       onCreated(await createProject(values).unwrap());
     } catch (error) {
       // Field problems go on the fields; anything else the base query has already toasted.
-      applyApiError(error, ["name", "colour"], setError);
+      applyApiError(error, ["name", "colour", "description"], setError);
     }
   };
 
@@ -57,7 +62,10 @@ export function NewProjectForm({ onCreated, onCancel }: NewProjectFormProps) {
         <ProjectTile name={trimmedName || "?"} colour={colour} size="sm" />
         <span className="min-w-0">
           <span className="block font-heading text-xl font-bold wrap-break-word">{trimmedName || "Your project"}</span>
-          <span className="block text-[13px] text-fg-muted">Preview</span>
+          {/* The description as you type, instead of "Preview". */}
+          <span className="line-clamp-2 block text-[13px] text-fg-muted wrap-break-word">
+            {trimmedDescription || "Preview"}
+          </span>
         </span>
       </div>
 
@@ -69,6 +77,16 @@ export function NewProjectForm({ onCreated, onCancel }: NewProjectFormProps) {
         maxLength={PROJECT_NAME_MAX}
         autoComplete="off"
         autoFocus
+      />
+
+      <FormTextarea
+        control={control}
+        name="description"
+        label="Description"
+        rows={3}
+        maxLength={PROJECT_DESCRIPTION_MAX}
+        showCount
+        placeholder={DESCRIPTION_PLACEHOLDER}
       />
 
       <ColourPicker control={control} name="colour" />

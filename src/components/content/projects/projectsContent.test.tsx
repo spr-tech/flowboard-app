@@ -45,6 +45,21 @@ describe("ProjectsContent", () => {
     expect(toggle.closest("a")).toBeNull();
   });
 
+  it("shows the description under the name, clamped to 2 lines, and nothing extra when it's empty", async () => {
+    mockFetch(() =>
+      jsonResponse(200, [
+        projectSummary("a", { name: "Alpha", description: "A long description of the launch work" }),
+        projectSummary("b", { name: "Beta", description: null }),
+      ])
+    );
+    renderWithStore(<ProjectsContent filter="all" />);
+
+    const description = await screen.findByText("A long description of the launch work");
+    expect(description).toHaveClass("line-clamp-2");
+    const beta = screen.getByRole("heading", { name: "Beta" }).parentElement;
+    expect(beta?.querySelectorAll(".line-clamp-2")).toHaveLength(0);
+  });
+
   it("offers to create the first project when there are none", async () => {
     mockFetch(() => jsonResponse(200, []));
     renderWithStore(<ProjectsContent filter="all" />);

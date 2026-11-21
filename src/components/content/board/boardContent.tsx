@@ -20,6 +20,7 @@ import { useTaskParam } from "@/utilities/hooks/useTaskParam";
 import { BoardColumns } from "./boardColumns";
 import { BoardFilters } from "./boardFilters";
 import { BoardHeader } from "./boardHeader";
+import { YourOrder } from "./yourOrder";
 import { TaskDrawer } from "./drawer/taskDrawer";
 import { DeleteColumnDialog } from "./modals/deleteColumnDialog";
 
@@ -59,8 +60,17 @@ export default function BoardContent({ projectId }: { projectId: string }) {
   return (
     <div className="flex flex-col gap-6">
       <BoardHeader project={project} />
-      <BoardFilters />
-      <BoardColumns project={project} filters={filters} today={localToday()} onOpenTask={openTask} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <BoardFilters />
+        {project.me.columnOrder && <YourOrder projectId={project.id} />}
+      </div>
+      <BoardColumns
+        project={project}
+        filters={filters}
+        meId={me?.id ?? null}
+        today={localToday()}
+        onOpenTask={openTask}
+      />
       <TaskDrawer project={project} meId={me?.id ?? null} />
       <DeleteColumnDialog project={project} />
     </div>

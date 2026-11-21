@@ -65,7 +65,7 @@ export function TaskCardFace({ task, isInDoneColumn, today }: Omit<TaskCardProps
 export function TaskCard({ task, isInDoneColumn, today, onOpen }: TaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
-    data: { columnId: task.columnId, title: task.title },
+    data: { kind: "card", columnId: task.columnId, title: task.title },
   });
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {

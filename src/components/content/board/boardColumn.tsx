@@ -2,7 +2,9 @@
 
 import { useState, type KeyboardEvent } from "react";
 import { useDroppable } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 
 import { toast } from "@/components/ui/toast/toast";
 import type { BoardTask } from "@/models/responses/boardResponses";
@@ -12,29 +14,41 @@ import { useUpdateColumnMutation } from "@/services/columnsService";
 import { useAppDispatch } from "@/stores/hooks";
 import { dialogOpened } from "@/stores/uiSlice";
 import { cn } from "@/utilities/helpers/cn";
+import { cardAreaId, columnSortId } from "./boardDnd";
 import { ColumnMenu } from "./columnMenu";
 import { QuickAddForm } from "./forms/quickAddForm";
 import { TaskCard } from "./taskCard";
-
-/** Drop target id for a column's empty space (cards use their own id). */
-export const columnDropId = (columnId: string) => `column:${columnId}`;
 
 type BoardColumnProps = {
   projectId: string;
   column: ProjectColumnSummary;
   tasks: BoardTask[];
   isOwner: boolean;
+  /** The owner, or the member who added this column. */
+  canRename: boolean;
   isLastColumn: boolean;
   today: string;
   onOpenTask: (taskId: string) => void;
 };
 
-/** One 300px column: header (name, count, done badge, owner menu), its cards, and quick add. */
-export function BoardColumn({ projectId, column, tasks, isOwner, isLastColumn, today, onOpenTask }: BoardColumnProps) {
+/**
+ * One 300px column: header (grip handle, name, count, done badge, menu), its cards, quick add.
+ * The column is dragged only by its handle, so column drags never clash with card drags or the menu.
+ */
+export function BoardColumn(props: BoardColumnProps) {
+  const { projectId, column, tasks, isOwner, canRename, isLastColumn, today, onOpenTask } = props;
   const dispatch = useAppDispatch();
   const [updateColumn] = useUpdateColumnMutation();
   const [renameText, setRenameText] = useState<string | null>(null);
-  const { setNodeRef, isOver } = useDroppable({ id: columnDropId(column.id), data: { columnId: column.id } });
+  // Destructured: the hooks lint rule treats an object holding refs as a ref itself.
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+    id: columnSortId(column.id),
+    data: { kind: "column", columnId: column.id },
+  });
+  const { setNodeRef: setCardAreaRef, isOver } = useDroppable({
+    id: cardAreaId(column.id),
+    data: { kind: "cardArea", columnId: column.id },
+  });
 
   const saveRename = async () => {
     const name = renameText?.trim() ?? "";
@@ -63,10 +77,25 @@ export function BoardColumn({ projectId, column, tasks, isOwner, isLastColumn, t
 
   return (
     <section
+      ref={setNodeRef}
       aria-label={column.name}
-      className="flex w-[300px] shrink-0 flex-col gap-3 rounded-card bg-surface-sunken p-3"
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      className={cn(
+        "flex w-[300px] shrink-0 flex-col gap-3 rounded-card bg-surface-sunken p-3",
+        isDragging && "opacity-40"
+      )}
     >
-      <header className="flex min-h-9 items-center justify-between gap-2 px-1">
+      <header className="flex min-h-9 items-center justify-between gap-1">
+        <button
+          ref={setActivatorNodeRef}
+          type="button"
+          {...attributes}
+          {...listeners}
+          aria-label={`Move column ${column.name}`}
+          className="inline-flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg text-fg-muted hover:bg-surface-page hover:text-fg-primary active:cursor-grabbing"
+        >
+          <GripVertical aria-hidden className="size-4" />
+        </button>
         {renameText !== null ? (
           <input
             value={renameText}
@@ -79,7 +108,7 @@ export function BoardColumn({ projectId, column, tasks, isOwner, isLastColumn, t
             className="h-9 min-w-0 flex-1 rounded-lg border-[1.5px] border-fg-primary bg-surface-card px-2 font-heading font-bold"
           />
         ) : (
-          <h2 className="flex min-w-0 items-center gap-2 text-base font-bold">
+          <h2 className="flex min-w-0 flex-1 items-center gap-2 text-base font-bold">
             <span className="truncate">{column.name}</span>
             <span className="text-sm font-semibold text-fg-muted">{tasks.length}</span>
           </h2>
@@ -90,11 +119,15 @@ export function BoardColumn({ projectId, column, tasks, isOwner, isLastColumn, t
               Done column
             </span>
           )}
-          {isOwner && renameText === null && (
+          {renameText === null && (
             <ColumnMenu
               columnName={column.name}
+              addedBy={column.createdBy.name ?? "someone"}
+              addedAt={column.createdAt}
               isDone={column.isDone}
               isLastColumn={isLastColumn}
+              canRename={canRename}
+              isOwner={isOwner}
               onRename={() => setRenameText(column.name)}
               onSetDone={() => void setDone()}
               onDelete={() => dispatch(dialogOpened({ kind: "deleteColumn", columnId: column.id }))}
@@ -104,7 +137,7 @@ export function BoardColumn({ projectId, column, tasks, isOwner, isLastColumn, t
       </header>
 
       <div
-        ref={setNodeRef}
+        ref={setCardAreaRef}
         className={cn(
           "flex min-h-16 flex-col gap-2.5 rounded-card p-0.5 transition-colors",
           isOver && "bg-surface-page outline-2 outline-offset-2 outline-fg-primary outline-dashed"

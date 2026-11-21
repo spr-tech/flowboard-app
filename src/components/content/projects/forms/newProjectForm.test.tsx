@@ -34,7 +34,36 @@ describe("NewProjectForm", () => {
     await vi.waitFor(() => expect(onCreated).toHaveBeenCalledWith(created));
     const request = fetchMock.mock.calls[0][0] as Request;
     expect(request.method).toBe("POST");
-    expect(await request.json()).toEqual({ name: "Launch", colour: "teal" });
+    // No description typed: sent as null (the schema turns empty into null).
+    expect(await request.json()).toEqual({ name: "Launch", colour: "teal", description: null });
+  });
+
+  it("previews the description under the name as it is typed, with a counter", async () => {
+    renderWithStore(<NewProjectForm onCreated={vi.fn()} onCancel={vi.fn()} />);
+    expect(screen.getByText("Preview")).toBeInTheDocument();
+    expect(screen.getByLabelText("Description")).toHaveAttribute(
+      "placeholder",
+      "e.g. Rebuilding the marketing site before the January launch"
+    );
+
+    await userEvent.type(screen.getByLabelText("Description"), "For the launch");
+
+    // In the preview card (the textarea holds the same text).
+    expect(screen.getByText("For the launch", { selector: "span" })).toBeInTheDocument();
+    expect(screen.queryByText("Preview")).not.toBeInTheDocument();
+    expect(screen.getByText("14 / 200")).toBeInTheDocument();
+  });
+
+  it("sends the trimmed description", async () => {
+    const fetchMock = mockFetch(() => jsonResponse(201, { id: "p1", name: "Launch" }));
+    renderWithStore(<NewProjectForm onCreated={vi.fn()} onCancel={vi.fn()} />);
+
+    await userEvent.type(screen.getByLabelText("Project name"), "Launch");
+    await userEvent.type(screen.getByLabelText("Description"), "  For the launch  ");
+    await userEvent.click(screen.getByRole("button", { name: "Create project" }));
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(await (fetchMock.mock.calls[0][0] as Request).json()).toMatchObject({ description: "For the launch" });
   });
 
   it("shows a server field error on the field", async () => {

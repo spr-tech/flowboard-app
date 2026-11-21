@@ -88,12 +88,44 @@ describe("BoardContent", () => {
     expect(screen.getByRole("button", { name: "Add column" })).toBeInTheDocument();
   });
 
-  it("hides the column menu and Add column from members", async () => {
+  it("gives members a grip handle on every column, and no Add column while the switch is off", async () => {
     renderBoard(boardWith({ me: boardMembership({ role: "MEMBER" }) }));
     await screen.findByText("Fix login");
 
-    expect(screen.queryByRole("button", { name: /Column options/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Move column To do" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Add column" })).not.toBeInTheDocument();
+  });
+
+  it("shows the description under the name, or the owner a quiet way to add one", async () => {
+    renderBoard(boardWith({ description: "For the launch" }));
+    expect(await screen.findByText("For the launch")).toBeInTheDocument();
+  });
+
+  it("lets the owner add a description inline, saving on Enter", async () => {
+    const { fetchMock } = renderBoard(boardWith(), () => jsonResponse(200, boardWith({ description: "New one" })));
+    await userEvent.click(await screen.findByRole("button", { name: "+ Add a description" }));
+    await userEvent.type(screen.getByRole("textbox", { name: "Project description" }), "New one{Enter}");
+
+    await vi.waitFor(() => expect(screen.getByText("New one")).toBeInTheDocument());
+    const patch = fetchMock.mock.calls.map(([r]) => r as Request).find((r) => r.method === "PATCH");
+    expect(await patch?.json()).toEqual({ description: "New one" });
+  });
+
+  it("Esc cancels the inline description, and members never see the add link", async () => {
+    renderBoard(boardWith());
+    await userEvent.click(await screen.findByRole("button", { name: "+ Add a description" }));
+    await userEvent.keyboard("{Escape}");
+    expect(screen.getByRole("button", { name: "+ Add a description" })).toBeInTheDocument();
+  });
+
+  it("shows a member's own column order, with Your order and a reset", async () => {
+    renderBoard(boardWith({ me: boardMembership({ role: "MEMBER", columnOrder: ["done", "todo", "doing"] }) }));
+    await screen.findByText("Fix login");
+
+    const columns = screen.getAllByRole("region").map((region) => region.getAttribute("aria-label"));
+    expect(columns).toEqual(["Done", "To do", "In progress"]);
+    expect(screen.getByText("Your order")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reset to team order" })).toBeInTheDocument();
   });
 
   describe("quick add", () => {

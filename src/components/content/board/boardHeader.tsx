@@ -5,10 +5,11 @@ import { ProjectTile } from "@/components/content/projects/projectTile";
 import { Avatar } from "@/components/ui/avatar/avatar";
 import { ButtonLink } from "@/components/ui/button/buttonLink";
 import type { ProjectDetail } from "@/models/responses/projectResponses";
+import { BoardDescription } from "./boardDescription";
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 
-/** Breadcrumb, colour tile, name, "N tasks · N done · N members", avatars, Settings. */
+/** Breadcrumb, colour tile, name, description, "N tasks · N done · N members", avatars, Settings. */
 export function BoardHeader({ project }: { project: ProjectDetail }) {
   const doneColumnIds = new Set(project.columns.filter((column) => column.isDone).map((column) => column.id));
   const doneCount = project.tasks.filter((task) => doneColumnIds.has(task.columnId)).length;
@@ -29,9 +30,14 @@ export function BoardHeader({ project }: { project: ProjectDetail }) {
       <header className="flex flex-wrap items-center justify-between gap-5">
         <div className="flex min-w-0 items-center gap-4">
           <ProjectTile name={project.name} colour={project.colour} />
-          <div className="min-w-0">
+          <div className="flex min-w-0 flex-col gap-1">
             <h1 className="text-3xl font-extrabold tracking-tight wrap-break-word">{project.name}</h1>
-            <p className="text-fg-secondary">
+            <BoardDescription
+              projectId={project.id}
+              description={project.description}
+              isOwner={project.me.role === "OWNER"}
+            />
+            <p className="text-sm text-fg-muted">
               {plural(project.tasks.length, "task")} · {doneCount} done · {plural(project.members.length, "member")}
             </p>
           </div>
