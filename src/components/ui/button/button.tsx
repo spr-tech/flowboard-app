@@ -11,8 +11,7 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         primary: "bg-primary text-fg-on-primary hover:bg-primary-hover",
-        secondary:
-          "border border-line-strong bg-surface-card text-fg-primary hover:bg-surface-sunken",
+        secondary: "border border-line-strong bg-surface-card text-fg-primary hover:bg-surface-sunken",
         outline: "border-[1.5px] border-fg-primary text-fg-primary hover:bg-surface-sunken",
         inverse: "bg-surface-inverse text-fg-on-inverse hover:bg-surface-inverse-raised",
         // No hover colours for these in the brand, so hover adjusts the colour itself.
@@ -38,7 +37,7 @@ export const buttonVariants = cva(
       { isIconOnly: true, size: "xl", className: "w-14" },
     ],
     defaultVariants: { variant: "primary", size: "md", isIconOnly: false },
-  },
+  }
 );
 
 type ButtonBaseProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> &

@@ -14,10 +14,26 @@ const password = { password: "pw-12345", confirmPassword: "pw-12345" };
 
 describe("authService", () => {
   it.each<[string, string, (store: Store) => Promise<unknown>]>([
-    ["register", "/api/auth/register", (store) => store.dispatch(register.initiate({ name: "Ada", email: "ada@example.com", ...password }))],
-    ["forgotPassword", "/api/auth/forgot-password", (store) => store.dispatch(forgotPassword.initiate({ email: "ada@example.com" }))],
-    ["resetPassword", "/api/auth/reset-password", (store) => store.dispatch(resetPassword.initiate({ token: "t", ...password }))],
-    ["verifyResetToken", "/api/auth/reset-password/verify", (store) => store.dispatch(verifyResetToken.initiate({ token: "t" }))],
+    [
+      "register",
+      "/api/auth/register",
+      (store) => store.dispatch(register.initiate({ name: "Ada", email: "ada@example.com", ...password })),
+    ],
+    [
+      "forgotPassword",
+      "/api/auth/forgot-password",
+      (store) => store.dispatch(forgotPassword.initiate({ email: "ada@example.com" })),
+    ],
+    [
+      "resetPassword",
+      "/api/auth/reset-password",
+      (store) => store.dispatch(resetPassword.initiate({ token: "t", ...password })),
+    ],
+    [
+      "verifyResetToken",
+      "/api/auth/reset-password/verify",
+      (store) => store.dispatch(verifyResetToken.initiate({ token: "t" })),
+    ],
   ])("%s POSTs JSON to %s", async (_name, path, send) => {
     const fetchMock = mockFetch(() => jsonResponse(200, {}));
     const store = makeStore();
@@ -31,12 +47,14 @@ describe("authService", () => {
 
   it("throws our AppError from unwrap(), with code and fields, and never toasts", async () => {
     mockFetch(() =>
-      jsonResponse(409, { error: { code: "EMAIL_TAKEN", message: "An account with this email already exists." } }),
+      jsonResponse(409, { error: { code: "EMAIL_TAKEN", message: "An account with this email already exists." } })
     );
     const store = makeStore();
 
     const call = store
-      .dispatch(register.initiate({ name: "Ada", email: "ada@example.com", password: "pw-12345", confirmPassword: "pw-12345" }))
+      .dispatch(
+        register.initiate({ name: "Ada", email: "ada@example.com", password: "pw-12345", confirmPassword: "pw-12345" })
+      )
       .unwrap();
 
     await expect(call).rejects.toEqual({

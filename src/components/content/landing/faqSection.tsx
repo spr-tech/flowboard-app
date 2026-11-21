@@ -2,11 +2,31 @@ import { Accordion, type AccordionEntry } from "@/components/ui/accordion/accord
 import { Reveal } from "@/components/ui/reveal/reveal";
 
 const faqs: AccordionEntry[] = [
-  { id: "free", title: "Is Flowboard free?", content: "Yes. Make an account and start a board. There is nothing to pay." },
-  { id: "github", title: "Can I sign in with GitHub?", content: "Yes. Use GitHub in one click, or sign up with an email and password." },
-  { id: "join", title: "How do teammates join a project?", content: "The project owner invites them by email. They follow the link and join as members." },
-  { id: "priority", title: "Can I set task priorities?", content: "Every task can be low, medium or high, and the label shows on its card." },
-  { id: "phone", title: "Does it work on my phone?", content: "Yes. Flowboard works in any modern browser, on desktop and on your phone." },
+  {
+    id: "free",
+    title: "Is Flowboard free?",
+    content: "Yes. Make an account and start a board. There is nothing to pay.",
+  },
+  {
+    id: "github",
+    title: "Can I sign in with GitHub?",
+    content: "Yes. Use GitHub in one click, or sign up with an email and password.",
+  },
+  {
+    id: "join",
+    title: "How do teammates join a project?",
+    content: "The project owner invites them by email. They follow the link and join as members.",
+  },
+  {
+    id: "priority",
+    title: "Can I set task priorities?",
+    content: "Every task can be low, medium or high, and the label shows on its card.",
+  },
+  {
+    id: "phone",
+    title: "Does it work on my phone?",
+    content: "Yes. Flowboard works in any modern browser, on desktop and on your phone.",
+  },
 ];
 
 export function FaqSection() {

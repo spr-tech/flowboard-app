@@ -57,17 +57,78 @@ const COLUMNS: { key: ColumnKey; name: string; isDone: boolean }[] = [
 
 // Listed in board order: within a column, earlier entries sit higher.
 const TASKS: SeedTask[] = [
-  { title: "Write homepage copy", description: "Headline, three feature blurbs and the call to action.", column: "todo", priority: "HIGH", assignee: "demo", dueInDays: -3, createdDaysAgo: 12 },
+  {
+    title: "Write homepage copy",
+    description: "Headline, three feature blurbs and the call to action.",
+    column: "todo",
+    priority: "HIGH",
+    assignee: "demo",
+    dueInDays: -3,
+    createdDaysAgo: 12,
+  },
   { title: "Pick a font pairing", column: "todo", priority: "LOW", assignee: "sam", dueInDays: 6, createdDaysAgo: 10 },
   { title: "Set up analytics", column: "todo", priority: "MEDIUM", assignee: null, dueInDays: null, createdDaysAgo: 8 },
-  { title: "Plan the launch email", column: "todo", priority: "MEDIUM", assignee: "demo", dueInDays: 14, createdDaysAgo: 4 },
-  { title: "Design the pricing page", description: "Three plans, monthly and yearly toggle.", column: "doing", priority: "HIGH", assignee: "demo", dueInDays: 0, createdDaysAgo: 11 },
-  { title: "Build the contact form", column: "doing", priority: "MEDIUM", assignee: "sam", dueInDays: -1, createdDaysAgo: 9 },
+  {
+    title: "Plan the launch email",
+    column: "todo",
+    priority: "MEDIUM",
+    assignee: "demo",
+    dueInDays: 14,
+    createdDaysAgo: 4,
+  },
+  {
+    title: "Design the pricing page",
+    description: "Three plans, monthly and yearly toggle.",
+    column: "doing",
+    priority: "HIGH",
+    assignee: "demo",
+    dueInDays: 0,
+    createdDaysAgo: 11,
+  },
+  {
+    title: "Build the contact form",
+    column: "doing",
+    priority: "MEDIUM",
+    assignee: "sam",
+    dueInDays: -1,
+    createdDaysAgo: 9,
+  },
   { title: "Compress hero images", column: "doing", priority: "LOW", assignee: "sam", dueInDays: 2, createdDaysAgo: 6 },
-  { title: "Review navigation labels", column: "review", priority: "MEDIUM", assignee: "demo", dueInDays: 1, createdDaysAgo: 7 },
-  { title: "Agree the sitemap", column: "done", priority: "HIGH", assignee: "demo", dueInDays: -10, createdDaysAgo: 13, completedDaysAgo: 9 },
-  { title: "Collect brand assets", column: "done", priority: "MEDIUM", assignee: "sam", dueInDays: -6, createdDaysAgo: 12, completedDaysAgo: 5 },
-  { title: "Set up the repository", column: "done", priority: "LOW", assignee: "demo", dueInDays: null, createdDaysAgo: 13, completedDaysAgo: 2 },
+  {
+    title: "Review navigation labels",
+    column: "review",
+    priority: "MEDIUM",
+    assignee: "demo",
+    dueInDays: 1,
+    createdDaysAgo: 7,
+  },
+  {
+    title: "Agree the sitemap",
+    column: "done",
+    priority: "HIGH",
+    assignee: "demo",
+    dueInDays: -10,
+    createdDaysAgo: 13,
+    completedDaysAgo: 9,
+  },
+  {
+    title: "Collect brand assets",
+    column: "done",
+    priority: "MEDIUM",
+    assignee: "sam",
+    dueInDays: -6,
+    createdDaysAgo: 12,
+    completedDaysAgo: 5,
+  },
+  {
+    title: "Set up the repository",
+    column: "done",
+    priority: "LOW",
+    assignee: "demo",
+    dueInDays: null,
+    createdDaysAgo: 13,
+    completedDaysAgo: 2,
+  },
 ];
 
 async function wipe() {
@@ -123,7 +184,13 @@ async function main() {
 
   await prisma.activity.createMany({
     data: [
-      { projectId: project.id, actorId: demo.id, action: "project.created", meta: { name: project.name }, createdAt: daysAgo(14) },
+      {
+        projectId: project.id,
+        actorId: demo.id,
+        action: "project.created",
+        meta: { name: project.name },
+        createdAt: daysAgo(14),
+      },
       { projectId: project.id, actorId: sam.id, action: "member.joined", createdAt: daysAgo(13) },
     ],
   });
@@ -178,7 +245,7 @@ async function main() {
   const activityCount = await prisma.activity.count();
   console.log(
     `Seeded 2 users, 1 project, ${COLUMNS.length} columns, ${TASKS.length} tasks, ${activityCount} activity rows.\n` +
-      `Sign in as demo@example.com or sam@example.com, password ${DEMO_PASSWORD}`,
+      `Sign in as demo@example.com or sam@example.com, password ${DEMO_PASSWORD}`
   );
 }
 

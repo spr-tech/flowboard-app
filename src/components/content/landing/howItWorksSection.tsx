@@ -47,9 +47,7 @@ function StepCard({ number, tone, title, body, mock }: StepCardProps) {
       <div aria-hidden className="relative mb-6.5">
         {mock}
       </div>
-      <p className={cn("relative mb-1.5 text-[13px] font-semibold", colours.step)}>
-        Step {Number(number)} of 3
-      </p>
+      <p className={cn("relative mb-1.5 text-[13px] font-semibold", colours.step)}>Step {Number(number)} of 3</p>
       <h3 className="relative mb-2 text-2xl font-bold tracking-[-0.02em]">{title}</h3>
       <p className={cn("relative text-base leading-relaxed", colours.body)}>{body}</p>
     </div>
@@ -104,7 +102,7 @@ export function HowItWorksSection() {
                   <span
                     className={cn(
                       fakeField,
-                      "min-w-0 flex-1 border border-fg-on-inverse/20 bg-surface-inverse-raised text-fg-on-inverse",
+                      "min-w-0 flex-1 border border-fg-on-inverse/20 bg-surface-inverse-raised text-fg-on-inverse"
                     )}
                   >
                     ada@team.dev

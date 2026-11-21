@@ -10,7 +10,7 @@ const sessionUser = { name: "Name From Session", email: "demo@example.com", imag
 describe("UserMenu", () => {
   it("shows the name from GET /api/me once it arrives", async () => {
     const fetchMock = mockFetch(() =>
-      jsonResponse(200, { id: "u1", name: "Demo From Api", email: "demo@example.com", image: null, hasPassword: true }),
+      jsonResponse(200, { id: "u1", name: "Demo From Api", email: "demo@example.com", image: null, hasPassword: true })
     );
     renderWithStore(<UserMenu user={sessionUser} />);
 
@@ -31,13 +31,13 @@ describe("UserMenu", () => {
 
   it("asks for /api/me once, however many components want it", async () => {
     const fetchMock = mockFetch(() =>
-      jsonResponse(200, { id: "u1", name: "Demo", email: "demo@example.com", image: null, hasPassword: true }),
+      jsonResponse(200, { id: "u1", name: "Demo", email: "demo@example.com", image: null, hasPassword: true })
     );
     renderWithStore(
       <>
         <UserMenu user={sessionUser} />
         <UserMenu user={sessionUser} />
-      </>,
+      </>
     );
 
     await screen.findAllByRole("button", { name: "Account menu" });

@@ -42,11 +42,11 @@ describe("sendEmail", () => {
     // Certificate checks must never be switched off.
     expect(createTransport).not.toHaveBeenCalledWith(expect.objectContaining({ tls: expect.anything() }));
     expect(sendMail).toHaveBeenCalledWith(
-      expect.objectContaining({ from: { name: "Flowboard", address: "sender@example.com" }, to: "ada@example.com" }),
+      expect.objectContaining({ from: { name: "Flowboard", address: "sender@example.com" }, to: "ada@example.com" })
     );
     expect(console.info).toHaveBeenCalledWith(
       "[email] sent",
-      expect.objectContaining({ messageId: "<abc@gmail.com>", accepted: ["ada@example.com"] }),
+      expect.objectContaining({ messageId: "<abc@gmail.com>", accepted: ["ada@example.com"] })
     );
   });
 

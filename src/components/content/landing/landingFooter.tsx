@@ -48,9 +48,7 @@ export function LandingFooter() {
           ))}
         </div>
       </div>
-      <p className="mx-auto mt-12 max-w-300 border-t border-fg-on-inverse/10 pt-6 text-sm">
-        © 2026 Flowboard
-      </p>
+      <p className="mx-auto mt-12 max-w-300 border-t border-fg-on-inverse/10 pt-6 text-sm">© 2026 Flowboard</p>
     </Reveal>
   );
 }

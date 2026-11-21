@@ -33,7 +33,7 @@ export function AuthShell({ panel, tone, children, className }: AuthShellProps) 
           "relative hidden flex-[1_1_520px] flex-col justify-between gap-12 overflow-hidden rounded-r-[40px] px-12 py-10",
           // Sticky needs a fixed height and no stretching, or it has nowhere to stick.
           "md:sticky md:top-0 md:flex md:h-dvh md:self-start",
-          colours.panel,
+          colours.panel
         )}
       >
         <Link href="/" className="self-start rounded-lg">

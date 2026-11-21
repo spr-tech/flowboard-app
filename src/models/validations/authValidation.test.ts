@@ -30,7 +30,7 @@ describe("registerSchema", () => {
   it(`accepts a password of exactly ${PASSWORD_MIN_LENGTH} characters`, () => {
     const exact = "a".repeat(PASSWORD_MIN_LENGTH);
     expect(registerSchema.safeParse({ ...validRegistration, password: exact, confirmPassword: exact }).success).toBe(
-      true,
+      true
     );
   });
 

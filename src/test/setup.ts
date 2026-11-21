@@ -45,10 +45,10 @@ vi.mock("@/server/lib/prisma", () => ({
         // Let Vitest and Promise checks inspect the object without tripping the guard.
         if (typeof property === "symbol" || property === "then") return undefined;
         throw new Error(
-          `Tests must not use the database (prisma.${String(property)}). Mock "@/server/lib/prisma" in the test.`,
+          `Tests must not use the database (prisma.${String(property)}). Mock "@/server/lib/prisma" in the test.`
         );
       },
-    },
+    }
   ),
 }));
 

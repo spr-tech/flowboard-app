@@ -7,10 +7,7 @@ import { cn } from "@/utilities/helpers/cn";
 export function TextLink({ className, ...rest }: ComponentProps<typeof Link>) {
   return (
     <Link
-      className={cn(
-        "rounded-sm font-semibold text-fg-link transition-colors hover:text-fg-link-hover",
-        className,
-      )}
+      className={cn("rounded-sm font-semibold text-fg-link transition-colors hover:text-fg-link-hover", className)}
       {...rest}
     />
   );

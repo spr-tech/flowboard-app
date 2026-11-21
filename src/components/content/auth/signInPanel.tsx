@@ -40,7 +40,10 @@ export function SignInPanel() {
           />
           <Rise delay={0.2}>where</Rise>
           <br />
-          <Rise delay={0.28}>you</Rise> <Rise delay={0.36} className="text-primary">left</Rise>{" "}
+          <Rise delay={0.28}>you</Rise>{" "}
+          <Rise delay={0.36} className="text-primary">
+            left
+          </Rise>{" "}
           <Rise delay={0.44}>off.</Rise>
         </p>
         <p className="mt-6 max-w-100 text-[17px] leading-relaxed text-fg-muted-on-inverse">
@@ -56,7 +59,7 @@ export function SignInPanel() {
               className={cn(
                 "inline-flex size-10 items-center justify-center rounded-full border-3 border-surface-inverse text-[13px] font-semibold",
                 person.className,
-                index > 0 && "-ml-3",
+                index > 0 && "-ml-3"
               )}
             >
               {person.initials}

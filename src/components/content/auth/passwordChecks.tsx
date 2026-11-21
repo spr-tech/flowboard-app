@@ -24,7 +24,7 @@ export function PasswordChecks({ checks }: { checks: PasswordCheck[] }) {
             "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px]",
             check.isMet
               ? "bg-status-done font-semibold text-status-done-fg"
-              : "bg-surface-sunken font-medium text-fg-secondary",
+              : "bg-surface-sunken font-medium text-fg-secondary"
           )}
         >
           {check.isMet ? (

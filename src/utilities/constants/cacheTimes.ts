@@ -21,7 +21,10 @@ export const CACHE = {
   projects: { endpoint: { keepUnusedDataFor: 300 }, subscription: { refetchOnMountOrArgChange: 60 } },
   members: { endpoint: { keepUnusedDataFor: 300 }, subscription: { refetchOnMountOrArgChange: 60 } },
   // Your own name doesn't change because you switched tabs, so Me skips the focus refetch too.
-  me: { endpoint: { keepUnusedDataFor: 600 }, subscription: { refetchOnMountOrArgChange: false, refetchOnFocus: false } },
+  me: {
+    endpoint: { keepUnusedDataFor: 600 },
+    subscription: { refetchOnMountOrArgChange: false, refetchOnFocus: false },
+  },
 } satisfies Record<string, CacheSetting>;
 
 /** Activity also polls, but only while the tab is visible. */

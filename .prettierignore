@@ -1,0 +1,13 @@
+# Generated, or owned by a tool: never hand-formatted.
+pnpm-lock.yaml
+pnpm-workspace.yaml
+src/lib/generated/
+next-env.d.ts
+.next/
+coverage/
+prisma/migrations/
+
+# Prose (plan docs, CLAUDE.md, README) and the exported design references in docs/designs:
+# not hand-edited code, and Prettier would only re-wrap and re-align them.
+*.md
+docs/

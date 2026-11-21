@@ -2,13 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/primitives/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/primitives/sheet";
 import { cn } from "@/utilities/helpers/cn";
 
 // Repeats the primitive's `data-[side=…]` prefix so these replace its max width rather than lose to it.
@@ -53,17 +47,11 @@ export function Drawer({
       <SheetContent
         side={side}
         {...(description ? {} : { "aria-describedby": undefined })}
-        className={cn(
-          "gap-0 border-line-subtle bg-surface-card text-fg-primary",
-          widthClasses[width],
-          className,
-        )}
+        className={cn("gap-0 border-line-subtle bg-surface-card text-fg-primary", widthClasses[width], className)}
       >
         <SheetHeader className={cn("px-6 pt-6 pb-4 pr-12", isTitleHidden && "sr-only")}>
           <SheetTitle className="text-xl font-bold tracking-tight">{title}</SheetTitle>
-          {description && (
-            <SheetDescription className="text-fg-secondary">{description}</SheetDescription>
-          )}
+          {description && <SheetDescription className="text-fg-secondary">{description}</SheetDescription>}
         </SheetHeader>
         <div className="flex-1 overflow-y-auto px-6 pb-6">{children}</div>
         {footer && (

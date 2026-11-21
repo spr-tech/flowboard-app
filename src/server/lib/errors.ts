@@ -11,7 +11,7 @@ export class ApiError extends Error {
     readonly status: number,
     readonly code: string,
     message: string,
-    readonly fields?: Record<string, string>,
+    readonly fields?: Record<string, string>
   ) {
     super(message);
     this.name = "ApiError";
@@ -37,7 +37,7 @@ export function errorResponse(error: unknown): NextResponse<ApiErrorBody> {
   if (error instanceof ApiError) {
     return NextResponse.json(
       { error: { code: error.code, message: error.message, fields: error.fields } },
-      { status: error.status },
+      { status: error.status }
     );
   }
   if (error instanceof ZodError) {
@@ -49,7 +49,7 @@ export function errorResponse(error: unknown): NextResponse<ApiErrorBody> {
           fields: zodFieldErrors(error),
         },
       },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -57,7 +57,7 @@ export function errorResponse(error: unknown): NextResponse<ApiErrorBody> {
   console.error(error);
   return NextResponse.json(
     { error: { code: "INTERNAL_ERROR", message: "Something went wrong on our side. Please try again." } },
-    { status: 500 },
+    { status: 500 }
   );
 }
 

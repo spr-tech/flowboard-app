@@ -15,7 +15,7 @@ export default function SignUpContent({ callbackUrl }: SignUpContentProps) {
   const loginHref = callbackUrl ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/login";
 
   return (
-    <AuthShell tone="primary"  panel={<SignUpPanel />}>
+    <AuthShell tone="primary" panel={<SignUpPanel />}>
       <h1 className="text-5xl leading-none font-extrabold tracking-[-0.045em]">
         Start your <Highlight>board</Highlight>
       </h1>

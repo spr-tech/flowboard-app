@@ -12,10 +12,9 @@ vi.mock("@/server/auth/passwordReset.service", () => ({ resetPassword: vi.fn() }
 const TOKEN = "a".repeat(43);
 
 function post(body: unknown) {
-  return POST(
-    new Request("http://localhost/api/auth/reset-password", { method: "POST", body: JSON.stringify(body) }),
-    { params: Promise.resolve({}) },
-  );
+  return POST(new Request("http://localhost/api/auth/reset-password", { method: "POST", body: JSON.stringify(body) }), {
+    params: Promise.resolve({}),
+  });
 }
 
 describe("POST /api/auth/reset-password", () => {
@@ -35,7 +34,9 @@ describe("POST /api/auth/reset-password", () => {
     const response = await post({ token: TOKEN, password: "new-password-1", confirmPassword: "new-password-1" });
 
     expect(response.status).toBe(400);
-    expect(await response.json()).toEqual({ error: { code: "TOKEN_USED", message: "This reset link was already used." } });
+    expect(await response.json()).toEqual({
+      error: { code: "TOKEN_USED", message: "This reset link was already used." },
+    });
   });
 
   it("validates with the shared schema before touching the token", async () => {

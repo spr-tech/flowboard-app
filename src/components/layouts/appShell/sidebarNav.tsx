@@ -41,7 +41,7 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
               "flex h-11 items-center gap-3 rounded-full px-4 text-[15px] font-medium transition-colors",
               isCurrent
                 ? "bg-highlight text-fg-on-highlight"
-                : "text-fg-muted-on-inverse hover:bg-surface-inverse-raised hover:text-fg-on-inverse",
+                : "text-fg-muted-on-inverse hover:bg-surface-inverse-raised hover:text-fg-on-inverse"
             )}
           >
             <Icon className="size-[18px] shrink-0" aria-hidden />

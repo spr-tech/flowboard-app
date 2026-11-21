@@ -52,7 +52,7 @@ type SegmentData = { params: Promise<Record<string, string | string[] | undefine
  */
 export function route<const S extends Schemas, const RequireAuth extends boolean>(
   options: RouteOptions<S, RequireAuth>,
-  handler: (context: RouteContext<S, RequireAuth>) => unknown,
+  handler: (context: RouteContext<S, RequireAuth>) => unknown
 ) {
   // `segment` must be required: Next's build checks the handler's second argument is
   // assignable to { params: Promise<…> }, and an optional one (… | undefined) isn't.
