@@ -8,6 +8,8 @@ export type ProjectDangerDialog = "delete" | "leave";
 export type UiState = {
   /** The phone-sized navigation drawer (the sidebar is always visible on md and up). */
   isMobileMenuOpen: boolean;
+  /** The landing page's phone menu (under md). Separate from the app shell's drawer. */
+  isLandingMenuOpen: boolean;
   /** The New project dialog (opened from the projects page; a modal library is revisited in milestone 6). */
   isNewProjectDialogOpen: boolean;
   /** Which Danger zone dialog is open on the project settings page, if any. */
@@ -16,6 +18,7 @@ export type UiState = {
 
 const initialState: UiState = {
   isMobileMenuOpen: false,
+  isLandingMenuOpen: false,
   isNewProjectDialogOpen: false,
   projectDangerDialog: null,
 };
@@ -30,6 +33,12 @@ export const uiSlice = createSlice({
     },
     mobileMenuClosed(state) {
       state.isMobileMenuOpen = false;
+    },
+    landingMenuToggled(state) {
+      state.isLandingMenuOpen = !state.isLandingMenuOpen;
+    },
+    landingMenuClosed(state) {
+      state.isLandingMenuOpen = false;
     },
     newProjectDialogOpened(state) {
       state.isNewProjectDialogOpen = true;
@@ -46,6 +55,7 @@ export const uiSlice = createSlice({
   },
   selectors: {
     selectIsMobileMenuOpen: (state) => state.isMobileMenuOpen,
+    selectIsLandingMenuOpen: (state) => state.isLandingMenuOpen,
     selectIsNewProjectDialogOpen: (state) => state.isNewProjectDialogOpen,
     selectProjectDangerDialog: (state) => state.projectDangerDialog,
   },
@@ -54,9 +64,16 @@ export const uiSlice = createSlice({
 export const {
   mobileMenuOpened,
   mobileMenuClosed,
+  landingMenuToggled,
+  landingMenuClosed,
   newProjectDialogOpened,
   newProjectDialogClosed,
   projectDangerDialogOpened,
   projectDangerDialogClosed,
 } = uiSlice.actions;
-export const { selectIsMobileMenuOpen, selectIsNewProjectDialogOpen, selectProjectDangerDialog } = uiSlice.selectors;
+export const {
+  selectIsMobileMenuOpen,
+  selectIsLandingMenuOpen,
+  selectIsNewProjectDialogOpen,
+  selectProjectDangerDialog,
+} = uiSlice.selectors;

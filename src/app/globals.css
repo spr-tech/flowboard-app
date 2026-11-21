@@ -31,6 +31,8 @@
   --brand-vermilion-dark: #8e2614;
   --brand-danger: #b3261e;
   --brand-lime: #d4f04a;
+  /* Deep plum: the sign-up story panel. White text on it is 12.6:1 (WCAG AA and AAA). */
+  --brand-plum-deep: #4b2740;
   --brand-olive: #2e3a00;
 
   --brand-chip-high: #fbe1da;
@@ -60,6 +62,8 @@
   --surface-card: var(--brand-white);
   --surface-inverse: var(--brand-espresso);
   --surface-inverse-raised: var(--brand-espresso-2);
+  /* A deep brand surface for story panels (sign-up), with white text */
+  --surface-brand-deep: var(--brand-plum-deep);
 
   /* Foreground (text and icons) */
   --fg-primary: var(--brand-espresso);
@@ -156,6 +160,7 @@
   --color-surface-card: var(--surface-card);
   --color-surface-inverse: var(--surface-inverse);
   --color-surface-inverse-raised: var(--surface-inverse-raised);
+  --color-surface-brand-deep: var(--surface-brand-deep);
 
   --color-fg-primary: var(--fg-primary);
   --color-fg-secondary: var(--fg-secondary);
@@ -229,6 +234,10 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-bricolage), var(--font-inter), ui-sans-serif, sans-serif;
 
+  /* Hover shadows: buttons lifting (shadow-lift) and cards tilting up (shadow-tile) */
+  --shadow-lift: 0 10px 22px -8px color-mix(in srgb, var(--brand-espresso) 30%, transparent);
+  --shadow-tile: 0 22px 44px -14px color-mix(in srgb, var(--brand-espresso) 24%, transparent);
+
   /* Radii */
   --radius-input: 14px;
   --radius-card: 18px;
@@ -268,6 +277,8 @@
   --animate-float-slow: float 6s ease-in-out infinite reverse;
   --animate-sway: sway 7s ease-in-out infinite;
   --animate-flip: flip 6s cubic-bezier(0.6, 0, 0.2, 1) infinite;
+  /* The landing phone menu: fades in and drops 8px into place. */
+  --animate-menu-in: menu-in 0.25s var(--ease-entrance) both;
 
   /* Headline words come up from below with a slight twist. */
   @keyframes rise {
@@ -308,6 +319,12 @@
     }
   }
   /* A task card that turns over from "to do" to "done", rests, and turns back. */
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      translate: 0 -8px;
+    }
+  }
   @keyframes flip {
     0%,
     38% {
@@ -345,13 +362,25 @@
 /*
  * The landing "stack" deck: cards sit in a tight pile and fan out on hover or keyboard focus.
  * Each card sets its pile position (--x0, --y0, --r0) and fanned position (--x1, --y1, --r1).
+ * The card under the pointer, or focused (Tab, or a tap on a phone), comes to the front:
+ * upright, 22px above its fanned place, a little bigger, with a deeper shadow.
  */
 @utility deck-card {
   transform: translate(var(--x0), var(--y0)) rotate(var(--r0));
-  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.35s ease;
 
   :where(.deck:hover, .deck:focus-within) & {
     transform: translate(var(--x1), var(--y1)) rotate(var(--r1));
+  }
+
+  &:hover,
+  &:focus {
+    z-index: 10;
+    transform: translate(var(--x1), calc(var(--y1) - 22px)) rotate(0deg) scale(1.08);
+    box-shadow: 0 34px 60px -18px color-mix(in srgb, var(--brand-espresso) 55%, transparent);
+    transition-duration: 0.35s;
   }
 }
 
@@ -561,6 +590,11 @@
   }
   .deck-card {
     transition: none !important;
+  }
+  /* The front card keeps its fanned place: no lift, turn or growth; it still comes to the front. */
+  .deck-card:hover,
+  .deck-card:focus {
+    transform: translate(var(--x1), var(--y1)) rotate(var(--r1));
   }
   /* Reveal skips hiding under reduced motion; this is the safety net if it ever doesn't. */
   [data-reveal-state],

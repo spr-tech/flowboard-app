@@ -39,7 +39,8 @@ export function LandingFooter() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="rounded-sm transition-colors hover:text-fg-on-inverse"
+                  // The underline is a 1px background that grows from the left, 0% to 100% wide.
+                  className="rounded-sm bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-[position:0_100%] bg-no-repeat transition-[color,background-size] duration-300 ease-out hover:bg-[length:100%_1px] hover:text-fg-on-inverse focus-visible:bg-[length:100%_1px] focus-visible:text-fg-on-inverse"
                 >
                   {link.label}
                 </Link>

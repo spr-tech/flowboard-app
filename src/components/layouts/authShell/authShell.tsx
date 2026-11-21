@@ -6,7 +6,8 @@ import { cn } from "@/utilities/helpers/cn";
 
 const tones = {
   inverse: { panel: "bg-surface-inverse text-fg-on-inverse", logo: "onDark" },
-  primary: { panel: "bg-primary text-fg-on-primary", logo: "onPrimary" },
+  // Sign up: deep plum with white text; the logo keeps its espresso tile.
+  brandDeep: { panel: "bg-surface-brand-deep text-fg-on-primary", logo: "onPrimary" },
 } as const;
 
 type AuthShellProps = {

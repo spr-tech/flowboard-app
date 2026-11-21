@@ -31,7 +31,7 @@ export function Accordion({ items, defaultOpenId }: AccordionProps) {
           value={item.id}
           className="group/item rounded-card border border-line-subtle bg-surface-card not-last:border-b"
         >
-          <AccordionTrigger className="min-h-16 items-center gap-4 rounded-card px-5.5 text-[17px] font-semibold text-fg-primary hover:no-underline **:data-[slot=accordion-trigger-icon]:hidden">
+          <AccordionTrigger className="min-h-16 items-center gap-4 rounded-card px-5.5 text-[17px] font-semibold text-fg-primary transition-colors hover:bg-surface-page hover:no-underline focus-visible:bg-surface-page **:data-[slot=accordion-trigger-icon]:hidden">
             {item.title}
             <span
               aria-hidden

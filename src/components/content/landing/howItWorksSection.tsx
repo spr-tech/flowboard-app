@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 
 import { Reveal } from "@/components/ui/reveal/reveal";
 import { cn } from "@/utilities/helpers/cn";
+import { tileLift } from "./landingMotion";
 
 const tones = {
   light: {
@@ -37,10 +38,22 @@ type StepCardProps = {
 function StepCard({ number, tone, title, body, mock }: StepCardProps) {
   const colours = tones[tone];
   return (
-    <div className={cn("relative overflow-hidden rounded-card-lg p-7", colours.card)}>
+    // Grows from 300px and stops at 380px, so a wrapped card sits centred under the others.
+    <div
+      className={cn(
+        "group/step relative max-w-[380px] flex-[1_1_300px] overflow-hidden rounded-card-lg p-7",
+        tileLift,
+        colours.card
+      )}
+    >
       <span
         aria-hidden
-        className={cn("absolute top-1.5 right-5 font-heading text-[92px] leading-none font-extrabold", colours.number)}
+        className={cn(
+          "absolute top-1.5 right-5 font-heading text-[92px] leading-none font-extrabold",
+          "transition-[translate,scale] duration-350 ease-[cubic-bezier(0.2,0.8,0.2,1)] delay-0",
+          "motion-safe:group-hover/step:-translate-x-2 motion-safe:group-hover/step:translate-y-1.5 motion-safe:group-hover/step:scale-108",
+          colours.number
+        )}
       >
         {number}
       </span>
@@ -70,7 +83,7 @@ export function HowItWorksSection() {
           </p>
         </Reveal>
 
-        <Reveal effect="rise" stagger={120} className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
+        <Reveal effect="rise" stagger={120} className="flex flex-wrap justify-center gap-5">
           <StepCard
             number="01"
             tone="light"

@@ -2,12 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import { makeStore } from "./store";
 import {
+  landingMenuClosed,
+  landingMenuToggled,
   mobileMenuClosed,
   mobileMenuOpened,
   newProjectDialogClosed,
   newProjectDialogOpened,
   projectDangerDialogClosed,
   projectDangerDialogOpened,
+  selectIsLandingMenuOpen,
   selectIsMobileMenuOpen,
   selectIsNewProjectDialogOpen,
   selectProjectDangerDialog,
@@ -15,9 +18,10 @@ import {
 } from "./uiSlice";
 
 describe("uiSlice", () => {
-  it("starts with the mobile menu and the New project dialog closed", () => {
+  it("starts with every menu and dialog closed", () => {
     expect(uiSlice.getInitialState()).toEqual({
       isMobileMenuOpen: false,
+      isLandingMenuOpen: false,
       isNewProjectDialogOpen: false,
       projectDangerDialog: null,
     });
@@ -38,6 +42,21 @@ describe("uiSlice", () => {
     expect(opened.isMobileMenuOpen).toBe(true);
 
     expect(uiSlice.reducer(opened, mobileMenuClosed()).isMobileMenuOpen).toBe(false);
+  });
+
+  it("toggles and closes the landing menu, separately from the app's drawer", () => {
+    const store = makeStore();
+
+    store.dispatch(landingMenuToggled());
+    expect(selectIsLandingMenuOpen(store.getState())).toBe(true);
+    expect(selectIsMobileMenuOpen(store.getState())).toBe(false);
+
+    store.dispatch(landingMenuToggled());
+    expect(selectIsLandingMenuOpen(store.getState())).toBe(false);
+
+    store.dispatch(landingMenuToggled());
+    store.dispatch(landingMenuClosed());
+    expect(selectIsLandingMenuOpen(store.getState())).toBe(false);
   });
 
   it("opens one Danger zone dialog at a time and closes it", () => {

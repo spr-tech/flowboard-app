@@ -32,6 +32,21 @@ describe("globals.css as built", () => {
     expect(builtCss).toMatch(rule);
   });
 
+  it("brings the hovered or focused deck card to the front: upright, lifted 22px, scaled 1.08", () => {
+    const front = builtCss.match(/\.deck-card\s*\{[^}]*\}[\s\S]*?&:hover,\s*&:focus\s*\{([^}]*)\}/)?.[1] ?? "";
+    const flat = builtCss.match(/\.deck-card:hover,\s*\.deck-card:focus\s*\{([^}]*)\}/g)?.join("") ?? "";
+    const rules = front + flat;
+    expect(rules).toMatch(/z-index:\s*10/);
+    expect(rules).toMatch(/translate\(var\(--x1\),\s*calc\(var\(--y1\) - 22px\)\)\s*rotate\(0deg\)\s*scale\(1\.08\)/);
+  });
+
+  it("keeps the front deck card in its fanned place under reduced motion", () => {
+    const reduced = builtCss.slice(builtCss.indexOf("prefers-reduced-motion"));
+    expect(reduced).toMatch(
+      /\.deck-card:hover,\s*\.deck-card:focus\s*\{\s*transform:\s*translate\(var\(--x1\),\s*var\(--y1\)\)\s*rotate\(var\(--r1\)\)/
+    );
+  });
+
   it("ships the hero load-in and sticker pop keyframes", () => {
     expect(builtCss).toMatch(/@keyframes load-in\s*\{/);
     expect(builtCss).toMatch(/@keyframes pop\s*\{/);

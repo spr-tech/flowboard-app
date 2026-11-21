@@ -7,6 +7,7 @@ import { Highlight } from "@/components/ui/typography/highlight";
 import { cn } from "@/utilities/helpers/cn";
 import { cssVars } from "@/utilities/helpers/cssVars";
 import { BoardPreview } from "./boardPreview";
+import { buttonLift } from "./landingMotion";
 
 // Each sticker pops in at its --pop-delay, then wiggles. The order runs pin, "High priority",
 // check tile, avatars, then the two cards on the board preview.
@@ -112,7 +113,8 @@ export function HeroSection() {
             variant="inverse"
             size="xl"
             endIcon={<ArrowBadge />}
-            className="load-in"
+            // group/cta: the arrow badge nudges when this button is hovered or focused.
+            className={cn("group/cta load-in", buttonLift)}
             style={cssVars({ "--load-delay": "500ms" })}
           />
           <ButtonLink
@@ -120,7 +122,7 @@ export function HeroSection() {
             text="See how it works"
             variant="outline"
             size="xl"
-            className="load-in"
+            className={cn("load-in", buttonLift)}
             style={cssVars({ "--load-delay": "580ms" })}
           />
         </div>
