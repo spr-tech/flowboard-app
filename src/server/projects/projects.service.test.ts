@@ -30,13 +30,14 @@ function detailRow(overrides: Record<string, unknown> = {}) {
       { id: "c1", name: "To do", position: 1000, isDone: false, _count: { tasks: 2 } },
       { id: "c3", name: "Done", position: 3000, isDone: true, _count: { tasks: 1 } },
     ],
-    members: [owner],
+    members: [{ ...owner, user: { id: "u1", name: "Ada", image: null } }],
     ...overrides,
   };
 }
 
 beforeEach(() => {
   resetPrismaMock();
+  prismaMock.task.findMany.mockResolvedValue([]);
   vi.spyOn(console, "info").mockImplementation(() => undefined);
 });
 
@@ -135,8 +136,50 @@ describe("getProject", () => {
         { id: "c1", name: "To do", isDone: false, taskCount: 2 },
         { id: "c3", name: "Done", isDone: true, taskCount: 1 },
       ],
+      tasks: [],
+      members: [{ id: "u1", name: "Ada", image: null, role: "OWNER" }],
       me: { role: "OWNER" },
     });
+  });
+
+  it("returns the board's tasks in the browser's shape", async () => {
+    prismaMock.projectMember.updateMany.mockResolvedValue({ count: 0 });
+    prismaMock.project.findUnique.mockResolvedValue(detailRow() as never);
+    prismaMock.task.findMany.mockResolvedValue([
+      {
+        id: "t1",
+        projectId: "p1",
+        columnId: "c1",
+        title: "Fix login",
+        description: null,
+        priority: "HIGH",
+        position: 1000,
+        dueDate: new Date("2026-11-25T00:00:00Z"),
+        completedAt: null,
+        createdAt: joinedAt,
+        assignee: { id: "u1", name: "Ada", image: null },
+      },
+    ] as never);
+
+    const detail = await getProject("u1", "p1");
+
+    expect(detail.tasks).toEqual([
+      {
+        id: "t1",
+        columnId: "c1",
+        title: "Fix login",
+        description: null,
+        priority: "HIGH",
+        position: 1000,
+        dueDate: "2026-11-25",
+        assignee: { id: "u1", name: "Ada", image: null },
+        completedAt: null,
+        createdAt: joinedAt.toISOString(),
+      },
+    ]);
+    expect(prismaMock.task.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { projectId: "p1" }, orderBy: [{ columnId: "asc" }, { position: "asc" }] })
+    );
   });
 
   it("answers 404 to a non-member", async () => {

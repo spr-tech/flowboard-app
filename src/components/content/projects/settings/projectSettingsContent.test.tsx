@@ -17,6 +17,8 @@ const detail = (role: "OWNER" | "MEMBER"): ProjectDetail => ({
   updatedAt: "2026-11-20T10:00:00.000Z",
   taskCount: 3,
   columns: [],
+  tasks: [],
+  members: [],
   me: myMembership({ role }),
 });
 

@@ -1,3 +1,4 @@
+import type { BoardMember, BoardTask } from "@/models/responses/boardResponses";
 import type { ProjectColour } from "@/utilities/enums/projectColours";
 
 export type ProjectRole = "OWNER" | "MEMBER";
@@ -45,7 +46,7 @@ export type ProjectColumnSummary = {
   taskCount: number;
 };
 
-/** GET /api/projects/:projectId (milestone 6 adds the board's tasks). Also what writes return. */
+/** GET /api/projects/:projectId: the whole board. Also what project writes return. */
 export type ProjectDetail = {
   id: string;
   name: string;
@@ -55,6 +56,10 @@ export type ProjectDetail = {
   taskCount: number;
   /** Left to right. */
   columns: ProjectColumnSummary[];
+  /** Every task, by column then position. */
+  tasks: BoardTask[];
+  /** Everyone on the project, owner first: assignee options and header avatars. */
+  members: BoardMember[];
   me: MyMembership;
 };
 

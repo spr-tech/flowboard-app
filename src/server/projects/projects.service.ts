@@ -18,6 +18,7 @@ import {
   toMyMembership,
   type Db,
 } from "./projectAccess";
+import { taskSelect, toBoardTask } from "@/server/tasks/taskShape";
 import { recordVisit } from "./projectPins.service";
 
 /** Every new board starts with these, Done last and marked as the done column. */
@@ -110,7 +111,7 @@ export async function listProjects(userId: string, today: string): Promise<Proje
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
-/** The project with its columns and my membership, or 404 if I'm not a member. */
+/** The whole board (project, columns, tasks, members, my membership), or 404 if I'm not a member. */
 async function loadDetail(db: Db, userId: string, projectId: string): Promise<ProjectDetail> {
   const project = await db.project.findUnique({
     where: { id: projectId },
@@ -124,11 +125,20 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
         orderBy: { position: "asc" },
         select: { id: true, name: true, position: true, isDone: true, _count: { select: { tasks: true } } },
       },
-      members: { where: { userId }, select: membershipSelect },
+      // Everyone, owner first then by joining; mine is picked out below.
+      members: {
+        orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
+        select: { ...membershipSelect, user: { select: { id: true, name: true, image: true } } },
+      },
     },
   });
-  const membership = project?.members[0];
+  const membership = project?.members.find((member) => member.user.id === userId);
   if (!project || !membership) throw projectNotFound();
+  const tasks = await db.task.findMany({
+    where: { projectId },
+    orderBy: [{ columnId: "asc" }, { position: "asc" }],
+    select: taskSelect,
+  });
 
   const columns = project.columns.map(({ _count, ...column }) => ({ ...column, taskCount: _count.tasks }));
   return {
@@ -139,6 +149,8 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
     updatedAt: project.updatedAt.toISOString(),
     taskCount: columns.reduce((sum, column) => sum + column.taskCount, 0),
     columns,
+    tasks: tasks.map(toBoardTask),
+    members: project.members.map(({ role, user }) => ({ ...user, role })),
     me: toMyMembership(membership),
   };
 }
