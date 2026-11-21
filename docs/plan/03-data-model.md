@@ -4,7 +4,7 @@
 - **User**: name, email (unique, stored lowercase), emailVerified (required by the Auth.js adapter), passwordHash (null for GitHub-only users), image, passwordChangedAt, timestamps.
 - **Account**: the Auth.js adapter table linking a GitHub login to a User. Unique on (provider, providerAccountId). No Session or VerificationToken tables: sessions are JWTs (JSON Web Tokens) and there are no magic links.
 - **Project**: name, colour, timestamps. No `ownerId`. `colour` is the enum `ProjectColour`: `vermilion | espresso | lime | blue | teal | plum | amber | rose` (default `vermilion`). It stores a key, not hex; the frontend maps each key to a token and a readable text colour.
-- **ProjectMember**: userId, projectId, role (OWNER | MEMBER, default MEMBER), joinedAt. Primary key (userId, projectId).
+- **ProjectMember**: userId, projectId, role (OWNER | MEMBER, default MEMBER), joinedAt, pinnedAt (nullable DateTime), lastOpenedAt (nullable DateTime). Primary key (userId, projectId). `pinnedAt` and `lastOpenedAt` are this user's own preferences (milestone 5).
 - **Column**: projectId, name, position (spaced float), isDone (exactly one per project).
 - **Task**: projectId, columnId, title, description, priority (LOW | MEDIUM | HIGH, default MEDIUM), position (float), dueDate (a calendar day, `@db.Date`, no time), assigneeId (nullable User), createdById, completedAt, timestamps.
 - **Invite**: projectId, email (stored lowercase), tokenHash, invitedById, expiresAt, acceptedAt, createdAt.
@@ -15,7 +15,12 @@
 - Ownership lives only in ProjectMember.role. "My projects" = projects I'm a member of.
 - Emails are lowercased before saving (User and Invite), in the seed now and in every service that writes an email.
 - A task is done when it's in the column with `isDone`. Moving in sets `completedAt`; moving out clears it. Overdue = dueDate before today and no completedAt.
-- **"Today" depends on the user's time zone**, but the server runs in UTC. This affects overdue, "Today" and due-this-week. Decide in milestone 8: either the browser sends its time zone with dashboard requests, or the client computes the grouping.
+- **"Today" is the browser's calendar day.** The server runs in UTC, but "today" depends on the user's time zone. So every request whose answer depends on today (overdue counts, next due date, and in milestone 8 the dashboard's "Today" and due-this-week) takes `?today=YYYY-MM-DD`, the browser's own local date. Zod checks it is a real date. The server never works out "today" itself. Decided in milestone 5; this also settles the dashboard (milestone 8).
+- **Pinning (per user).** Pinning sets my `ProjectMember.pinnedAt` to now; unpinning sets it to null. Any member can pin, not just the owner. Pinning an already-pinned project keeps the original time, so the pin order holds. There's no cap on the number of pins. Pins order "oldest pin first".
+- **Last opened.** Opening a project (GET `/api/projects/:projectId`) sets my `lastOpenedAt` to now, but at most once a minute per user and project: one conditional update (`where lastOpenedAt is null or older than 60 seconds`), so refreshes inside the minute write nothing and two tabs can't both write. "Recent" means opened by me, not changed by anyone. A project I've never opened uses `joinedAt` instead.
+- **Pins and visits write no Activity row.** They change nothing anyone else sees. They are the exception to "every service that changes data writes an Activity row".
+- **"Updated" on a project card** is the latest of the project's own `updatedAt` and its newest Activity row. It is only used for the "Updated …" line and the projects page's default order, not for the sidebar.
+- **Sidebar "Your projects"** (at most 3): my pinned projects first, oldest pin first; then the remaining slots filled with my other projects by `lastOpenedAt` (falling back to `joinedAt`), most recent first; no duplicates. Computed in the browser from the GET `/api/projects` list.
 - **One done column per project.** A partial unique index (`Column_one_done_per_project`, on projectId where isDone) makes a second done column impossible; services make sure there is always one. So "Set as done column" must clear the old done column **before** setting the new one, in one transaction, or the index rejects it.
 - Positions are spaced floats (1000, 2000, 3000). A moved card takes the midpoint of its neighbours; top = first − 1000; bottom = last + 1000; empty column = 1000. If a gap gets too small, re-space the whole column in the same transaction.
 - Invite and password-reset tokens are stored only as hashes (SHA-256). Reset tokens are 32 random bytes, sent only in the email link.
@@ -30,6 +35,8 @@
 
 ## Changes from the old schema
 Add Account, Invite, PasswordResetToken, Activity; rename Member to ProjectMember with a role enum; drop Project.ownerId, description, status, dueDate; Project.color (hex string) becomes colour (enum); add Column.isDone; Column.order becomes position (float); add Task.projectId, createdById, completedAt; drop Task.status and label; Task.dueDate becomes date-only; switch positions to spaced floats; User.password becomes passwordHash; add User.emailVerified and passwordChangedAt.
+
+Milestone 5 adds `ProjectMember.pinnedAt` and `lastOpenedAt` (migration `project_member_pin_and_recency`).
 
 ## Local database commands
 - `pnpm db:migrate`: create and apply a new migration after a schema change (`prisma migrate dev`).

@@ -53,12 +53,19 @@ Auth notes:
 ## Projects
 | Method | Path | Who | What |
 |---|---|---|---|
-| GET | /api/projects | Signed in | My projects with progress + avatars |
-| POST | /api/projects | Signed in | Project + OWNER membership + 3 default columns, one transaction |
-| GET | /api/projects/:projectId | Member | Whole board: project, columns, tasks |
-| PATCH | /api/projects/:projectId | Owner | Rename / recolour |
-| DELETE | /api/projects/:projectId | Owner | Body has the typed project name |
-| POST | /api/projects/:projectId/leave | Member, not owner | Leave, unassign my tasks |
+| GET | /api/projects?today=YYYY-MM-DD | Signed in | My projects as cards: done/total, overdue count and next due date (against `today`), up to 4 member avatars (owner first), "updated", and `me: { role, pinnedAt, lastOpenedAt, joinedAt }`. Newest "updated" first; the browser applies pin order |
+| POST | /api/projects | Signed in | Project + OWNER membership + 3 default columns (To do / In progress / Done) + `project.created`, one transaction |
+| GET | /api/projects/:projectId | Member | The project, its columns and `me` (milestone 6 adds the tasks). Also records my visit: `lastOpenedAt`, at most once a minute |
+| PATCH | /api/projects/:projectId | Owner | Rename / recolour. No write and no Activity row if nothing changed |
+| DELETE | /api/projects/:projectId | Owner | Body has the typed project name; 400 `NAME_MISMATCH` if it differs. Returns `{ id }` |
+| POST | /api/projects/:projectId/leave | Member, not owner | Leave, unassign my tasks, `member.left`, one transaction |
+| POST | /api/projects/:projectId/pin | Member (any role) | Pin for me. Already pinned → unchanged (keeps the first pin's time). Returns my updated membership `{ projectId, role, pinnedAt, lastOpenedAt, joinedAt }` |
+| DELETE | /api/projects/:projectId/pin | Member (any role) | Unpin for me. Returns my updated membership |
+
+Projects notes:
+- Pins are per user and have no cap. Pins and visits write no Activity row (they are personal; see `03-data-model.md`).
+- The visit write is one conditional `updateMany` (`lastOpenedAt` null or older than 60 seconds), so refreshes inside a minute don't write.
+- Owner-only actions by a member → 403 `OWNER_ONLY`; any project action by a non-member → 404 `PROJECT_NOT_FOUND`.
 
 ## Columns
 | Method | Path | Who | What |
@@ -78,7 +85,7 @@ Auth notes:
 ## Members and invites
 | Method | Path | Who | What |
 |---|---|---|---|
-| GET | /api/projects/:projectId/members | Member | Members with roles |
+| GET | /api/projects/:projectId/members | Member | Members with roles and their task counts in this project (built in milestone 5) |
 | DELETE | /api/projects/:projectId/members/:userId | Owner | Remove + unassign, one transaction |
 | GET | /api/projects/:projectId/invites | Owner | Pending invites |
 | POST | /api/projects/:projectId/invites | Owner | Invite by email |
