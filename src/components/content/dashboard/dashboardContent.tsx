@@ -49,6 +49,15 @@ export default function DashboardContent({ filter }: { filter: DashboardFilter }
                 <Skeleton key={card} className="h-32 rounded-card-lg" />
               ))}
             </div>
+            {/* The sections' places, so nothing jumps when they arrive. */}
+            <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+              <Skeleton className="h-96 rounded-card-lg" />
+              <div className="flex flex-col gap-5">
+                <Skeleton className="h-40 rounded-card-lg" />
+                <Skeleton className="h-36 rounded-card-lg" />
+                <Skeleton className="h-32 rounded-card-lg" />
+              </div>
+            </div>
           </>
         )}
       </SkeletonScreen>
