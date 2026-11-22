@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { projectSummary } from "@/test/projectFixtures";
@@ -17,6 +17,30 @@ const projects = [
 const cardNames = () => screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
 
 describe("ProjectsContent", () => {
+  it("while loading: the title, tabs and New project show at once; six card skeletons follow after 200ms", async () => {
+    let answer: (response: Response) => void = () => {};
+    mockFetch(() => new Promise<Response>((resolve) => (answer = resolve)));
+    renderWithStore(<ProjectsContent filter="all" />);
+
+    expect(screen.getByRole("heading", { name: "Projects", level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "New project" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Filter projects" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading your projects");
+    expect(screen.getByRole("status").closest("[aria-busy='true']")).not.toBeNull();
+    // No shapes yet: a fast load never flashes a skeleton.
+    expect(document.querySelectorAll(".skeleton")).toHaveLength(0);
+
+    // The count line, then per card: tile, badge, name, updated, two progress labels, bar, 3 avatars.
+    await waitFor(() => expect(document.querySelectorAll(".skeleton")).toHaveLength(1 + 6 * 10));
+    expect(document.querySelectorAll(".skeleton[aria-hidden='true']")).toHaveLength(61);
+
+    answer(jsonResponse(200, projects));
+    await screen.findByText("First pin");
+    expect(document.querySelectorAll(".skeleton")).toHaveLength(0);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(document.querySelector("[aria-busy]")).toBeNull();
+  });
+
   it("lists pinned projects first in pin order, then the rest newest-updated first", async () => {
     mockFetch(() => jsonResponse(200, projects));
     renderWithStore(<ProjectsContent filter="all" />);

@@ -14,8 +14,10 @@ import { DeleteProjectDialog } from "../modals/deleteProjectDialog";
 import { LeaveProjectDialog } from "../modals/leaveProjectDialog";
 import { ProjectLoadProblem } from "../projectLoadProblem";
 import { ProjectTile } from "../projectTile";
+import { useDelayedFlag } from "@/utilities/hooks/useDelayedFlag";
 import { ColumnsSection } from "./columnsSection";
-import { SettingsSection } from "./settingsSection";
+import { ProjectSettingsSkeleton } from "./projectSettingsSkeleton";
+import { SETTINGS_SECTIONS, SettingsSection } from "./settingsSection";
 
 /**
  * /projects/[projectId]/settings (docs/designs/project-settings.md).
@@ -29,13 +31,9 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
   // A dialog left open (say, by the browser's back button) mustn't reopen on the next visit.
   useEffect(() => () => void dispatch(dialogClosed()), [dispatch]);
 
-  if (isLoading) {
-    return (
-      <p role="status" className="text-fg-secondary">
-        Loading project settings…
-      </p>
-    );
-  }
+  const showSkeleton = useDelayedFlag(isLoading);
+
+  if (isLoading) return <ProjectSettingsSkeleton projectId={projectId} showShapes={showSkeleton} />;
   if (!project) return <ProjectLoadProblem error={error} onRetry={refetch} />;
 
   const isOwner = project.me.role === "OWNER";
@@ -77,11 +75,7 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
         </p>
       )}
 
-      <SettingsSection
-        id="settings-general"
-        title="General"
-        description="The name and colour everyone sees on the board, the projects list and the dashboard."
-      >
+      <SettingsSection {...SETTINGS_SECTIONS.general}>
         <ProjectGeneralForm
           key={`${project.name}|${project.colour}|${project.description ?? ""}`}
           project={project}
@@ -89,17 +83,12 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
         />
       </SettingsSection>
 
-      <SettingsSection
-        id="settings-columns"
-        title="Columns"
-        description="The board's columns, left to right (the team order). Tasks in the done column count as finished on the dashboard."
-      >
+      <SettingsSection {...SETTINGS_SECTIONS.columns}>
         <ColumnsSection project={project} meId={me?.id ?? null} />
       </SettingsSection>
 
       <SettingsSection
-        id="settings-danger"
-        title="Danger zone"
+        {...SETTINGS_SECTIONS.danger}
         description={isOwner ? "Permanent actions. They affect everyone on this board." : "Leaving only affects you."}
       >
         <div className="flex flex-wrap items-center justify-between gap-4">

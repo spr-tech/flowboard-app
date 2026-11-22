@@ -9,9 +9,11 @@ import { useAppDispatch } from "@/stores/hooks";
 import { dialogClosed, dialogOpened } from "@/stores/uiSlice";
 import { localToday } from "@/utilities/helpers/localToday";
 import { countPinned, filterProjects, sortForProjectsPage, type ProjectFilter } from "@/utilities/helpers/projectOrder";
+import { useDelayedFlag } from "@/utilities/hooks/useDelayedFlag";
 import { NewProjectDialog } from "./modals/newProjectDialog";
 import { ProjectCard } from "./projectCard";
 import { ProjectFilterTabs } from "./projectFilterTabs";
+import { ProjectCountSkeleton, ProjectGridSkeleton } from "./projectsSkeleton";
 
 const emptyTabMessages: Record<ProjectFilter, string> = {
   all: "",
@@ -28,6 +30,8 @@ export default function ProjectsContent({ filter }: { filter: ProjectFilter }) {
   // A dialog left open (say, by the browser's back button) mustn't reopen on the next visit.
   useEffect(() => () => void dispatch(dialogClosed()), [dispatch]);
   const { data: projects, isLoading, isError, refetch } = useProjects();
+  // The title, tabs and New project button never wait; the data parts show skeletons, after 200ms.
+  const showSkeleton = useDelayedFlag(isLoading);
   const today = localToday();
 
   const ownedCount = projects?.filter((project) => project.me.role === "OWNER").length ?? 0;
@@ -35,10 +39,11 @@ export default function ProjectsContent({ filter }: { filter: ProjectFilter }) {
   const pinnedCount = countPinned(projects ?? []);
 
   return (
-    <section className="flex flex-col gap-7">
+    <section aria-busy={isLoading || undefined} className="flex flex-col gap-7">
       <header className="flex flex-wrap items-end justify-between gap-5">
         <div>
           <h1 className="text-display-section leading-none font-extrabold tracking-tighter">Projects</h1>
+          {showSkeleton && <ProjectCountSkeleton />}
           {projects && projects.length > 0 && (
             <p className="mt-2.5 text-fg-secondary">
               {plural(projects.length, "project")} · {ownedCount} you own
@@ -55,14 +60,7 @@ export default function ProjectsContent({ filter }: { filter: ProjectFilter }) {
       <ProjectFilterTabs active={filter} />
 
       {isLoading ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-5">
-          <p className="sr-only" role="status">
-            Loading your projects
-          </p>
-          {[0, 1, 2].map((key) => (
-            <div key={key} aria-hidden className="h-[260px] animate-pulse rounded-card-lg bg-surface-sunken" />
-          ))}
-        </div>
+        <ProjectGridSkeleton showShapes={showSkeleton} />
       ) : isError && !projects ? (
         <div className="flex flex-col items-start gap-4 rounded-card-lg border border-line-subtle bg-surface-card p-6">
           <p className="text-fg-secondary">We couldn&apos;t load your projects.</p>
