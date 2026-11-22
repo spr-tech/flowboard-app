@@ -1,9 +1,26 @@
 import type { ReactNode } from "react";
 
+/** The sections' fixed copy, shared by the page and its loading skeleton. */
+export const SETTINGS_SECTIONS = {
+  general: {
+    id: "settings-general",
+    title: "General",
+    description: "The name and colour everyone sees on the board, the projects list and the dashboard.",
+  },
+  columns: {
+    id: "settings-columns",
+    title: "Columns",
+    description:
+      "The board's columns, left to right (the team order). Tasks in the done column count as finished on the dashboard.",
+  },
+  danger: { id: "settings-danger", title: "Danger zone" },
+} as const;
+
 type SettingsSectionProps = {
   id: string;
   title: string;
-  description: string;
+  /** Text, or a skeleton while it depends on data that is still loading. */
+  description: ReactNode;
   children: ReactNode;
 };
 
@@ -18,7 +35,7 @@ export function SettingsSection({ id, title, description, children }: SettingsSe
         <h2 id={id} className="text-xl font-bold tracking-tight">
           {title}
         </h2>
-        <p className="mt-1.5 text-sm text-fg-secondary">{description}</p>
+        <div className="mt-1.5 text-sm text-fg-secondary">{description}</div>
       </div>
       <div className="rounded-card-lg border border-line-subtle bg-surface-card p-6">{children}</div>
     </section>

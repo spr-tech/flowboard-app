@@ -38,7 +38,7 @@ export function AddColumnForm({ projectId, layout = "board" }: AddColumnFormProp
         text="Add column"
         variant="ghost"
         startIcon={<Plus aria-hidden />}
-        className="w-[300px] shrink-0 justify-start rounded-card border-2 border-dashed border-line-strong"
+        className="w-full shrink-0 justify-start rounded-card md:w-[300px] border-2 border-dashed border-line-strong"
         onClick={() => setIsOpen(true)}
       />
     );
@@ -72,7 +72,7 @@ export function AddColumnForm({ projectId, layout = "board" }: AddColumnFormProp
       noValidate
       className={cn(
         "flex flex-col gap-2",
-        layout === "board" && "w-[300px] shrink-0 self-start rounded-card bg-surface-sunken p-3"
+        layout === "board" && "w-full shrink-0 self-start md:w-[300px] rounded-card bg-surface-sunken p-3"
       )}
     >
       <div className="flex gap-2">

@@ -16,7 +16,7 @@ export function AddColumnArea({ project }: { project: Pick<ProjectDetail, "id" |
   const usage = `${memberColumnCount} of ${memberColumnLimit} member columns used`;
   if (memberColumnCount >= memberColumnLimit) {
     return (
-      <div className="flex w-[300px] shrink-0 flex-col gap-1.5 rounded-card border-2 border-dashed border-line-strong p-3">
+      <div className="flex w-full shrink-0 flex-col gap-1.5 rounded-card border-2 border-dashed border-line-strong p-3 md:w-[300px]">
         <button type="button" disabled className="h-11 cursor-not-allowed text-left font-semibold text-fg-muted">
           + Add column
         </button>
@@ -27,7 +27,7 @@ export function AddColumnArea({ project }: { project: Pick<ProjectDetail, "id" |
     );
   }
   return (
-    <div className="flex w-[300px] shrink-0 flex-col gap-1.5">
+    <div className="flex w-full shrink-0 flex-col gap-1.5 md:w-[300px]">
       <AddColumnForm projectId={project.id} />
       <p className="px-1 text-sm text-fg-muted">{usage}</p>
     </div>

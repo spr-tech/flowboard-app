@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -13,6 +13,34 @@ const detail = (role: "OWNER" | "MEMBER"): ProjectDetail =>
   projectDetail({ colour: "blue", taskCount: 3, me: boardMembership({ role }) });
 
 describe("ProjectSettingsContent", () => {
+  it("while loading: the fixed headings show at once; the project's parts are skeletons after 200ms", async () => {
+    // The project answers only when the test says so; /api/me answers at once.
+    let answer: (response: Response) => void = () => {};
+    mockFetch((request) =>
+      request.url.endsWith("/api/projects/p1")
+        ? new Promise<Response>((resolve) => (answer = resolve))
+        : jsonResponse(200, { id: "demo", name: "Alex Morgan", email: "demo@example.com", image: null })
+    );
+    renderWithStore(<ProjectSettingsContent projectId="p1" />);
+
+    expect(screen.getByRole("heading", { name: "Project settings", level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "General" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Columns" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Danger zone" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back to board" })).toHaveAttribute("href", "/projects/p1");
+    expect(screen.getByRole("status")).toHaveTextContent("Loading project settings");
+    expect(screen.getByRole("status").closest("[aria-busy='true']")).not.toBeNull();
+    expect(document.querySelectorAll(".skeleton")).toHaveLength(0);
+
+    await waitFor(() => expect(document.querySelectorAll(".skeleton").length).toBeGreaterThan(20));
+    expect(document.querySelectorAll(".skeleton:not([aria-hidden='true'])")).toHaveLength(0);
+
+    answer(jsonResponse(200, detail("OWNER")));
+    expect(await screen.findByText("Website relaunch · you're the owner")).toBeInTheDocument();
+    expect(document.querySelectorAll(".skeleton")).toHaveLength(0);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("gives the owner editable General settings and Delete in the Danger zone", async () => {
     mockFetch(() => jsonResponse(200, detail("OWNER")));
     renderWithStore(<ProjectSettingsContent projectId="p1" />);

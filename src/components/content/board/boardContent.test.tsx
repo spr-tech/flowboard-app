@@ -43,6 +43,32 @@ const cardTitles = (name: string) =>
 describe("BoardContent", () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it("while loading: a busy status at once, then the board's skeleton after 200ms, then the board", async () => {
+    let answer: (response: Response) => void = () => {};
+    mockFetch((request) =>
+      new URL(request.url).pathname === "/api/me"
+        ? jsonResponse(200, me)
+        : new Promise<Response>((resolve) => (answer = resolve))
+    );
+    renderWithStore(<BoardContent projectId="p1" />);
+
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Loading the board");
+    expect(status.closest("[aria-busy='true']")).not.toBeNull();
+    expect(screen.queryByText(/Loading the board…/)).not.toBeInTheDocument();
+    expect(document.querySelectorAll(".skeleton")).toHaveLength(0);
+
+    // Breadcrumb, tile, two text bars, 3 avatars, 4 pills, then 3 columns of (2 header bars + 2/3/4 cards).
+    await vi.waitFor(() => expect(document.querySelectorAll(".skeleton")).toHaveLength(1 + 1 + 2 + 3 + 4 + 6 + 9));
+    expect(document.querySelectorAll(".skeleton:not([aria-hidden='true'])")).toHaveLength(0);
+    expect(document.querySelectorAll(".skeleton-on-sunken")).toHaveLength(6 + 9);
+
+    answer(jsonResponse(200, boardWith()));
+    expect(await screen.findByText("3 tasks · 1 done · 2 members")).toBeInTheDocument();
+    expect(document.querySelectorAll(".skeleton")).toHaveLength(0);
+    expect(document.querySelector("[aria-busy]")).toBeNull();
+  });
+
   it("shows the header summary, every column and its cards in order, and the done column's badge", async () => {
     renderBoard();
 

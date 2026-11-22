@@ -51,4 +51,17 @@ describe("globals.css as built", () => {
     expect(builtCss).toMatch(/@keyframes load-in\s*\{/);
     expect(builtCss).toMatch(/@keyframes pop\s*\{/);
   });
+
+  it("ships the skeleton shimmer, and turns it off under reduced motion", () => {
+    expect(builtCss).toMatch(/@keyframes skeleton-shimmer\s*\{/);
+    expect(builtCss).toMatch(/animation:\s*skeleton-shimmer 1\.4s/);
+    const reduced = builtCss.slice(builtCss.indexOf("prefers-reduced-motion"));
+    expect(reduced).toMatch(/\.skeleton::after\s*\{\s*animation:\s*none !important;\s*display:\s*none;/);
+  });
+
+  it("gives the board row a slim sand scrollbar", () => {
+    const rule = builtCss.match(/\.board-scrollbar\s*\{([^}]*)\}/)?.[1] ?? "";
+    expect(rule).toMatch(/scrollbar-width:\s*thin/);
+    expect(rule).toMatch(/scrollbar-color:\s*var\(--line-strong\) transparent/);
+  });
 });

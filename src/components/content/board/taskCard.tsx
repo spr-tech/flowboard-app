@@ -24,10 +24,12 @@ type TaskCardProps = {
   isInDoneColumn: boolean;
   today: string;
   onOpen: (taskId: string) => void;
+  /** In a folded phone column: neither draggable nor a drop target (its box is clipped away). */
+  isDisabled?: boolean;
 };
 
 /** The card's face, shared by the sortable card and the drag overlay. */
-export function TaskCardFace({ task, isInDoneColumn, today }: Omit<TaskCardProps, "onOpen">) {
+export function TaskCardFace({ task, isInDoneColumn, today }: Omit<TaskCardProps, "onOpen" | "isDisabled">) {
   const due = task.dueDate ? dueChip(task.dueDate, today) : null;
   return (
     <>
@@ -62,10 +64,12 @@ export function TaskCardFace({ task, isInDoneColumn, today }: Omit<TaskCardProps
  * A draggable card. Pointer: drag after 6px, otherwise a click opens the drawer. Keyboard: Space
  * picks it up (dnd-kit's keyboard sensor), Enter opens the drawer.
  */
-export function TaskCard({ task, isInDoneColumn, today, onOpen }: TaskCardProps) {
+export function TaskCard({ task, isInDoneColumn, today, onOpen, isDisabled = false }: TaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
     data: { kind: "card", columnId: task.columnId, title: task.title },
+    // Both halves: a plain `true` only stops dragging and leaves it a drop target.
+    disabled: { draggable: isDisabled, droppable: isDisabled },
   });
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
