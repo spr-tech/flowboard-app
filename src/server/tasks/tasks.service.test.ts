@@ -242,6 +242,21 @@ describe("updateTask", () => {
     expect(prismaMock.activity.create).not.toHaveBeenCalled();
   });
 
+  it("records the new assignee's name, so the feed can say who it was assigned to", async () => {
+    givenTask();
+    prismaMock.task.update.mockResolvedValue({
+      ...taskRow(),
+      assignee: { id: "sam", name: "Sam", image: null },
+    } as never);
+
+    await updateTask("u1", "t1", { assigneeId: "sam" });
+
+    expect(prismaMock.activity.create.mock.calls[0][0].data).toMatchObject({
+      action: "task.updated",
+      meta: { fields: ["assigneeId"], assignee: { id: "sam", name: "Sam" } },
+    });
+  });
+
   it("only assigns project members", async () => {
     givenTask();
     prismaMock.projectMember.findUnique.mockResolvedValueOnce(member as never).mockResolvedValueOnce(null);

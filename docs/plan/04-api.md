@@ -49,6 +49,14 @@ Auth notes:
 | GET | /api/dashboard/projects | Signed in | Project progress rows |
 | GET | /api/dashboard/stats | Signed in | 14-day completed, priority split, next 7 days |
 | GET | /api/dashboard/activity | Signed in | Activity across my projects |
+| GET | /api/tasks/:taskId/activity | Member | One task's history, for the task drawer (milestone 8) |
+
+Dashboard notes (milestone 8):
+- Every endpoint but the two activity feeds takes `?today=YYYY-MM-DD&tz=<IANA zone>`: the browser's own day and its time zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`). Due dates are days, compared with `today`; `completedAt` is a moment, turned into the browser's local day with `tz` ("completed this week", the 14-day chart). Both are validated; the server never works out "today" itself.
+- "My" tasks are the ones assigned to me. Groups: Overdue (due before today), Today, This week (the next 6 days, a rolling week like the 7-day strip), Later, No due date. "Due this week" = today plus the next 6 days; "Completed this week" = the last 7 local days, today included.
+- My tasks also lists tasks completed today (local), in their group, so a ticked task stays visible struck through. Each task carries its project's `doneColumnId` (ticking moves it there through PATCH /api/tasks/:taskId/move) and `reopenColumnId`, the first column in the team order that isn't the done column (unticking moves it back there).
+- Projects: up to 5 rows in the sidebar's order (pinned first, then most recently opened), from the same figures as the projects page.
+- Activity: the newest 20 rows, `{ id, action, meta, createdAt, actor, project, task }`; the browser writes the sentence. `task.updated` records the new assignee `{ id, name }` in meta when the assignee changed.
 
 ## Projects
 | Method | Path | Who | What |

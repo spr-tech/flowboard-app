@@ -114,7 +114,14 @@ export async function updateTask(userId: string, taskId: string, changes: TaskCh
         actorId: userId,
         action: ActivityAction.TaskUpdated,
         taskId,
-        meta: { title: updated.title, fields },
+        // A new assignee is recorded by name too, so the feed can say "assigned X to Sam".
+        meta: {
+          title: updated.title,
+          fields,
+          ...(fields.includes("assigneeId")
+            ? { assignee: updated.assignee ? { id: updated.assignee.id, name: updated.assignee.name } : null }
+            : {}),
+        },
       },
     });
     return toBoardTask(updated);
