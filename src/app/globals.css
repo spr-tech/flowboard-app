@@ -444,6 +444,40 @@
 }
 
 /*
+ * Skeleton loading blocks (components/ui/skeleton). A sunken cream block with a light band
+ * sweeping left to right every 1.4s. On a sunken surface (the board's columns) the "card" tone
+ * swaps them: a white block with a sunken band. Static under reduced motion (below).
+ * Top-level keyframes, for the same reason as the reveal ones: only a utility names them.
+ */
+@keyframes skeleton-shimmer {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 100% 0;
+  }
+}
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-sunken);
+  --skeleton-band: color-mix(in srgb, var(--surface-card) 65%, transparent);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    translate: -100% 0;
+    background-image: linear-gradient(90deg, transparent, var(--skeleton-band), transparent);
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  }
+}
+@utility skeleton-on-sunken {
+  background-color: var(--surface-card);
+  --skeleton-band: color-mix(in srgb, var(--surface-sunken) 80%, transparent);
+}
+
+/*
  * Scroll reveals. The server renders data-reveal with no state, so content is visible if
  * JavaScript never runs. Reveal sets data-reveal-state="hidden" after mount (only below the
  * fold), then "shown" when it scrolls into view. With data-reveal-stagger the direct children
@@ -590,6 +624,11 @@
   }
   .deck-card {
     transition: none !important;
+  }
+  /* Loading skeletons stay still: no shimmer band at all. */
+  .skeleton::after {
+    animation: none !important;
+    display: none;
   }
   /* The front card keeps its fanned place: no lift, turn or growth; it still comes to the front. */
   .deck-card:hover,
