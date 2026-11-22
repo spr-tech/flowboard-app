@@ -58,4 +58,10 @@ describe("globals.css as built", () => {
     const reduced = builtCss.slice(builtCss.indexOf("prefers-reduced-motion"));
     expect(reduced).toMatch(/\.skeleton::after\s*\{\s*animation:\s*none !important;\s*display:\s*none;/);
   });
+
+  it("gives the board row a slim sand scrollbar", () => {
+    const rule = builtCss.match(/\.board-scrollbar\s*\{([^}]*)\}/)?.[1] ?? "";
+    expect(rule).toMatch(/scrollbar-width:\s*thin/);
+    expect(rule).toMatch(/scrollbar-color:\s*var\(--line-strong\) transparent/);
+  });
 });

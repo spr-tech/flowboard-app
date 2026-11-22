@@ -472,6 +472,22 @@
     animation: skeleton-shimmer 1.4s ease-in-out infinite;
   }
 }
+/* The board's horizontal row (md and up): a slim sand scrollbar. */
+@utility board-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: var(--line-strong);
+  }
+}
 @utility skeleton-on-sunken {
   background-color: var(--surface-card);
   --skeleton-band: color-mix(in srgb, var(--surface-sunken) 80%, transparent);

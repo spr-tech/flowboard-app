@@ -256,6 +256,15 @@ describe("BoardColumns on a phone (under md)", () => {
 describe("BoardColumns from md up", () => {
   afterEach(() => vi.unstubAllGlobals());
 
+  it("keeps the horizontal row, now snapping to columns with the slim scrollbar", async () => {
+    stubScreenWidth(DESKTOP_WIDTH);
+    await renderColumns(projectDetail(), () => jsonResponse(200, {}));
+
+    const row = screen.getAllByRole("region")[0].parentElement;
+    expect(row).toHaveClass("md:flex-row", "md:overflow-x-auto", "md:snap-x", "md:*:snap-start", "board-scrollbar");
+    for (const column of screen.getAllByRole("region")) expect(column).toHaveClass("md:w-[300px]");
+  });
+
   it("keeps every column open and reachable, even one folded on a phone", async () => {
     stubScreenWidth(DESKTOP_WIDTH);
     window.localStorage.setItem(collapsedColumnsKey("p1"), JSON.stringify({ todo: true }));

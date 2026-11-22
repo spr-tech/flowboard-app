@@ -22,6 +22,7 @@ import { useMoveTaskMutation } from "@/services/tasksService";
 import { columnTasks, dropNeighbours, type BoardFilters } from "@/utilities/helpers/boardView";
 import { moveId, orderColumns } from "@/utilities/helpers/columnOrder";
 import { useCollapsedColumns } from "@/utilities/hooks/useCollapsedColumns";
+import { cn } from "@/utilities/helpers/cn";
 import { useIsPhone } from "@/utilities/hooks/useMediaQuery";
 import { AddColumnArea } from "./addColumnArea";
 import { BoardColumn } from "./boardColumn";
@@ -153,8 +154,16 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
         },
       }}
     >
-      {/* Phones: a full-width stack. md and up: the horizontal row, unchanged. */}
-      <div className="flex flex-col gap-3 pb-4 md:-mx-8 md:flex-row md:items-start md:gap-4 md:overflow-x-auto md:px-8">
+      {/* Phones: a full-width stack. md and up: the horizontal row, snapping to each column (and
+          to Add column, so the end stays reachable) with a slim sand scrollbar. No snapping during
+          a drag: it would fight dnd-kit's auto-scroll near the edges. */}
+      <div
+        className={cn(
+          "flex flex-col gap-3 pb-4 md:-mx-8 md:flex-row md:items-start md:gap-4 md:overflow-x-auto md:px-8",
+          "board-scrollbar md:snap-x md:snap-mandatory md:scroll-px-8 md:*:snap-start",
+          (activeTask || activeColumn) && "md:snap-none"
+        )}
+      >
         <SortableContext
           items={columns.map((column) => columnSortId(column.id))}
           strategy={isPhone ? verticalListSortingStrategy : horizontalListSortingStrategy}
