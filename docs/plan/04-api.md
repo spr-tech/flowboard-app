@@ -101,6 +101,14 @@ Task notes: a task in a project I'm not in is 404 `TASK_NOT_FOUND`, like the pro
 | GET | /api/invites/token/:token | Anyone | Preview: project, inviter, state |
 | POST | /api/invites/token/:token/accept | Signed in | Join the project |
 
+Members and invites notes (milestone 7):
+- Invites: owner only; the email is lowercased. Already a member → 409 `ALREADY_MEMBER` ("<name> is already a member.", as a field error on `email`). A pending invite (not accepted, not cancelled; expired ones too) for the same email is sent again on the same row with a new token and expiry, and the answer says `resent: true`. Tokens are 32 random bytes; only the SHA-256 hash is stored; they last 7 days.
+- The invite row is written first, then the email is sent. If sending fails, 502 `EMAIL_NOT_SENT`; the invite stays listed so Resend works.
+- POST /invites and resend return the invite `{ id, email, createdAt, expiresAt, resent }`; GET /invites lists pending ones, newest first, expired ones included (the page marks them). Cancel stamps `cancelledAt` and returns `{ id }`.
+- Remove: never the owner (400 `CANNOT_REMOVE_OWNER`); someone not in the project → 404 `MEMBER_NOT_FOUND`. Returns `{ projectId, userId, unassignedTaskCount }`.
+- Preview states: `valid` (project name, colour, description, inviter, invited email), `expired` (inviter), `used`, `cancelled`, `invalid`, and `member` when the signed-in user is already in the project.
+- Accept: the session's email must be the invited one (403 `INVITE_EMAIL_MISMATCH`); expired, used or cancelled → 400 `INVITE_EXPIRED` / `INVITE_USED` / `INVITE_CANCELLED`; unknown → 404 `INVITE_NOT_FOUND`. One transaction: MEMBER membership, `acceptedAt` (a conditional update, so two clicks can't both join), `member.joined`. Already a member: the invite is marked used and the project returned. Returns `{ projectId, projectName }`.
+
 ## Conventions
 - Short paths for anything with an ID; the service finds its project and checks membership.
 - Non-members get 404, not 403.
