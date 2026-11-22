@@ -78,6 +78,26 @@ describe("BoardContent", () => {
     expect(within(column("Done")).getByText("Done column")).toBeInTheDocument();
   });
 
+  it("gives the owner an Invite button that opens the invite form in a dialog", async () => {
+    renderBoard(boardWith(), () =>
+      jsonResponse(201, { id: "inv1", email: "ada@team.dev", sentAt: "", expiresAt: "", resent: false })
+    );
+
+    await userEvent.click(await screen.findByRole("button", { name: "Invite" }));
+    const dialog = screen.getByRole("dialog", { name: "Invite to Website relaunch" });
+    await userEvent.type(within(dialog).getByLabelText("Invite by email"), "ada@team.dev");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Send invite" }));
+
+    expect(await within(dialog).findByText("Invite sent to ada@team.dev.")).toBeInTheDocument();
+  });
+
+  it("shows no Invite button to members", async () => {
+    renderBoard(boardWith({ me: boardMembership({ role: "MEMBER" }) }));
+
+    await screen.findByText("3 tasks · 1 done · 2 members");
+    expect(screen.queryByRole("button", { name: "Invite" })).not.toBeInTheDocument();
+  });
+
   it("filters by priority and by only my tasks", async () => {
     renderBoard();
     await screen.findByText("Fix login");

@@ -12,7 +12,8 @@ export type OpenDialog =
   | { kind: "newProject" }
   | { kind: "deleteProject" }
   | { kind: "leaveProject" }
-  | { kind: "deleteColumn"; columnId: string };
+  | { kind: "deleteColumn"; columnId: string }
+  | { kind: "invite" };
 
 export type BoardPriorityFilter = "all" | "HIGH" | "MEDIUM" | "LOW";
 

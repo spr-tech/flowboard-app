@@ -25,6 +25,7 @@ import { BoardSkeleton } from "./boardSkeleton";
 import { YourOrder } from "./yourOrder";
 import { TaskDrawer } from "./drawer/taskDrawer";
 import { DeleteColumnDialog } from "./modals/deleteColumnDialog";
+import { InviteDialog } from "./modals/inviteDialog";
 
 /** /projects/[projectId]: the board (docs/designs/app-screens.md, "Board"). */
 export default function BoardContent({ projectId }: { projectId: string }) {
@@ -71,6 +72,7 @@ export default function BoardContent({ projectId }: { projectId: string }) {
       />
       <TaskDrawer project={project} meId={me?.id ?? null} />
       <DeleteColumnDialog project={project} />
+      {project.me.role === "OWNER" && <InviteDialog projectId={project.id} projectName={project.name} />}
     </div>
   );
 }
