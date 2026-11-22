@@ -15,11 +15,13 @@ import {
 } from "@/stores/uiSlice";
 import type { BoardFilters as Filters } from "@/utilities/helpers/boardView";
 import { localToday } from "@/utilities/helpers/localToday";
+import { useDelayedFlag } from "@/utilities/hooks/useDelayedFlag";
 import { flushPendingDeletes } from "@/utilities/hooks/useDeleteTask";
 import { useTaskParam } from "@/utilities/hooks/useTaskParam";
 import { BoardColumns } from "./boardColumns";
 import { BoardFilters } from "./boardFilters";
 import { BoardHeader } from "./boardHeader";
+import { BoardSkeleton } from "./boardSkeleton";
 import { YourOrder } from "./yourOrder";
 import { TaskDrawer } from "./drawer/taskDrawer";
 import { DeleteColumnDialog } from "./modals/deleteColumnDialog";
@@ -48,13 +50,9 @@ export default function BoardContent({ projectId }: { projectId: string }) {
     [dispatch]
   );
 
-  if (isLoading) {
-    return (
-      <p role="status" className="text-fg-secondary">
-        Loading the board…
-      </p>
-    );
-  }
+  const showSkeleton = useDelayedFlag(isLoading);
+
+  if (isLoading) return <BoardSkeleton showShapes={showSkeleton} />;
   if (!project) return <ProjectLoadProblem error={error} onRetry={refetch} />;
 
   return (
