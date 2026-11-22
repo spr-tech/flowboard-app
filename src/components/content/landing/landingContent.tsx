@@ -14,7 +14,8 @@ export default function LandingContent() {
     // and the board's scroll-driven tilt would then track it instead of the page.
     <div className="overflow-x-clip bg-surface-page">
       <LandingNav />
-      <main>
+      {/* Section links stop the section just below the sticky bar (about 96px tall), not under it. */}
+      <main className="[&_section[id]]:scroll-mt-28">
         <HeroSection />
         <SloganSection />
         <HowItWorksSection />
