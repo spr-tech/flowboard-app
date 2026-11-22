@@ -236,6 +236,20 @@ describe("resetPassword", () => {
     });
   });
 
+  it("refuses a common password, or one with the account's name or email, before using the token", async () => {
+    prismaMock.user.findUnique.mockResolvedValue({ email: "ada.obi@example.com", name: "Ada Obi" } as never);
+
+    await expect(resetPassword("token", "qwertyuiop")).rejects.toMatchObject({
+      status: 400,
+      fields: { password: "This password is too common. Try a longer or less predictable one." },
+    });
+    await expect(resetPassword("token", "ada.obi-forever")).rejects.toMatchObject({
+      fields: { password: "Don't use your name or email in your password" },
+    });
+    expect(prismaMock.passwordResetToken.updateMany).not.toHaveBeenCalled();
+    expect(prismaMock.user.update).not.toHaveBeenCalled();
+  });
+
   it("also cancels the user's other unused links", async () => {
     await resetPassword("token", "new-password");
 
