@@ -16,12 +16,13 @@ import { ProjectLoadProblem } from "../projectLoadProblem";
 import { ProjectTile } from "../projectTile";
 import { useDelayedFlag } from "@/utilities/hooks/useDelayedFlag";
 import { ColumnsSection } from "./columnsSection";
+import { MembersSection } from "./members/membersSection";
 import { ProjectSettingsSkeleton } from "./projectSettingsSkeleton";
 import { SETTINGS_SECTIONS, SettingsSection } from "./settingsSection";
 
 /**
  * /projects/[projectId]/settings (docs/designs/project-settings.md).
- * General, Columns and the Danger zone; members and invites arrive in milestone 7.
+ * General, Columns, Members (with invites) and the Danger zone.
  */
 export default function ProjectSettingsContent({ projectId }: { projectId: string }) {
   const dispatch = useAppDispatch();
@@ -85,6 +86,10 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
 
       <SettingsSection {...SETTINGS_SECTIONS.columns}>
         <ColumnsSection project={project} meId={me?.id ?? null} />
+      </SettingsSection>
+
+      <SettingsSection {...SETTINGS_SECTIONS.members}>
+        <MembersSection projectId={project.id} isOwner={isOwner} meId={me?.id ?? null} />
       </SettingsSection>
 
       <SettingsSection

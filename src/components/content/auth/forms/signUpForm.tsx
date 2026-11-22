@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +12,7 @@ import { FormInput } from "@/components/ui/form/formInput";
 import { FormPasswordInput } from "@/components/ui/form/formPasswordInput";
 import { registerSchema, type RegisterFormValues } from "@/models/validations/authValidation";
 import { useRegisterMutation } from "@/services/authService";
+import { useInvitePreview } from "@/services/invitesService";
 import { safeCallbackUrl } from "@/utilities/helpers/safeCallbackUrl";
 import { getPasswordChecks, PasswordChecks } from "../passwordChecks";
 import { applyApiError, isAppError } from "@/utilities/helpers/applyApiError";
@@ -21,12 +22,16 @@ const FIELDS = ["name", "email", "password", "confirmPassword"] as const;
 type SignUpFormProps = {
   /** Where to go once the account exists, straight from the URL; checked before use. */
   callbackUrl?: string;
+  /** From ?invite=: a live invite's email is filled in and locked, so the account matches it. */
+  inviteToken?: string;
 };
 
 /** Creates the account through POST /api/auth/register, then signs straight in (product flow 1). */
-export function SignUpForm({ callbackUrl }: SignUpFormProps) {
+export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
   const router = useRouter();
   const [registerAccount] = useRegisterMutation();
+  const invite = useInvitePreview(inviteToken ?? "", { skip: !inviteToken });
+  const lockedEmail = invite.data?.state === "valid" ? invite.data.email : undefined;
   const [formError, setFormError] = useState<string | null>(null);
   // One toggle reveals both password fields, as in the design.
   const [isPasswordRevealed, setIsPasswordRevealed] = useState(false);
@@ -34,11 +39,17 @@ export function SignUpForm({ callbackUrl }: SignUpFormProps) {
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { isSubmitting },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
+
+  // The invite's email arrives after the first render; put it in the (locked) field.
+  useEffect(() => {
+    if (lockedEmail) setValue("email", lockedEmail, { shouldValidate: false });
+  }, [lockedEmail, setValue]);
 
   // Worked out from the typed values on each render, so there's no state to keep in sync.
   const [password, confirmPassword] = useWatch({ control, name: ["password", "confirmPassword"] });
@@ -79,6 +90,9 @@ export function SignUpForm({ callbackUrl }: SignUpFormProps) {
           type="email"
           autoComplete="email"
           placeholder="name@company.com"
+          readOnly={Boolean(lockedEmail)}
+          helperText={lockedEmail ? "This is the address your invite was sent to." : undefined}
+          className={lockedEmail ? "bg-surface-sunken text-fg-secondary" : undefined}
         />
         <FormPasswordInput
           control={control}

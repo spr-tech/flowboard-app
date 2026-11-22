@@ -17,7 +17,7 @@ type ProjectSettingsSkeletonProps = {
  */
 export function ProjectSettingsSkeleton({ projectId, showShapes }: ProjectSettingsSkeletonProps) {
   const shape = (className: string) => (showShapes ? <Skeleton className={className} /> : null);
-  const { general, columns, danger } = SETTINGS_SECTIONS;
+  const { general, columns, members, danger } = SETTINGS_SECTIONS;
 
   return (
     <SkeletonScreen label="Loading project settings" className="mx-auto flex max-w-5xl flex-col gap-8">
@@ -77,6 +77,23 @@ export function ProjectSettingsSkeleton({ projectId, showShapes }: ProjectSettin
               </div>
             ))}
             <Skeleton className="mt-2 h-10 w-full rounded-card" />
+          </div>
+        )}
+      </SettingsSection>
+
+      <SettingsSection {...members}>
+        {showShapes && (
+          <div className="flex flex-col gap-3">
+            {["w-36", "w-28"].map((name) => (
+              <div key={name} className="flex items-center gap-3 p-1">
+                <Skeleton className="size-11 rounded-full" />
+                <span className="flex flex-1 flex-col gap-2">
+                  <Skeleton className={`h-4 ${name}`} />
+                  <Skeleton className="h-3.5 w-52" />
+                </span>
+                <Skeleton className="h-6 w-16 rounded-full" />
+              </div>
+            ))}
           </div>
         )}
       </SettingsSection>

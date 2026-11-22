@@ -6,10 +6,11 @@ import { Avatar } from "@/components/ui/avatar/avatar";
 import { ButtonLink } from "@/components/ui/button/buttonLink";
 import type { ProjectDetail } from "@/models/responses/projectResponses";
 import { BoardDescription } from "./boardDescription";
+import { InviteButton } from "./inviteButton";
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 
-/** Breadcrumb, colour tile, name, description, "N tasks · N done · N members", avatars, Settings. */
+/** Breadcrumb, colour tile, name, description, "N tasks · N done · N members", avatars, Invite (owner), Settings. */
 export function BoardHeader({ project }: { project: ProjectDetail }) {
   const doneColumnIds = new Set(project.columns.filter((column) => column.isDone).map((column) => column.id));
   const doneCount = project.tasks.filter((task) => doneColumnIds.has(task.columnId)).length;
@@ -54,7 +55,7 @@ export function BoardHeader({ project }: { project: ProjectDetail }) {
               />
             ))}
           </span>
-          {/* Invite arrives with members and invites in milestone 7. */}
+          {project.me.role === "OWNER" && <InviteButton />}
           <ButtonLink
             href={`/projects/${project.id}/settings`}
             text="Settings"
