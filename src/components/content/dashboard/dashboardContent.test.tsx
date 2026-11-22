@@ -186,8 +186,9 @@ describe("DashboardContent", () => {
     const box = await screen.findByRole("checkbox", { name: "Mark Review pricing done" });
     await userEvent.click(box);
 
-    // Before the server answers: ticked and struck through.
-    const ticked = screen.getByRole("checkbox", { name: "Mark Review pricing not done" });
+    // Before the server answers: ticked and struck through. (The tick lands on the next render
+    // after the click, not inside it, so wait for it rather than look at the very same moment.)
+    const ticked = await screen.findByRole("checkbox", { name: "Mark Review pricing not done" });
     expect(ticked).toHaveAttribute("aria-checked", "true");
     expect(screen.getByText("Review pricing")).toHaveClass("line-through");
     const move = fetchMock.mock.calls.map(([r]) => r as Request).find((r) => r.method === "PATCH");
