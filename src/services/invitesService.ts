@@ -61,6 +61,10 @@ export function useInvites(projectId: string, options: { skip?: boolean } = {}) 
 }
 
 /** A link's state, checked every time the page opens: it changes once used or cancelled. */
-export function useInvitePreview(token: string) {
-  return invitesService.usePreviewInviteQuery(token, { refetchOnMountOrArgChange: true, refetchOnFocus: false });
+export function useInvitePreview(token: string, options: { skip?: boolean } = {}) {
+  return invitesService.usePreviewInviteQuery(token, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: false,
+    ...options,
+  });
 }

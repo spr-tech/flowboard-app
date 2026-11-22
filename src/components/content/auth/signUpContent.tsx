@@ -9,9 +9,11 @@ import { SignUpPanel } from "./signUpPanel";
 export type SignUpContentProps = {
   /** From ?callbackUrl=: where to go once the account exists. */
   callbackUrl?: string;
+  /** From ?invite=: the invite link this sign-up came from (its email is locked). */
+  inviteToken?: string;
 };
 
-export default function SignUpContent({ callbackUrl }: SignUpContentProps) {
+export default function SignUpContent({ callbackUrl, inviteToken }: SignUpContentProps) {
   const loginHref = callbackUrl ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/login";
 
   return (
@@ -23,7 +25,7 @@ export default function SignUpContent({ callbackUrl }: SignUpContentProps) {
 
       <GithubButton callbackUrl={callbackUrl} />
       <AuthDivider label="or sign up with email" />
-      <SignUpForm callbackUrl={callbackUrl} />
+      <SignUpForm callbackUrl={callbackUrl} inviteToken={inviteToken} />
 
       {/* Plain text until there are Terms and Privacy pages to link to. */}
       <p className="mt-4 text-center text-[13px] leading-relaxed text-fg-muted">

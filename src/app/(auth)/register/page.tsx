@@ -7,5 +7,5 @@ export const metadata: Metadata = { title: "Create your account · Flowboard" };
 
 export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
-  return <SignUpContent callbackUrl={searchParam(params, "callbackUrl")} />;
+  return <SignUpContent callbackUrl={searchParam(params, "callbackUrl")} inviteToken={searchParam(params, "invite")} />;
 }
