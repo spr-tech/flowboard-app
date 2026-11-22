@@ -9,8 +9,8 @@ import type { BoardTask, TaskPriority } from "@/models/responses/boardResponses"
 import type { ProjectDetail } from "@/models/responses/projectResponses";
 import { TASK_DESCRIPTION_MAX, TASK_TITLE_MAX } from "@/models/validations/boardValidation";
 import { useMoveTaskMutation, useUpdateTaskMutation, type UpdateTaskArgs } from "@/services/tasksService";
-import { formatRelativeTime } from "@/utilities/helpers/dateLabels";
 import { useDeleteTask } from "@/utilities/hooks/useDeleteTask";
+import { TaskHistory } from "./taskHistory";
 import { useTaskAutosave, type TextField } from "./useTaskAutosave";
 
 type TaskDrawerFormProps = {
@@ -193,7 +193,7 @@ export function TaskDrawerForm({ project, task, meId, flushRef, onDeleted }: Tas
         )}
       </div>
 
-      <p className="text-sm text-fg-muted">Created {formatRelativeTime(task.createdAt)}</p>
+      <TaskHistory taskId={task.id} meId={meId} />
 
       <div className="flex items-center justify-between gap-3 border-t border-line-subtle pt-4">
         <Button

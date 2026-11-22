@@ -8,6 +8,7 @@ import { baseApi } from "@/configs/serviceConfig";
 import type { AppDispatch } from "@/stores/store";
 import { ApiTag } from "@/utilities/enums/apiTags";
 import { positionBetween } from "@/utilities/helpers/position";
+import { dashboardService } from "./dashboardService";
 import { projectsService } from "./projectsService";
 
 export type CreateTaskArgs = { projectId: string; title: string; columnId: string };
@@ -44,6 +45,29 @@ const writeTask = (dispatch: AppDispatch, projectId: string, task: BoardTask) =>
     if (index >= 0) tasks[index] = task;
     else tasks.push(task);
   });
+
+/**
+ * Ticks (moved into its project's done column) or unticks a task in every cached My tasks list.
+ * It stays in its group either way; the page strikes it through while completedAt is set.
+ */
+function patchMyTasks(dispatch: AppDispatch, state: unknown, taskId: string, columnId: string) {
+  const cached = dashboardService.util.selectCachedArgsForQuery(
+    state as Parameters<typeof dashboardService.util.selectCachedArgsForQuery>[0],
+    "getMyTasks"
+  );
+  return cached.map((day) =>
+    dispatch(
+      dashboardService.util.updateQueryData("getMyTasks", day, (draft) => {
+        for (const task of draft.groups.flatMap((group) => group.tasks)) {
+          if (task.id !== taskId) continue;
+          const intoDone = task.project.doneColumnId === columnId;
+          task.columnId = columnId;
+          task.completedAt = intoDone ? (task.completedAt ?? new Date().toISOString()) : null;
+        }
+      })
+    )
+  );
+}
 
 export const tasksService = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -95,10 +119,13 @@ export const tasksService = baseApi.injectEndpoints({
           task.position = positionBetween(positionOf(args.afterTaskId), positionOf(args.beforeTaskId));
           task.completedAt = target?.isDone ? (stayedInDone ? task.completedAt : new Date().toISOString()) : null;
         });
+        // The dashboard's checkbox: tick (into the done column) or untick, in every cached copy.
+        const myTaskPatches = patchMyTasks(dispatch, getState(), args.taskId, args.columnId);
         try {
           writeTask(dispatch, args.projectId, (await queryFulfilled).data);
         } catch {
           patch.undo();
+          myTaskPatches.forEach((myTaskPatch) => myTaskPatch.undo());
         }
       },
     }),
