@@ -49,10 +49,10 @@ describe("activitySentence", () => {
     expect(say("column.renamed", { from: "QA", to: "Review" })).toBe("Ada Obi renamed the column QA to Review");
     expect(say("column.done_set", { name: "Shipped" })).toBe("Ada Obi made Shipped the done column");
     expect(say("member.joined", { invitedBy: "Alex Morgan" })).toBe(
-      "Ada Obi joined Website relaunch Invited by Alex Morgan"
+      "Ada Obi joined Website relaunch · Invited by Alex Morgan"
     );
     expect(say("member.removed", { name: "Sam", unassignedTaskCount: 3 })).toBe(
-      "Ada Obi removed Sam 3 tasks unassigned"
+      "Ada Obi removed Sam · 3 tasks unassigned"
     );
     expect(say("member.invited", { email: "bisi@team.dev" })).toBe("Ada Obi invited bisi@team.dev");
     expect(say("member.invited", { email: "bisi@team.dev", resent: true })).toBe(

@@ -4,7 +4,14 @@
 // The server only stores what happened (action + meta); the words live here.
 import type { ActivityItem } from "@/models/responses/dashboardResponses";
 
-export type ActivityParts = { actor: string; text: string; target: string | null; detail: string | null };
+/** `note` is a side remark shown after a dot: "Bisi joined Capstone · Invited by Alex". */
+export type ActivityParts = {
+  actor: string;
+  text: string;
+  target: string | null;
+  detail: string | null;
+  note: string | null;
+};
 
 const FIELD_LABELS: Record<string, string> = {
   title: "title",
@@ -22,11 +29,17 @@ export function describeActivity(item: ActivityItem, meId: string | null, inTask
   const meta = item.meta ?? {};
   const actor = item.actor.id === meId ? "You" : item.actor.name?.trim() || "Someone";
   const title = inTask ? "it" : (item.task?.title ?? str(meta.title) ?? "a task");
-  const parts = (text: string, target: string | null = null, detail: string | null = null) => ({
+  const parts = (
+    text: string,
+    target: string | null = null,
+    detail: string | null = null,
+    note: string | null = null
+  ) => ({
     actor,
     text,
     target,
     detail,
+    note,
   });
 
   switch (item.action) {
@@ -66,12 +79,12 @@ export function describeActivity(item: ActivityItem, meId: string | null, inTask
     case "member.invited":
       return parts(meta.resent ? "sent a new invite to" : "invited", str(meta.email));
     case "member.joined":
-      return parts("joined", item.project.name, str(meta.invitedBy) ? `Invited by ${str(meta.invitedBy)}` : null);
+      return parts("joined", item.project.name, null, str(meta.invitedBy) ? `Invited by ${str(meta.invitedBy)}` : null);
     case "member.left":
       return parts("left", item.project.name);
     case "member.removed": {
       const count = typeof meta.unassignedTaskCount === "number" ? meta.unassignedTaskCount : 0;
-      return parts("removed", str(meta.name), count ? `${plural(count, "task")} unassigned` : null);
+      return parts("removed", str(meta.name), null, count ? `${plural(count, "task")} unassigned` : null);
     }
     case "invite.cancelled":
       return parts("cancelled the invite for", str(meta.email));
@@ -82,6 +95,7 @@ export function describeActivity(item: ActivityItem, meId: string | null, inTask
 
 /** The whole sentence as text (screen readers, tests). */
 export function activitySentence(item: ActivityItem, meId: string | null, inTask = false): string {
-  const { actor, text, target, detail } = describeActivity(item, meId, inTask);
-  return [actor, text, target, detail].filter(Boolean).join(" ");
+  const { actor, text, target, detail, note } = describeActivity(item, meId, inTask);
+  const sentence = [actor, text, target, detail].filter(Boolean).join(" ");
+  return note ? `${sentence} · ${note}` : sentence;
 }
