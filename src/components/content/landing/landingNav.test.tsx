@@ -5,28 +5,28 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "@/test/renderWithStore";
 import { LandingNav } from "./landingNav";
 
-const MD_UP = "(min-width: 48rem)";
+const LG_UP = "(min-width: 64rem)";
 
-/** The "change" listeners registered on the md query, so a test can widen the screen. */
-let mdListeners: ((event: MediaQueryListEvent) => void)[] = [];
-let isMdUp = false;
+/** The "change" listeners registered on the lg query (1024px), so a test can widen the screen. */
+let lgListeners: ((event: MediaQueryListEvent) => void)[] = [];
+let isLgUp = false;
 
 beforeEach(() => {
-  mdListeners = [];
-  isMdUp = false;
+  lgListeners = [];
+  isLgUp = false;
   // jsdom has no matchMedia, no layout and no scrolling.
   vi.stubGlobal(
     "matchMedia",
     vi.fn((query: string) => ({
       get matches() {
-        return query === MD_UP && isMdUp;
+        return query === LG_UP && isLgUp;
       },
       media: query,
       addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
-        if (query === MD_UP) mdListeners.push(listener);
+        if (query === LG_UP) lgListeners.push(listener);
       },
       removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
-        mdListeners = mdListeners.filter((item) => item !== listener);
+        lgListeners = lgListeners.filter((item) => item !== listener);
       },
     }))
   );
@@ -43,9 +43,9 @@ afterEach(() => {
   window.history.replaceState(null, "", "/");
 });
 
-function widenToMd() {
-  isMdUp = true;
-  act(() => mdListeners.forEach((listener) => listener({ matches: true } as MediaQueryListEvent)));
+function widenToLg() {
+  isLgUp = true;
+  act(() => lgListeners.forEach((listener) => listener({ matches: true } as MediaQueryListEvent)));
 }
 
 function renderNav() {
@@ -70,15 +70,19 @@ describe("LandingNav (phone menu)", () => {
     expect(document.body.style.position).toBe("");
   });
 
-  it("keeps only the logo and the menu button in the phone bar; the menu has the sign-up and sign-in links", () => {
+  it("under lg (phones and tablets) the bar is only the logo and the menu button; the menu has the rest", () => {
     const { panel } = renderNav();
     const bar = screen.getByRole("navigation", { name: "Main" });
 
-    // Hidden under md by CSS (jsdom can't apply it, so the class is what's checked).
-    expect(within(bar).getByRole("link", { name: "Get started" })).toHaveClass("max-md:hidden");
-    expect(within(bar).getByRole("link", { name: "Sign in" })).toHaveClass("max-md:hidden");
-    expect(within(bar).getByRole("link", { name: "Flowboard" })).not.toHaveClass("max-md:hidden");
-    expect(within(bar).getByRole("button", { name: "Open menu" })).toHaveClass("md:hidden");
+    // Switched by CSS at lg, 1024px (jsdom can't apply it, so the classes are what's checked).
+    expect(within(bar).getByRole("link", { name: "Get started" })).toHaveClass("max-lg:hidden");
+    expect(within(bar).getByRole("link", { name: "Sign in" })).toHaveClass("max-lg:hidden");
+    expect(within(bar).getByRole("link", { name: "Flowboard" })).not.toHaveClass("max-lg:hidden");
+    expect(within(bar).getByRole("link", { name: "How it works" }).parentElement).toHaveClass("hidden", "lg:flex");
+    expect(within(bar).getByRole("button", { name: "Open menu" })).toHaveClass("lg:hidden");
+    expect(panel).toHaveClass("lg:hidden");
+    // Nothing in the nav still switches at md.
+    expect(document.querySelector('header [class*="md:"]')).toBeNull();
     expect(panel.querySelector('a[href="/register"]')).toHaveTextContent("Create a free board");
     expect(panel.querySelector('a[href="/login"]')).toHaveTextContent("Sign in");
   });
@@ -180,15 +184,25 @@ describe("LandingNav (phone menu)", () => {
     }
   });
 
-  it("closes when the screen widens to md and unlocks the page", async () => {
+  it("closes when the screen widens to lg (1024px) and unlocks the page", async () => {
     const { button, panel } = renderNav();
     await userEvent.click(button);
 
-    widenToMd();
+    widenToLg();
 
     expect(panel).not.toBeVisible();
     expect(document.body.style.position).toBe("");
-    // The menu button is hidden from md up, so focus goes to the logo instead.
+    // The menu button is hidden from lg up, so focus goes to the logo instead.
     expect(screen.getByRole("link", { name: "Flowboard" })).toHaveFocus();
+  });
+
+  it("stays open on a tablet: it only listens for lg, not md", async () => {
+    const { button, panel } = renderNav();
+    await userEvent.click(button);
+
+    const queries = vi.mocked(window.matchMedia).mock.calls.map(([query]) => query);
+    expect(queries).toContain(LG_UP);
+    expect(queries).not.toContain("(min-width: 48rem)");
+    expect(panel).toBeVisible();
   });
 });
