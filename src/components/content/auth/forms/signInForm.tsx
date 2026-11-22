@@ -18,6 +18,10 @@ type SignInFormProps = {
   callbackUrl?: string;
 };
 
+/** Set by the server after 5 failed attempts for an email in 15 minutes. */
+const RATE_LIMITED = "rate_limited";
+export const TOO_MANY_ATTEMPTS = "Too many attempts. Try again in a few minutes.";
+
 /** Email and password sign-in through the Auth.js Credentials provider. */
 export function SignInForm({ callbackUrl }: SignInFormProps) {
   const router = useRouter();
@@ -38,7 +42,8 @@ export function SignInForm({ callbackUrl }: SignInFormProps) {
     const result = await signIn("credentials", { ...values, redirect: false });
 
     if (result?.error) {
-      setFormError("Invalid email or password");
+      // The same answer for real and unknown emails (src/server/auth/signInLimit.service.ts).
+      setFormError(result.code === RATE_LIMITED ? TOO_MANY_ATTEMPTS : "Invalid email or password");
       return;
     }
     router.push(safeCallbackUrl(callbackUrl, window.location.origin));
