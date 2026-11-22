@@ -34,7 +34,8 @@ const PANEL_GAP_PX = 16;
 
 /**
  * Sticky on every screen. From md up: logo, section links, Sign in and Get started.
- * Under md: one row (logo, Get started, a round menu button). The menu is a full-screen cream
+ * Under md: just the logo and a round menu button (Sign in and Get started don't fit beside them;
+ * the menu offers "Create a free board" and "Sign in" instead). The menu is a full-screen cream
  * panel under the bar: the page behind it can't scroll and doesn't show through, focus stays
  * inside it, and a section link closes it and then scrolls to that section.
  * Its open state lives in the UI slice, like the app shell's drawer.
@@ -140,7 +141,12 @@ export function LandingNav() {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <ButtonLink href="/login" text="Sign in" variant="ghost" className={cn("max-md:hidden", buttonLift)} />
-            <ButtonLink href="/register" text="Get started" onClick={close} className={buttonLift} />
+            <ButtonLink
+              href="/register"
+              text="Get started"
+              onClick={close}
+              className={cn("max-md:hidden", buttonLift)}
+            />
             <button
               ref={buttonRef}
               type="button"

@@ -70,6 +70,19 @@ describe("LandingNav (phone menu)", () => {
     expect(document.body.style.position).toBe("");
   });
 
+  it("keeps only the logo and the menu button in the phone bar; the menu has the sign-up and sign-in links", () => {
+    const { panel } = renderNav();
+    const bar = screen.getByRole("navigation", { name: "Main" });
+
+    // Hidden under md by CSS (jsdom can't apply it, so the class is what's checked).
+    expect(within(bar).getByRole("link", { name: "Get started" })).toHaveClass("max-md:hidden");
+    expect(within(bar).getByRole("link", { name: "Sign in" })).toHaveClass("max-md:hidden");
+    expect(within(bar).getByRole("link", { name: "Flowboard" })).not.toHaveClass("max-md:hidden");
+    expect(within(bar).getByRole("button", { name: "Open menu" })).toHaveClass("md:hidden");
+    expect(panel.querySelector('a[href="/register"]')).toHaveTextContent("Create a free board");
+    expect(panel.querySelector('a[href="/login"]')).toHaveTextContent("Sign in");
+  });
+
   it("opens with focus on the first section link: four sections, then Create a free board above Sign in", async () => {
     const { button, panel } = renderNav();
 
