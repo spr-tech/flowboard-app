@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { boardTask } from "@/test/projectFixtures";
+import { boardTask, projectDetail } from "@/test/projectFixtures";
 import type { BoardFilters } from "@/utilities/helpers/boardView";
 import { dropNeighbours } from "@/utilities/helpers/boardView";
-import { collisionByKind, resolveDrop } from "./boardDnd";
+import { boardAnnouncements, collisionByKind, resolveDrop } from "./boardDnd";
 
 const filters: BoardFilters = { priority: "all", onlyMine: false, meId: null, hiddenIds: [] };
 const project = {
@@ -41,6 +41,15 @@ describe("resolveDrop", () => {
     expect(neighboursFor("a", { id: "area:done", columnId: "done" })).toEqual({});
   });
 
+  it("dropping on a folded column's header (phones) goes to the bottom of that column", () => {
+    const { others, index } = resolveDrop(project, filters, "x", {
+      id: "header:todo",
+      columnId: "todo",
+      kind: "columnHeader",
+    });
+    expect(dropNeighbours(others, index)).toEqual({ afterTaskId: "c" });
+  });
+
   it("reports when a card is dropped back where it was", () => {
     const drop = resolveDrop(project, filters, "b", { id: "b", columnId: "todo", kind: "card" });
     expect(drop.index).toBe(drop.fromIndex);
@@ -58,7 +67,12 @@ describe("collisionByKind", () => {
     rect: { current: { top: 0, left: x, width: 100, height: 100, bottom: 100, right: x + 100 } },
   });
   const rectAt = (x: number) => ({ top: 0, left: x, width: 100, height: 100, bottom: 100, right: x + 100 });
-  const containers = [target("column:a", "column", 0), target("card1", "card", 10), target("area:a", "cardArea", 20)];
+  const containers = [
+    target("column:a", "column", 0),
+    target("card1", "card", 10),
+    target("area:a", "cardArea", 20),
+    target("header:b", "columnHeader", 30),
+  ];
   const collide = (kind: string) =>
     collisionByKind({
       active: { id: "x", data: { current: { kind } }, rect: { current: { initial: null, translated: null } } },
@@ -72,7 +86,19 @@ describe("collisionByKind", () => {
     expect(collide("column")).toEqual(["column:a"]);
   });
 
-  it("lets a card land only on cards and card areas", () => {
-    expect(collide("card").sort()).toEqual(["area:a", "card1"]);
+  it("lets a card land only on cards, card areas and folded column headers", () => {
+    expect(collide("card").sort()).toEqual(["area:a", "card1", "header:b"]);
+  });
+});
+
+describe("boardAnnouncements", () => {
+  const picked = (isPhone: boolean) =>
+    boardAnnouncements(projectDetail(), true, isPhone).onDragStart({
+      active: { id: "column:done", data: { current: { kind: "column", columnId: "done" } } },
+    } as never);
+
+  it("tells a phone user to move columns up and down, and a desktop user left and right", () => {
+    expect(picked(true)).toContain("Use the up and down arrow keys");
+    expect(picked(false)).toContain("Use the left and right arrow keys");
   });
 });

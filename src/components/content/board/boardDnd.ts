@@ -15,18 +15,32 @@ import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import type { ProjectDetail } from "@/models/responses/projectResponses";
 import { columnTasks, type BoardFilters } from "@/utilities/helpers/boardView";
 
-export type DragKind = "card" | "cardArea" | "column";
+/**
+ * "columnHeader" is a folded column's header on a phone: a card dropped on it goes to the bottom
+ * of that column. It only accepts drops while folded; the folded column's own cards and card area
+ * are disabled meanwhile (their boxes are clipped to nothing), so dnd-kit leaves them out.
+ */
+export type DragKind = "card" | "cardArea" | "column" | "columnHeader";
 
 /** Ids: cards use their own id; these keep the other kinds from colliding with them. */
 export const columnSortId = (columnId: string) => `column:${columnId}`;
 export const cardAreaId = (columnId: string) => `area:${columnId}`;
+export const columnHeaderDropId = (columnId: string) => `header:${columnId}`;
 
 const kindOf = (container: { data: { current?: Record<string, unknown> } }) =>
   container.data.current?.kind as DragKind | undefined;
 
-/** What a dragged item may land on: a column on columns; a card on cards and card areas. */
+/** What a dragged item may land on: a column on columns; a card on cards, card areas and folded headers. */
 const accepts = (dragging: DragKind | undefined, target: DragKind | undefined) =>
-  dragging === "column" ? target === "column" : target === "card" || target === "cardArea";
+  dragging === "column" ? target === "column" : isCardDropKind(target);
+
+/** The targets a card can be dropped on. */
+export type CardDropKind = Exclude<DragKind, "column">;
+export const isCardDropKind = (kind: unknown): kind is CardDropKind =>
+  kind === "card" || kind === "cardArea" || kind === "columnHeader";
+
+/** Card drops that send the card to the bottom of the column. */
+const dropsAtBottom = (kind: DragKind) => kind === "cardArea" || kind === "columnHeader";
 
 export const collisionByKind: CollisionDetection = (args) => {
   const dragging = kindOf(args.active);
@@ -61,7 +75,7 @@ export function resolveDrop(
   const others = list.filter((task) => task.id !== activeId);
   const fromIndex = list.findIndex((task) => task.id === activeId);
   let index: number;
-  if (over.kind === "cardArea") index = others.length;
+  if (dropsAtBottom(over.kind)) index = others.length;
   // Same column: the card takes the hovered card's place (as dnd-kit's arrayMove does).
   else if (fromIndex >= 0) index = list.findIndex((task) => task.id === over.id);
   // Another column: it goes just above the hovered card.
@@ -69,17 +83,21 @@ export function resolveDrop(
   return { others, fromIndex, index: Math.max(0, index) };
 }
 
-/** Screen reader announcements in plain English, for cards and for columns. */
-export function boardAnnouncements(project: ProjectDetail, isOwner: boolean): Announcements {
+/**
+ * Screen reader announcements in plain English, for cards and for columns. Columns sit side by
+ * side from md up and in a stack on phones (`isPhone`), which changes the arrow keys and wording.
+ */
+export function boardAnnouncements(project: ProjectDetail, isOwner: boolean, isPhone = false): Announcements {
   const columnName = (columnId: unknown) => project.columns.find((column) => column.id === columnId)?.name ?? "";
   const label = (data: Record<string, unknown> | undefined) =>
     data?.kind === "column" ? `column ${columnName(data.columnId)}` : String(data?.title ?? "the card");
   const whoSees = isOwner ? "This changes the team order for everyone." : "This changes only your view.";
+  const arrows = isPhone ? "up and down" : "left and right";
 
   return {
     onDragStart: ({ active }) =>
       active.data.current?.kind === "column"
-        ? `Picked up ${label(active.data.current)}. Use the left and right arrow keys to move it. ${whoSees}`
+        ? `Picked up ${label(active.data.current)}. Use the ${arrows} arrow keys to move it. ${whoSees}`
         : `Picked up ${label(active.data.current)}.`,
     onDragOver: ({ active, over }) => {
       if (!over) return undefined;
