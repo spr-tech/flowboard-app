@@ -11,6 +11,7 @@ import bcrypt from "bcryptjs";
 import type { ResetPasswordResponse, ResetTokenState } from "@/models/responses/authResponses";
 import { githubSignInEmail, resetPasswordEmail } from "@/server/auth/authEmails";
 import { BCRYPT_ROUNDS } from "@/server/auth/auth.service";
+import { assertPasswordAllowed } from "@/server/auth/passwordRules";
 import { sendEmail } from "@/server/lib/email";
 import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
@@ -101,6 +102,10 @@ export async function resetPassword(token: string, newPassword: string): Promise
   const row = await findToken(token);
   const state = stateOf(row);
   if (!row || state !== "valid") throw TOKEN_ERRORS[state === "valid" ? "invalid" : state]();
+
+  // The rules the form can't check: a common password, or one containing this account's name or email.
+  const owner = await prisma.user.findUnique({ where: { id: row.userId }, select: { email: true, name: true } });
+  assertPasswordAllowed(newPassword, owner ?? {});
 
   const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
   const now = new Date();

@@ -9,6 +9,7 @@
 - **Task**: projectId, columnId, title, description, priority (LOW | MEDIUM | HIGH, default MEDIUM), position (float), dueDate (a calendar day, `@db.Date`, no time), assigneeId (nullable User), createdById, completedAt, timestamps.
 - **Invite**: projectId, email (stored lowercase), tokenHash, invitedById, expiresAt, acceptedAt, cancelledAt (milestone 7: cancelling stamps it and keeps the row, so the link can say it was cancelled), createdAt. Pending = not accepted and not cancelled (expired ones included).
 - **PasswordResetToken**: userId, tokenHash, expiresAt, usedAt, createdAt.
+- **SignInAttempt** (milestone 9): email (lowercase), createdAt; one row per failed email-and-password sign-in, indexed on (email, createdAt), for the 5-per-15-minutes limit. Not linked to User, so unknown emails count the same way. Rows older than the window are tidied away when a new failure is recorded, and a successful sign-in deletes the email's rows.
 - **Activity**: projectId, actorId, action (a string such as `task.created`, `task.moved`, `task.completed`, `member.joined`, `member.removed`, `project.created`, ...), taskId (nullable), meta (JSON, e.g. `{ "title": "Fix login", "from": "In progress", "to": "Done" }`), createdAt.
 
 ## Rules
@@ -43,7 +44,7 @@
 ## Changes from the old schema
 Add Account, Invite, PasswordResetToken, Activity; rename Member to ProjectMember with a role enum; drop Project.ownerId, description, status, dueDate; Project.color (hex string) becomes colour (enum); add Column.isDone; Column.order becomes position (float); add Task.projectId, createdById, completedAt; drop Task.status and label; Task.dueDate becomes date-only; switch positions to spaced floats; User.password becomes passwordHash; add User.emailVerified and passwordChangedAt.
 
-Milestone 7 adds `Invite.cancelledAt` (migration `invite_cancelled_at`). Milestone 5 adds `ProjectMember.pinnedAt` and `lastOpenedAt` (migration `project_member_pin_and_recency`). Milestone 6 adds `Project.description`, `membersCanAddColumns`, `memberColumnLimit`, `Column.createdById` and `createdAt`, and `ProjectMember.columnOrder` (migration `column_permissions_and_order`). Existing columns are backfilled with their project's owner and the project's createdAt: `createdById` is added nullable, filled, then made required.
+Milestone 7 adds `Invite.cancelledAt` (migration `invite_cancelled_at`). Milestone 9 adds `SignInAttempt` (migration `sign_in_attempts`). Milestone 5 adds `ProjectMember.pinnedAt` and `lastOpenedAt` (migration `project_member_pin_and_recency`). Milestone 6 adds `Project.description`, `membersCanAddColumns`, `memberColumnLimit`, `Column.createdById` and `createdAt`, and `ProjectMember.columnOrder` (migration `column_permissions_and_order`). Existing columns are backfilled with their project's owner and the project's createdAt: `createdById` is added nullable, filled, then made required.
 
 ## Local database commands
 - `pnpm db:migrate`: create and apply a new migration after a schema change (`prisma migrate dev`).

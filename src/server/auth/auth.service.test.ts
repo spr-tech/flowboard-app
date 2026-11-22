@@ -12,6 +12,19 @@ beforeEach(() => {
 });
 
 describe("register", () => {
+  it("refuses a common password, or one containing the name or email, and creates nothing", async () => {
+    await expect(
+      register({ name: "Ada Okafor", email: "ada@example.com", password: "1234567890" })
+    ).rejects.toMatchObject({
+      status: 400,
+      fields: { password: "This password is too common. Try a longer or less predictable one." },
+    });
+    await expect(
+      register({ name: "Ada Okafor", email: "ada@example.com", password: "okafor-is-great" })
+    ).rejects.toMatchObject({ fields: { password: "Don't use your name or email in your password" } });
+    expect(prismaMock.user.create).not.toHaveBeenCalled();
+  });
+
   const input = { name: "  Ada Okafor ", email: " Ada@Example.COM", password: "correct-horse" };
 
   it("saves a trimmed name, a lowercased email and a bcrypt hash, never the password", async () => {

@@ -7,7 +7,7 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 
 import { loginSchema } from "@/models/validations/authValidation";
-import { verifyCredentials } from "@/server/auth/auth.service";
+import { signInWithPassword } from "@/server/auth/signInLimit.service";
 import { updateSessionToken } from "@/server/auth/sessionToken";
 import { prisma } from "@/server/lib/prisma";
 import { normaliseEmail } from "@/utilities/helpers/normaliseEmail";
@@ -41,8 +41,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       authorize: async (credentials) => {
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
-        // null tells Auth.js the sign-in failed; the form shows "Invalid email or password".
-        return verifyCredentials(parsed.data.email, parsed.data.password);
+        // null tells Auth.js the sign-in failed ("Invalid email or password"). After 5 failures in
+        // 15 minutes it throws TooManySignInAttempts instead ("Too many attempts…").
+        return signInWithPassword(parsed.data.email, parsed.data.password);
       },
     }),
   ],

@@ -217,6 +217,19 @@ model Task {
   @@index([assigneeId])
 }
 
+// ─── Sign-in rate limit ──────────────────────────────────────────────────────
+
+/// One failed email-and-password sign-in. At most 5 per email in 15 minutes (milestone 9).
+/// Not linked to User: unknown emails are counted exactly like real ones.
+model SignInAttempt {
+  id        String   @id @default(cuid())
+  // Always stored lowercase.
+  email     String
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}
+
 // ─── Activity ────────────────────────────────────────────────────────────────
 
 model Activity {

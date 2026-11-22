@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
 
+import { PASSWORD_MIN_LENGTH } from "@/models/validations/authValidation";
 import { register } from "@/server/auth/auth.service";
 import { ApiError } from "@/server/lib/errors";
 import { POST } from "./route";
@@ -53,7 +54,9 @@ describe("POST /api/auth/register", () => {
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body.error.code).toBe("VALIDATION_FAILED");
-    expect(body.error.fields).toMatchObject({ password: "Password must be at least 8 characters" });
+    expect(body.error.fields).toMatchObject({
+      password: `Password must be at least ${PASSWORD_MIN_LENGTH} characters`,
+    });
     expect(register).not.toHaveBeenCalled();
   });
 

@@ -2,6 +2,7 @@
 import bcrypt from "bcryptjs";
 
 import type { RegisterResponse } from "@/models/responses/authResponses";
+import { assertPasswordAllowed } from "@/server/auth/passwordRules";
 import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
 import { isUniqueViolation } from "@/server/lib/prismaErrors";
@@ -25,6 +26,8 @@ const emailTaken = () =>
 export async function register(input: { name: string; email: string; password: string }): Promise<RegisterResponse> {
   const email = normaliseEmail(input.email);
   const name = input.name.trim();
+
+  assertPasswordAllowed(input.password, { email, name });
 
   const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (existing) throw emailTaken();

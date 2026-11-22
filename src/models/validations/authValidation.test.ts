@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { loginSchema, PASSWORD_MIN_LENGTH, registerSchema } from "./authValidation";
+import {
+  changePasswordFormSchema,
+  changePasswordSchema,
+  loginSchema,
+  PASSWORD_MIN_LENGTH,
+  passwordMentionsYou,
+  registerSchema,
+  updateMeSchema,
+} from "./authValidation";
 
 const validRegistration = {
   name: "Ada Okafor",
@@ -68,5 +76,56 @@ describe("loginSchema", () => {
   it("requires a password", () => {
     const result = loginSchema.safeParse({ email: "demo@example.com", password: "" });
     expect(fieldErrors(result)).toEqual({ password: "Password is required" });
+  });
+});
+
+describe("new password rules", () => {
+  const register = (password: string) =>
+    registerSchema.safeParse({ ...validRegistration, password, confirmPassword: password });
+
+  it("asks for 10 characters", () => {
+    expect(PASSWORD_MIN_LENGTH).toBe(10);
+    expect(fieldErrors(register("nine-char")).password).toBe("Password must be at least 10 characters");
+    expect(register("ten-chars!").success).toBe(true);
+  });
+
+  it("allows any characters, symbols and spaces included", () => {
+    expect(register("plum harbour ☕ & <ok>").success).toBe(true);
+  });
+
+  it("caps a password at 72 bytes, counting accented letters and emoji as more than one", () => {
+    expect(register("x".repeat(72)).success).toBe(true);
+    expect(fieldErrors(register("x".repeat(73))).password).toMatch(/^Password is too long: 72 bytes at most/);
+    // 36 two-byte letters are 72 bytes; one more is 74.
+    expect(register("é".repeat(36)).success).toBe(true);
+    expect(register("é".repeat(37)).success).toBe(false);
+  });
+
+  it("refuses the email's name part or a word of the name, when 4+ characters", () => {
+    expect(fieldErrors(register("my okafor secret")).password).toBe("Don't use your name or email in your password");
+    expect(passwordMentionsYou("theADAadventure", { email: "ada@x.dev", name: "Ada Li" })).toBe(false);
+    expect(passwordMentionsYou("plum-sam.rivera-1", { email: "sam.rivera+work@x.dev" })).toBe(true);
+  });
+});
+
+describe("account schemas", () => {
+  it("renames with the same rules as sign-up", () => {
+    expect(updateMeSchema.parse({ name: "  Ada Okafor " })).toEqual({ name: "Ada Okafor" });
+    expect(fieldErrors(updateMeSchema.safeParse({ name: "Al" })).name).toBe("Name must be at least 3 characters");
+  });
+
+  it("changes a password: current one typed, new rules, matching confirmation", () => {
+    const change = { currentPassword: "old", password: "plum-harbour-71", confirmPassword: "plum-harbour-71" };
+    expect(changePasswordSchema.safeParse(change).success).toBe(true);
+    expect(fieldErrors(changePasswordSchema.safeParse({ ...change, currentPassword: "" })).currentPassword).toBe(
+      "Enter your current password"
+    );
+    expect(fieldErrors(changePasswordSchema.safeParse({ ...change, confirmPassword: "x" })).confirmPassword).toBe(
+      "Passwords don't match"
+    );
+    const forAda = changePasswordFormSchema({ email: "ada@x.dev", name: "Ada Okafor" });
+    expect(
+      fieldErrors(forAda.safeParse({ ...change, password: "okafor-2026!", confirmPassword: "okafor-2026!" })).password
+    ).toBe("Don't use your name or email in your password");
   });
 });

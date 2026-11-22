@@ -20,8 +20,43 @@ export const accountService = baseApi.injectEndpoints({
       // Keep it 10 minutes after the last screen using it goes away (see cacheTimes.ts).
       ...CACHE.me.endpoint,
     }),
+
+    /** My name shows on boards, member lists and the feed, so those refresh too. */
+    updateMe: builder.mutation<MeResponse, { name: string }>({
+      query: (body) => ({ url: `/${controller}`, method: "PATCH", body }),
+      onQueryStarted: async (_args, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(accountService.util.upsertQueryData("getMe", undefined, data));
+        } catch {
+          // The form shows why.
+        }
+      },
+      invalidatesTags: (result) => (result ? [ApiTag.Project, ApiTag.Member, ApiTag.Activity] : []),
+    }),
+
+    /**
+     * The server signs this device in again with the new password, so nothing is refetched here:
+     * the answer goes straight into the Me cache.
+     */
+    changePassword: builder.mutation<
+      MeResponse,
+      { currentPassword: string; password: string; confirmPassword: string }
+    >({
+      query: (body) => ({ url: `/${controller}/password`, method: "PATCH", body }),
+      onQueryStarted: async (_args, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(accountService.util.upsertQueryData("getMe", undefined, data));
+        } catch {
+          // The form shows why.
+        }
+      },
+    }),
   }),
 });
+
+export const { useUpdateMeMutation, useChangePasswordMutation } = accountService;
 
 const { useGetMeQuery } = accountService;
 
