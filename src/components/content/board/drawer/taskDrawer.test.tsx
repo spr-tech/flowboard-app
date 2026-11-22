@@ -22,11 +22,37 @@ const board = projectDetail({
   tasks: [boardTask("a", { title: "Fix login", description: "Steps", dueDate: "2026-11-30" })],
 });
 
+/** The task's own history, newest first. */
+const history = [
+  {
+    id: "h2",
+    action: "task.moved",
+    meta: { title: "Fix login", from: "To do", to: "Review" },
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    actor: { id: "demo", name: "Alex Morgan", image: null },
+    project: { id: "p1", name: "Website relaunch", colour: "vermilion" },
+    task: { id: "a", title: "Fix login" },
+  },
+  {
+    id: "h1",
+    action: "task.created",
+    meta: { title: "Fix login", column: "To do" },
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    actor: { id: "sam", name: "Sam Rivera", image: null },
+    project: { id: "p1", name: "Website relaunch", colour: "vermilion" },
+    task: { id: "a", title: "Fix login" },
+  },
+];
+
 /** Renders the drawer for ?task=<id>, with the board cached; writes answer 200 with the task. */
 async function openDrawer(taskId: string) {
   nav.params = new URLSearchParams({ task: taskId });
   const fetchMock = mockFetch((request) =>
-    request.method === "GET" ? jsonResponse(200, board) : jsonResponse(200, board.tasks[0])
+    request.method !== "GET"
+      ? jsonResponse(200, board.tasks[0])
+      : request.url.endsWith("/activity")
+        ? jsonResponse(200, history)
+        : jsonResponse(200, board)
   );
   const view = renderWithStore(<div />);
   await view.store.dispatch(projectsService.endpoints.getProject.initiate("p1"));
@@ -51,6 +77,15 @@ describe("TaskDrawer", () => {
     expect(screen.getByLabelText("Due date")).toHaveValue("2026-11-30");
     expect(screen.getByLabelText("Description")).toHaveValue("Steps");
     expect(screen.getByRole("option", { name: "Alex Morgan (you)" })).toBeInTheDocument();
+  });
+
+  it("shows the task's own history instead of when it was created", async () => {
+    await openDrawer("a");
+
+    const history = await screen.findByRole("list");
+    expect(history).toHaveTextContent("You moved it to Review · 2 hours ago");
+    expect(history).toHaveTextContent("Sam Rivera created it in To do · 3 days ago");
+    expect(screen.queryByText(/^Created /)).not.toBeInTheDocument();
   });
 
   it("closes quietly (removing ?task=) for a task that isn't on the board", async () => {
