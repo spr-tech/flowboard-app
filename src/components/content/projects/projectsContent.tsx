@@ -10,7 +10,6 @@ import { dialogClosed, dialogOpened } from "@/stores/uiSlice";
 import { localToday } from "@/utilities/helpers/localToday";
 import { countPinned, filterProjects, sortForProjectsPage, type ProjectFilter } from "@/utilities/helpers/projectOrder";
 import { useDelayedFlag } from "@/utilities/hooks/useDelayedFlag";
-import { NewProjectDialog } from "./modals/newProjectDialog";
 import { ProjectCard } from "./projectCard";
 import { ProjectFilterTabs } from "./projectFilterTabs";
 import { ProjectCountSkeleton, ProjectGridSkeleton } from "./projectsSkeleton";
@@ -99,8 +98,6 @@ export default function ProjectsContent({ filter }: { filter: ProjectFilter }) {
           </ul>
         </>
       )}
-
-      <NewProjectDialog />
     </section>
   );
 }
