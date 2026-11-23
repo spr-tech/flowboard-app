@@ -13,7 +13,8 @@ export type OpenDialog =
   | { kind: "deleteProject" }
   | { kind: "leaveProject" }
   | { kind: "deleteColumn"; columnId: string }
-  | { kind: "invite" };
+  | { kind: "invite" }
+  | { kind: "signOut" };
 
 export type BoardPriorityFilter = "all" | "HIGH" | "MEDIUM" | "LOW";
 

@@ -7,6 +7,7 @@ import { Logo } from "@/components/ui/logo/logo";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { mobileMenuClosed, mobileMenuOpened, selectIsMobileMenuOpen } from "@/stores/uiSlice";
 import { SidebarNav } from "./sidebarNav";
+import { SignOutDialog } from "./signOutDialog";
 import { SidebarProjects } from "./sidebarProjects";
 import { TopBar } from "./topBar";
 
@@ -60,6 +61,9 @@ export function AppShell({ user, children }: AppShellProps) {
         <TopBar user={user} onOpenMenu={() => dispatch(mobileMenuOpened())} />
         <main className="flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
+
+      {/* Dialogs any page can open through the dialog slot. */}
+      <SignOutDialog />
     </div>
   );
 }
