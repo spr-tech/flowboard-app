@@ -9,7 +9,6 @@ describe("NotFoundContent", () => {
   it("sends signed-in people to their projects", () => {
     render(<NotFoundContent isSignedIn />);
     expect(screen.getByRole("heading", { level: 1, name: "We couldn't find that page" })).toBeInTheDocument();
-    expect(document.title).toBe("Page not found · Flowboard");
     expect(screen.getByRole("link", { name: "Go to your projects" })).toHaveAttribute("href", "/projects");
   });
 

@@ -9,8 +9,6 @@ import { Highlight } from "@/components/ui/typography/highlight";
 export default function NotFoundContent({ isSignedIn }: { isSignedIn: boolean }) {
   return (
     <StatusShell>
-      {/* React puts this in <head>; not-found pages can't export metadata. */}
-      <title>Page not found · Flowboard</title>
       <section className="flex flex-col items-start gap-5">
         <p className="font-heading text-5xl font-extrabold tracking-tight">
           <Highlight>404</Highlight>
