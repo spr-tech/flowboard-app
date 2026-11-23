@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar/avatar";
+import { Button } from "@/components/ui/button/button";
 import { Skeleton } from "@/components/ui/skeleton/skeleton";
 import type { DashboardProject } from "@/models/responses/dashboardResponses";
 import type { DashboardQuery } from "@/models/validations/dashboardValidation";
@@ -100,13 +103,38 @@ export function ProjectProgress({ day }: { day: DashboardQuery }) {
   );
 }
 
-/** Newest events across my projects, polled every 30 seconds: "Ada moved Fix sign-in to Done · 2 hours ago". */
+/**
+ * Events across my projects, 5 at a time, newest at the top: "Ada moved Fix sign-in to Done ·
+ * 2 hours ago". Older and Newer page through them. The first page polls every 30 seconds; an
+ * older page stays still, and a "New activity" pill appears if the first page has changed.
+ */
 export function TeamActivity({ meId }: { meId: string | null }) {
-  const { data, isLoading, isError, refetch } = useTeamActivity();
+  // The cursors of the pages I've gone back through ([] = the first page). Newer pops one.
+  const [cursors, setCursors] = useState<string[]>([]);
+  const cursor = cursors.at(-1) ?? null;
+  const first = useTeamActivity(null);
+  const older = useTeamActivity(cursor ?? "", { skip: cursor === null });
+  const { data, isLoading, isError, refetch } = cursor === null ? first : older;
+  const nextCursor = data?.nextCursor ?? null;
+  // Page 2 starts where page 1 ended when I left it. New rows push page 1's end along, so its
+  // nextCursor no longer matches: something new is at the top.
+  const hasNewActivity = cursors.length > 0 && first.data !== undefined && first.data.nextCursor !== cursors[0];
+
   return (
     <DashboardCard
       id="dashboard-activity"
       title="Team activity"
+      action={
+        hasNewActivity && (
+          <button
+            type="button"
+            onClick={() => setCursors([])}
+            className="cursor-pointer rounded-full bg-highlight px-3 py-1 text-[13px] font-semibold text-fg-on-highlight"
+          >
+            New activity
+          </button>
+        )
+      }
       loadingLabel="Loading team activity"
       isLoading={isLoading}
       isError={isError && !data}
@@ -122,32 +150,54 @@ export function TeamActivity({ meId }: { meId: string | null }) {
         </div>
       }
     >
-      {!data?.length ? (
+      {!data?.items.length ? (
         <p className="py-6 text-center text-sm text-fg-secondary">
           When you or your teammates change something, it shows up here.
         </p>
       ) : (
-        <ol aria-live="polite" className="flex flex-col gap-3.5">
-          {data.map((item) => {
-            const { actor, text, target, detail, note } = describeActivity(item, meId);
-            const where = note ?? item.project.name;
-            return (
-              <li key={item.id} className="flex items-start gap-3">
-                <Avatar name={item.actor.name ?? "?"} imageUrl={item.actor.image} size="md" />
-                <span className="min-w-0 flex-1 text-sm">
-                  <span className="text-fg-secondary">
-                    <strong className="text-fg-primary">{actor}</strong> {text}
-                    {target && <strong className="font-semibold text-fg-primary"> {target}</strong>}
-                    {detail && ` ${detail}`}
+        <>
+          <ol aria-live="polite" className="flex flex-col gap-3.5">
+            {data.items.map((item) => {
+              const { actor, text, target, detail, note } = describeActivity(item, meId);
+              const where = note ?? item.project.name;
+              return (
+                <li key={item.id} className="flex items-start gap-3">
+                  <Avatar name={item.actor.name ?? "?"} imageUrl={item.actor.image} size="md" />
+                  <span className="min-w-0 flex-1 text-sm">
+                    <span className="text-fg-secondary">
+                      <strong className="text-fg-primary">{actor}</strong> {text}
+                      {target && <strong className="font-semibold text-fg-primary"> {target}</strong>}
+                      {detail && ` ${detail}`}
+                    </span>
+                    <span className="block text-[13px] text-fg-muted">
+                      {where} · {formatRelativeTime(item.createdAt)}
+                    </span>
                   </span>
-                  <span className="block text-[13px] text-fg-muted">
-                    {where} · {formatRelativeTime(item.createdAt)}
-                  </span>
-                </span>
-              </li>
-            );
-          })}
-        </ol>
+                </li>
+              );
+            })}
+          </ol>
+          {(cursors.length > 0 || nextCursor) && (
+            <nav aria-label="Team activity pages" className="flex justify-between gap-3">
+              <Button
+                text="Newer"
+                variant="secondary"
+                size="sm"
+                startIcon={<ChevronLeft aria-hidden />}
+                disabled={cursors.length === 0}
+                onClick={() => setCursors(cursors.slice(0, -1))}
+              />
+              <Button
+                text="Older"
+                variant="secondary"
+                size="sm"
+                endIcon={<ChevronRight aria-hidden />}
+                disabled={!nextCursor}
+                onClick={() => nextCursor && setCursors([...cursors, nextCursor])}
+              />
+            </nav>
+          )}
+        </>
       )}
     </DashboardCard>
   );

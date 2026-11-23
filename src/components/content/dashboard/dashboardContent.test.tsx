@@ -89,7 +89,7 @@ type DashboardMocks = {
   summary?: DashboardSummary;
   myTasks?: MyTasksResponse;
   stats?: DashboardStats;
-  activity?: unknown;
+  activity?: unknown[];
   projects?: ProjectSummary[];
   onMove?: () => Response | Promise<Response>;
 };
@@ -108,7 +108,9 @@ function mockDashboard(overrides: DashboardMocks = {}) {
       ]);
     }
     if (path === "/api/dashboard/stats") return jsonResponse(200, overrides.stats ?? stats);
-    if (path === "/api/dashboard/activity") return jsonResponse(200, overrides.activity ?? activity);
+    if (path === "/api/dashboard/activity") {
+      return jsonResponse(200, { items: overrides.activity ?? activity, nextCursor: null });
+    }
     return jsonResponse(200, {
       id: "ada-me",
       name: "Alex Morgan",
