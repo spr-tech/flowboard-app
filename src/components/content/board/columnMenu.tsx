@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownmenu/dropdownMenu";
+import type { ColumnRights } from "@/utilities/helpers/projectPermissions";
 
 type ColumnMenuProps = {
   columnName: string;
@@ -19,9 +20,8 @@ type ColumnMenuProps = {
   addedAt: string;
   isDone: boolean;
   isLastColumn: boolean;
-  /** The owner, or the member who added this column. */
-  canRename: boolean;
-  isOwner: boolean;
+  /** What I may do to this column (from can()). */
+  rights: ColumnRights;
   onRename: () => void;
   onSetDone: () => void;
   onDelete: () => void;
@@ -32,12 +32,13 @@ export const addedOn = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 /**
- * Every member sees who added the column. Rename for the owner and for the member who added it;
- * Set as done and Delete for the owner only (or why the last column can't be deleted).
+ * Every member sees who added the column. Rename for the owner and managers with manageColumns;
+ * Set as done for the owner only; Delete for the owner and managers with deleteColumns (or why the
+ * last column can't be deleted).
  */
 export function ColumnMenu(props: ColumnMenuProps) {
-  const { columnName, addedBy, addedAt, isDone, isLastColumn, canRename, isOwner, onRename, onSetDone, onDelete } =
-    props;
+  const { columnName, addedBy, addedAt, isDone, isLastColumn, rights, onRename, onSetDone, onDelete } = props;
+  const canSetDone = rights.setDone && !isDone;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -52,20 +53,20 @@ export function ColumnMenu(props: ColumnMenuProps) {
         <DropdownMenuLabel className="px-2 py-1.5 text-xs font-normal text-fg-muted">
           Added by {addedBy} · {addedOn(addedAt)}
         </DropdownMenuLabel>
-        {(canRename || isOwner) && <DropdownMenuSeparator />}
-        {canRename && (
+        {(rights.rename || canSetDone || rights.delete) && <DropdownMenuSeparator />}
+        {rights.rename && (
           <DropdownMenuItem className="px-2 py-2" onSelect={onRename}>
             <Pencil aria-hidden />
             Rename
           </DropdownMenuItem>
         )}
-        {isOwner && !isDone && (
+        {canSetDone && (
           <DropdownMenuItem className="px-2 py-2" onSelect={onSetDone}>
             <CheckCircle2 aria-hidden />
             Set as done column
           </DropdownMenuItem>
         )}
-        {isOwner &&
+        {rights.delete &&
           (isLastColumn ? (
             <DropdownMenuLabel className="px-2 py-2 text-sm font-normal text-fg-muted">
               A board needs at least one column.

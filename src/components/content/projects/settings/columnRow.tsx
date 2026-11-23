@@ -11,6 +11,7 @@ import { COLUMN_NAME_MAX } from "@/models/validations/boardValidation";
 import { useMoveColumnMutation, useUpdateColumnMutation } from "@/services/columnsService";
 import { useAppDispatch } from "@/stores/hooks";
 import { dialogOpened } from "@/stores/uiSlice";
+import type { ColumnRights } from "@/utilities/helpers/projectPermissions";
 
 type ColumnRowProps = {
   projectId: string;
@@ -20,28 +21,19 @@ type ColumnRowProps = {
   /** The neighbours in the team order (move left / right goes past them). */
   before: ProjectColumnSummary | undefined;
   after: ProjectColumnSummary | undefined;
-  isOwner: boolean;
-  canRename: boolean;
+  /** What I may do to this column (from can()). */
+  rights: ColumnRights;
   isOnlyColumn: boolean;
 };
 
 const plural = (count: number) => `${count} task${count === 1 ? "" : "s"}`;
 
 /**
- * One column in Settings › Columns: number, name (inline rename for the owner and the column's
- * creator), task count, who added it, the done badge or "Set as done", move left / right in the
+ * One column in Settings › Columns: number, name (inline rename for the owner and managers with
+ * manageColumns), task count, who added it, the done badge or "Set as done", move left / right in the
  * team order, and delete. Changes save as they're made.
  */
-export function ColumnRow({
-  projectId,
-  column,
-  number,
-  before,
-  after,
-  isOwner,
-  canRename,
-  isOnlyColumn,
-}: ColumnRowProps) {
+export function ColumnRow({ projectId, column, number, before, after, rights, isOnlyColumn }: ColumnRowProps) {
   const dispatch = useAppDispatch();
   const [updateColumn] = useUpdateColumnMutation();
   const [moveColumn] = useMoveColumnMutation();
@@ -92,7 +84,7 @@ export function ColumnRow({
     <li className="flex flex-wrap items-center gap-3 rounded-card border border-line-subtle p-3">
       <span className="w-6 text-center text-sm font-semibold text-fg-muted">{number}</span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        {canRename ? (
+        {rights.rename ? (
           <input
             value={name}
             maxLength={COLUMN_NAME_MAX}
@@ -114,35 +106,41 @@ export function ColumnRow({
           Done column
         </span>
       ) : (
-        isOwner && <Button text="Set as done" variant="secondary" size="sm" onClick={() => void setDone()} />
+        rights.setDone && <Button text="Set as done" variant="secondary" size="sm" onClick={() => void setDone()} />
       )}
-      {isOwner && (
+      {(rights.reorderTeam || rights.delete) && (
         <span className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            startIcon={<ChevronLeft aria-hidden />}
-            aria-label={`Move ${column.name} left`}
-            disabled={!before}
-            onClick={() => void move("left")}
-          />
-          <Button
-            variant="ghost"
-            size="sm"
-            startIcon={<ChevronRight aria-hidden />}
-            aria-label={`Move ${column.name} right`}
-            disabled={!after}
-            onClick={() => void move("right")}
-          />
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-danger"
-            startIcon={<Trash2 aria-hidden />}
-            aria-label={`Delete ${column.name}`}
-            disabled={isOnlyColumn}
-            onClick={() => dispatch(dialogOpened({ kind: "deleteColumn", columnId: column.id }))}
-          />
+          {rights.reorderTeam && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                startIcon={<ChevronLeft aria-hidden />}
+                aria-label={`Move ${column.name} left`}
+                disabled={!before}
+                onClick={() => void move("left")}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                startIcon={<ChevronRight aria-hidden />}
+                aria-label={`Move ${column.name} right`}
+                disabled={!after}
+                onClick={() => void move("right")}
+              />
+            </>
+          )}
+          {rights.delete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-danger"
+              startIcon={<Trash2 aria-hidden />}
+              aria-label={`Delete ${column.name}`}
+              disabled={isOnlyColumn}
+              onClick={() => dispatch(dialogOpened({ kind: "deleteColumn", columnId: column.id }))}
+            />
+          )}
         </span>
       )}
     </li>

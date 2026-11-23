@@ -106,7 +106,6 @@ export function projectDetail(overrides: Partial<ProjectDetail> = {}): ProjectDe
       { id: "sam", name: "Sam Rivera", image: null, role: "MEMBER", permissions: null },
     ],
     memberTakeLimit: 5,
-    columnPermissions: { membersCanAddColumns: false, memberColumnLimit: 3, memberColumnCount: 0 },
     me: boardMembership(),
     ...overrides,
   };

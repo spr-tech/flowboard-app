@@ -35,8 +35,7 @@ function detailRow(overrides: Record<string, unknown> = {}) {
     name: "Website relaunch",
     description: null,
     colour: "vermilion",
-    membersCanAddColumns: true,
-    memberColumnLimit: 3,
+    memberTakeLimit: 5,
     createdAt: joinedAt,
     updatedAt: joinedAt,
     columns: [
@@ -169,7 +168,7 @@ describe("getProject", () => {
         { id: "u2", name: "Sam", image: null, role: "MEMBER" },
       ],
       // Only Sam's column counts toward the member limit.
-      columnPermissions: { membersCanAddColumns: true, memberColumnLimit: 3, memberColumnCount: 1 },
+      memberTakeLimit: 5,
       me: { role: "OWNER", columnOrder: null },
     });
   });
@@ -286,8 +285,6 @@ describe("updateProject", () => {
       name: "Old name",
       colour: "vermilion",
       description: null,
-      membersCanAddColumns: false,
-      memberColumnLimit: 3,
       memberTakeLimit: 5,
     } as never);
     prismaMock.project.findUnique.mockResolvedValue(detailRow() as never);
@@ -365,42 +362,6 @@ describe("updateProject", () => {
     expect(prismaMock.activity.create.mock.calls[0][0].data).toMatchObject({
       action: "project.updated",
       meta: { from: { description: null }, to: { description: "For the launch" } },
-    });
-  });
-
-  it("changes who may add columns with its own project.column_permissions_changed row", async () => {
-    prismaMock.projectMember.findUnique.mockResolvedValue(owner as never);
-
-    await updateProject("u1", "p1", { membersCanAddColumns: true, memberColumnLimit: 2 });
-
-    expect(prismaMock.project.update.mock.calls[0][0].data).toEqual({
-      membersCanAddColumns: true,
-      memberColumnLimit: 2,
-    });
-    expect(prismaMock.activity.create).toHaveBeenCalledTimes(1);
-    expect(prismaMock.activity.create.mock.calls[0][0].data).toMatchObject({
-      action: "project.column_permissions_changed",
-      meta: { membersCanAddColumns: true, memberColumnLimit: 2 },
-    });
-  });
-
-  it("switching it off never deletes columns, it only blocks new ones", async () => {
-    prismaMock.projectMember.findUnique.mockResolvedValue(owner as never);
-    prismaMock.project.findUniqueOrThrow.mockResolvedValue({
-      name: "Old name",
-      colour: "vermilion",
-      description: null,
-      membersCanAddColumns: true,
-      memberColumnLimit: 3,
-    } as never);
-
-    const detail = await updateProject("u1", "p1", { membersCanAddColumns: false });
-
-    expect(prismaMock.column.delete).not.toHaveBeenCalled();
-    expect(prismaMock.column.deleteMany).not.toHaveBeenCalled();
-    expect(detail.columns.map((c) => c.id)).toEqual(["c1", "c2", "c3"]);
-    expect(prismaMock.activity.create.mock.calls[0][0].data).toMatchObject({
-      meta: { membersCanAddColumns: false, memberColumnLimit: 3 },
     });
   });
 

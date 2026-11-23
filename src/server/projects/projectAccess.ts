@@ -62,6 +62,7 @@ export function permissionContext(
 }
 
 const OWNER_ONLY_ACTIONS: readonly PermissionAction[] = [
+  "column.setDone",
   "member.changeRole",
   "manager.editPermissions",
   "project.editSettings",

@@ -2,7 +2,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import type { ColumnRights } from "@/utilities/helpers/projectPermissions";
 import { ColumnMenu } from "./columnMenu";
+
+const all: ColumnRights = { rename: true, reorderTeam: true, setDone: true, delete: true };
+const none: ColumnRights = { rename: false, reorderTeam: false, setDone: false, delete: false };
 
 function openMenu(props: Partial<Parameters<typeof ColumnMenu>[0]> = {}) {
   const handlers = { onRename: vi.fn(), onSetDone: vi.fn(), onDelete: vi.fn() };
@@ -13,8 +17,7 @@ function openMenu(props: Partial<Parameters<typeof ColumnMenu>[0]> = {}) {
       addedAt="2026-11-20T10:00:00.000Z"
       isDone={false}
       isLastColumn={false}
-      canRename
-      isOwner
+      rights={all}
       {...handlers}
       {...props}
     />
@@ -26,16 +29,18 @@ function openMenu(props: Partial<Parameters<typeof ColumnMenu>[0]> = {}) {
 }
 
 describe("ColumnMenu", () => {
-  it("offers Rename, Set as done column and Delete column", async () => {
+  it("offers Rename, Set as done column and Delete column to the owner", async () => {
     const { handlers, open } = openMenu();
     await open();
 
+    expect(screen.getByRole("menuitem", { name: "Rename" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Delete column" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("menuitem", { name: "Set as done column" }));
     expect(handlers.onSetDone).toHaveBeenCalled();
   });
 
-  it("shows every member who added the column; members get Rename only on their own", async () => {
-    const { open } = openMenu({ isOwner: false, canRename: true });
+  it("a manager with manageColumns only: Rename, never Set as done", async () => {
+    const { open } = openMenu({ rights: { ...none, rename: true, reorderTeam: true } });
     await open();
 
     expect(screen.getByText("Added by Sam Rivera · 20 Nov 2026")).toBeInTheDocument();
@@ -44,8 +49,8 @@ describe("ColumnMenu", () => {
     expect(screen.queryByRole("menuitem", { name: "Delete column" })).not.toBeInTheDocument();
   });
 
-  it("gives a member nothing but the label on a column someone else added", async () => {
-    const { open } = openMenu({ isOwner: false, canRename: false });
+  it("gives a member nothing but the label", async () => {
+    const { open } = openMenu({ rights: none });
     await open();
 
     expect(screen.getByText(/Added by Sam Rivera/)).toBeInTheDocument();

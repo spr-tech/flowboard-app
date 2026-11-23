@@ -12,14 +12,14 @@ import { cardAreaId, columnHeaderDropId, columnSortId } from "./boardDnd";
 import { ColumnHeader } from "./columnHeader";
 import { QuickAddForm } from "./forms/quickAddForm";
 import { TaskCard } from "./taskCard";
+import type { ColumnRights } from "@/utilities/helpers/projectPermissions";
 
 type BoardColumnProps = {
   projectId: string;
   column: ProjectColumnSummary;
   tasks: BoardTask[];
-  isOwner: boolean;
-  /** The owner, or the member who added this column. */
-  canRename: boolean;
+  /** What I may do to this column (from can()). */
+  rights: ColumnRights;
   isLastColumn: boolean;
   today: string;
   onOpenTask: (taskId: string) => void;
@@ -36,7 +36,7 @@ type BoardColumnProps = {
  * The column is dragged only by its handle, so column drags never clash with card drags or the menu.
  */
 export function BoardColumn(props: BoardColumnProps) {
-  const { projectId, column, tasks, isOwner, canRename, isLastColumn, today, onOpenTask } = props;
+  const { projectId, column, tasks, rights, isLastColumn, today, onOpenTask } = props;
   const { isCollapsed, isPhone, onToggle } = props;
   const bodyId = `column-body-${column.id}`;
   // Destructured: the hooks lint rule treats an object holding refs as a ref itself.
@@ -71,8 +71,7 @@ export function BoardColumn(props: BoardColumnProps) {
         projectId={projectId}
         column={column}
         taskCount={tasks.length}
-        isOwner={isOwner}
-        canRename={canRename}
+        rights={rights}
         isLastColumn={isLastColumn}
         grip={
           <button

@@ -57,6 +57,9 @@ describe("resetColumnOrder", () => {
     prismaMock.projectMember.findUnique.mockResolvedValue(member as never);
 
     expect(await resetColumnOrder("sam", "p1")).toEqual({ projectId: "p1", columnOrder: null });
-    expect(prismaMock.projectMember.update.mock.calls[0][0].data).toEqual({ columnOrder: Prisma.DbNull, cardOrder: Prisma.DbNull });
+    expect(prismaMock.projectMember.update.mock.calls[0][0].data).toEqual({
+      columnOrder: Prisma.DbNull,
+      cardOrder: Prisma.DbNull,
+    });
   });
 });

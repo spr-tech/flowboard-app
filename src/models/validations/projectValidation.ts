@@ -24,14 +24,6 @@ export const projectDescriptionField = z
   .transform((value) => (value === "" ? null : value))
   .nullable();
 
-export const MEMBER_COLUMN_LIMIT_MIN = 1;
-export const MEMBER_COLUMN_LIMIT_MAX = 10;
-export const memberColumnLimitField = z
-  .number("Enter a number")
-  .int("Enter a whole number")
-  .min(MEMBER_COLUMN_LIMIT_MIN, `At least ${MEMBER_COLUMN_LIMIT_MIN}`)
-  .max(MEMBER_COLUMN_LIMIT_MAX, `At most ${MEMBER_COLUMN_LIMIT_MAX}`);
-
 export const memberTakeLimitField = z
   .number("Enter a number")
   .int("Enter a whole number")
@@ -50,15 +42,13 @@ export type CreateProjectFormValues = z.output<typeof createProjectSchema>;
 
 /**
  * PATCH /api/projects/:projectId (owner): Settings › General (name, colour, description) and
- * Settings › Columns (who may add columns, and how many). Send only what changed.
+ * Settings › Tasks (the take limit). Send only what changed.
  */
 export const updateProjectSchema = z
   .object({
     name: projectNameField.optional(),
     colour: projectColourField.optional(),
     description: projectDescriptionField.optional(),
-    membersCanAddColumns: z.boolean().optional(),
-    memberColumnLimit: memberColumnLimitField.optional(),
     memberTakeLimit: memberTakeLimitField.optional(),
   })
   .refine((value) => Object.values(value).some((field) => field !== undefined), "Change at least one setting");

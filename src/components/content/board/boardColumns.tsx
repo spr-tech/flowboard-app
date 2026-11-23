@@ -21,6 +21,7 @@ import { useMoveColumnMutation, useSetColumnOrderMutation } from "@/services/col
 import { useMoveTaskMutation } from "@/services/tasksService";
 import { columnTasks, dropNeighbours, type BoardFilters } from "@/utilities/helpers/boardView";
 import { moveId, orderColumns } from "@/utilities/helpers/columnOrder";
+import { columnRights, projectCan } from "@/utilities/helpers/projectPermissions";
 import { useCollapsedColumns } from "@/utilities/hooks/useCollapsedColumns";
 import { cn } from "@/utilities/helpers/cn";
 import { useIsPhone } from "@/utilities/hooks/useMediaQuery";
@@ -63,7 +64,7 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
   const [activeColumn, setActiveColumn] = useState<ProjectColumnSummary | null>(null);
   // A drop is followed by a click on the card; this ignores that one click.
   const justDropped = useRef(false);
-  const isOwner = project.me.role === "OWNER";
+  const teamColumns = projectCan(project, meId, "column.reorderTeam").allowed;
   const columns = orderColumns(project.columns, project.me.columnOrder);
   // Layout is CSS (md: classes); this is only for dnd-kit's direction and inert folds.
   const isPhone = useIsPhone();
@@ -98,8 +99,8 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
     if (from < 0 || to < 0 || from === to) return;
     const next = moveId(ids, from, to);
     try {
-      if (isOwner) {
-        // The owner sees the team order, so the new neighbours are the team neighbours.
+      if (teamColumns) {
+        // Whoever changes the team order sees it, so the new neighbours are the team neighbours.
         const neighbours = { afterColumnId: next[to - 1], beforeColumnId: next[to + 1] };
         await moveColumn({ projectId: project.id, columnId, ...neighbours }).unwrap();
       } else {
@@ -147,7 +148,7 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
       onDragEnd={onDragEnd}
       onDragCancel={endDrag}
       accessibility={{
-        announcements: boardAnnouncements(project, isOwner, isPhone),
+        announcements: boardAnnouncements(project, teamColumns, isPhone),
         screenReaderInstructions: {
           draggable:
             "To move a card or a column, press Space, use the arrow keys, then press Space again to drop it or Escape to cancel. Press Enter on a card to open it.",
@@ -174,8 +175,7 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
               projectId={project.id}
               column={column}
               tasks={columnTasks(project.tasks, column.id, filters)}
-              isOwner={isOwner}
-              canRename={isOwner || column.createdBy.id === meId}
+              rights={columnRights(project, meId, column)}
               isLastColumn={project.columns.length === 1}
               today={today}
               onOpenTask={(taskId) => !justDropped.current && onOpenTask(taskId)}
@@ -185,7 +185,7 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
             />
           ))}
         </SortableContext>
-        <AddColumnArea project={project} />
+        <AddColumnArea project={project} meId={meId} />
       </div>
 
       <DragOverlay>

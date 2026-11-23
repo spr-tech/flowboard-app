@@ -140,8 +140,6 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
       name: true,
       description: true,
       colour: true,
-      membersCanAddColumns: true,
-      memberColumnLimit: true,
       memberTakeLimit: true,
       createdAt: true,
       updatedAt: true,
@@ -181,7 +179,6 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
   ]);
   const myContext = permissionContext(userId, membership);
 
-  const ownerId = project.members.find((member) => member.role === "OWNER")?.user.id;
   const columns = project.columns.map(({ _count, createdAt, ...column }) => ({
     ...column,
     createdAt: createdAt.toISOString(),
@@ -199,11 +196,6 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
     tasks: tasks.map(toBoardTask),
     members: members.map((member) => ({ ...member.user, role: member.role, permissions: permissionsOf(member) })),
     memberTakeLimit: project.memberTakeLimit,
-    columnPermissions: {
-      membersCanAddColumns: project.membersCanAddColumns,
-      memberColumnLimit: project.memberColumnLimit,
-      memberColumnCount: columns.filter((column) => column.createdBy.id !== ownerId).length,
-    },
     me: {
       ...toMyMembership(membership),
       // Whoever changes the team order has no personal one (owner; managers with the switch).
@@ -251,16 +243,14 @@ export type ProjectChanges = {
   name?: string;
   colour?: ProjectColour;
   description?: string | null;
-  membersCanAddColumns?: boolean;
-  memberColumnLimit?: number;
   memberTakeLimit?: number;
 };
 
 /**
  * Owner only. Writes only what really changed. General settings (name, colour, description) get a
- * project.updated row with the before and after; column permissions get their own
- * project.column_permissions_changed row with the new switch and limit. Turning the switch off or
- * lowering the limit never deletes columns; it only blocks new ones.
+ * project.updated row with the before and after; the take limit gets its own
+ * project.take_limit_changed row. Lowering the limit never takes tasks away; it only blocks new
+ * takes until members are under it.
  */
 export async function updateProject(
   userId: string,
@@ -276,8 +266,6 @@ export async function updateProject(
         name: true,
         colour: true,
         description: true,
-        membersCanAddColumns: true,
-        memberColumnLimit: true,
         memberTakeLimit: true,
       },
     });
@@ -291,23 +279,15 @@ export async function updateProject(
         to[key] = next;
       }
     }
-    const permissions: { membersCanAddColumns?: boolean; memberColumnLimit?: number } = {};
-    if (changes.membersCanAddColumns !== undefined && changes.membersCanAddColumns !== before.membersCanAddColumns) {
-      permissions.membersCanAddColumns = changes.membersCanAddColumns;
-    }
-    if (changes.memberColumnLimit !== undefined && changes.memberColumnLimit !== before.memberColumnLimit) {
-      permissions.memberColumnLimit = changes.memberColumnLimit;
-    }
-
     const takeLimit =
       changes.memberTakeLimit !== undefined && changes.memberTakeLimit !== before.memberTakeLimit
         ? changes.memberTakeLimit
         : undefined;
 
-    if (Object.keys(to).length > 0 || Object.keys(permissions).length > 0 || takeLimit !== undefined) {
+    if (Object.keys(to).length > 0 || takeLimit !== undefined) {
       await tx.project.update({
         where: { id: projectId },
-        data: { ...to, ...permissions, ...(takeLimit !== undefined ? { memberTakeLimit: takeLimit } : {}) },
+        data: { ...to, ...(takeLimit !== undefined ? { memberTakeLimit: takeLimit } : {}) },
       });
     }
     if (takeLimit !== undefined) {
@@ -323,19 +303,6 @@ export async function updateProject(
     if (Object.keys(to).length > 0) {
       await tx.activity.create({
         data: { projectId, actorId: userId, action: ActivityAction.ProjectUpdated, meta: { from, to } },
-      });
-    }
-    if (Object.keys(permissions).length > 0) {
-      await tx.activity.create({
-        data: {
-          projectId,
-          actorId: userId,
-          action: ActivityAction.ProjectColumnPermissionsChanged,
-          meta: {
-            membersCanAddColumns: permissions.membersCanAddColumns ?? before.membersCanAddColumns,
-            memberColumnLimit: permissions.memberColumnLimit ?? before.memberColumnLimit,
-          },
-        },
       });
     }
     return loadDetail(tx, userId, projectId);

@@ -54,15 +54,6 @@ export type ProjectColumnSummary = {
   createdAt: string;
 };
 
-/** Who may add columns (Settings › Columns). */
-export type ColumnPermissions = {
-  membersCanAddColumns: boolean;
-  /** 1 to 10, for all members together. */
-  memberColumnLimit: number;
-  /** Columns created by someone other than the owner. */
-  memberColumnCount: number;
-};
-
 /**
  * My membership, plus my own column and card orders (null = the team order; always null for
  * whoever changes the team order) and how many open tasks I took from the pool.
@@ -90,7 +81,6 @@ export type ProjectDetail = {
   members: BoardMember[];
   /** How many open tasks a member may take from the unassigned pool (1 to 20). */
   memberTakeLimit: number;
-  columnPermissions: ColumnPermissions;
   me: MyBoardMembership;
 };
 
