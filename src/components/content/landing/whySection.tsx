@@ -10,15 +10,16 @@ import { WhyPhoneDeck } from "./whyPhoneDeck";
 export function WhySection() {
   return (
     <section id="why" className="rounded-t-[48px] bg-surface-inverse px-6 py-22 text-fg-on-inverse">
-      <div className="mx-auto flex max-w-300 flex-wrap items-center gap-14">
-        <div className="flex-[1_1_420px]">
+      {/* Under md the text block is centred and sits 32px above the phone card stack. */}
+      <div className="mx-auto flex max-w-300 flex-wrap items-center gap-14 max-md:gap-8">
+        <div className="flex-[1_1_420px] max-md:text-center">
           <p className="mb-4.5 text-sm font-semibold text-highlight">Why teams pick it</p>
           {/* One block per line (not <br />s), so the lines can rise one after another. */}
           <Reveal
             as="h2"
             effect="rise"
             stagger={120}
-            className="text-display-why leading-[0.95] font-extrabold tracking-[-0.045em]"
+            className="text-display-why leading-[0.95] font-extrabold tracking-[-0.045em] max-md:text-display-why-phone"
           >
             <span className="block">Plan it.</span>
             <span className="block text-primary">Drag it.</span>
@@ -26,7 +27,7 @@ export function WhySection() {
               <Highlight className="-rotate-2 rounded-[0.12em]">Ship it.</Highlight>
             </span>
           </Reveal>
-          <p className="mt-7 mb-8 max-w-115 text-[17px] leading-relaxed text-fg-muted-on-inverse">
+          <p className="mt-7 mb-8 max-w-115 text-[17px] leading-relaxed text-fg-muted-on-inverse max-md:mx-auto max-md:max-w-[32ch]">
             Everything lives on one board your whole team can see. No setup call, no training, no clutter. Just the
             work, who owns it and where it stands.
           </p>
@@ -35,7 +36,8 @@ export function WhySection() {
             text="Start your first board"
             variant="highlight"
             size="lg"
-            className={buttonLift}
+            // Phones: 56px tall, full width up to 320px, centred.
+            className={cn(buttonLift, "max-md:mx-auto max-md:flex max-md:h-14 max-md:w-full max-md:max-w-80")}
           />
         </div>
 

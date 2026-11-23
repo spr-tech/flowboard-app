@@ -261,6 +261,8 @@
   --text-display-statement: clamp(40px, 7vw, 110px);
   --text-display-section: clamp(32px, 4vw, 52px);
   --text-display-why: clamp(38px, 5vw, 72px);
+  /* The Why heading on phones (under md), where 38px looked small above the card stack: 48px at 390. */
+  --text-display-why-phone: clamp(44px, 12.3vw, 56px);
   --text-display-cta: clamp(34px, 4.6vw, 64px);
   --text-display-faq: clamp(28px, 3.4vw, 44px);
 }
