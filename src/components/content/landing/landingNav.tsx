@@ -120,16 +120,18 @@ export function LandingNav() {
 
   return (
     <header className="sticky top-3 z-50 px-6 pt-5">
-      <div className="relative mx-auto max-w-300">
+      {/* From lg the pill is a compact 960px; under lg (the phone bar) it's unchanged. */}
+      <div className="relative mx-auto max-w-300 lg:max-w-240">
         <nav
           ref={navRef}
           aria-label="Main"
-          className="relative z-10 flex items-center justify-between gap-3 rounded-full border border-line-subtle bg-surface-card/90 py-2.5 pr-2.5 pl-5.5 shadow-sm backdrop-blur lg:gap-4"
+          className="relative z-10 flex items-center justify-between gap-3 rounded-full border border-line-subtle bg-surface-card/90 py-2.5 pr-2.5 pl-5.5 shadow-sm backdrop-blur lg:gap-4 lg:py-2"
         >
           <Link ref={logoRef} href="#top" onClick={close} className="shrink-0 rounded-lg">
             <Logo variant="onLight" />
           </Link>
-          <div className="hidden gap-7 text-[15px] lg:flex">
+          {/* 4px between the links; each keeps its own padding for its hover pill. */}
+          <div className="hidden gap-1 text-[15px] lg:flex">
             {sectionLinks.map((link) => (
               <Link
                 key={link.href}
@@ -141,12 +143,17 @@ export function LandingNav() {
             ))}
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <ButtonLink href="/login" text="Sign in" variant="ghost" className={cn("max-lg:hidden", buttonLift)} />
+            <ButtonLink
+              href="/login"
+              text="Sign in"
+              variant="ghost"
+              className={cn("max-lg:hidden lg:h-10", buttonLift)}
+            />
             <ButtonLink
               href="/register"
               text="Get started"
               onClick={close}
-              className={cn("max-lg:hidden", buttonLift)}
+              className={cn("max-lg:hidden lg:h-10", buttonLift)}
             />
             <button
               ref={buttonRef}

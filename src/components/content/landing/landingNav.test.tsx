@@ -87,6 +87,18 @@ describe("LandingNav (phone menu)", () => {
     expect(panel.querySelector('a[href="/login"]')).toHaveTextContent("Sign in");
   });
 
+  it("from lg the pill is compact: 960px, 8px padding, 40px buttons, 4px between links", () => {
+    renderNav();
+    const bar = screen.getByRole("navigation", { name: "Main" });
+
+    // Checked by class (jsdom has no layout); measured in a browser at 1024, 1280 and 1440px.
+    expect(bar.parentElement).toHaveClass("max-w-300", "lg:max-w-240");
+    expect(bar).toHaveClass("py-2.5", "lg:py-2");
+    expect(within(bar).getByRole("link", { name: "Get started" })).toHaveClass("lg:h-10");
+    expect(within(bar).getByRole("link", { name: "Sign in" })).toHaveClass("lg:h-10");
+    expect(within(bar).getByRole("link", { name: "How it works" }).parentElement).toHaveClass("gap-1");
+  });
+
   it("opens with focus on the first section link: four sections, then Create a free board above Sign in", async () => {
     const { button, panel } = renderNav();
 
