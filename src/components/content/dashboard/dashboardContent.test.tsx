@@ -2,7 +2,9 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { DashboardSummary, MyTask, MyTasksResponse } from "@/models/responses/dashboardResponses";
+import type { DashboardStats, DashboardSummary, MyTask, MyTasksResponse } from "@/models/responses/dashboardResponses";
+import type { ProjectSummary } from "@/models/responses/projectResponses";
+import { projectSummary } from "@/test/projectFixtures";
 import { jsonResponse, mockFetch, renderWithStore } from "@/test/renderWithStore";
 import type { DashboardFilter } from "@/utilities/helpers/dashboardFilter";
 import { localToday } from "@/utilities/helpers/localToday";
@@ -66,26 +68,49 @@ const activity = [
   },
 ];
 
+const stats: DashboardStats = {
+  completedPerDay: Array.from({ length: 14 }, (_, i) => ({ date: addDays(i - 13), count: i === 13 ? 2 : 0 })),
+  openByPriority: { HIGH: 1, MEDIUM: 1, LOW: 1 },
+  next7Days: Array.from({ length: 7 }, (_, i) => ({ date: addDays(i), count: i === 0 ? 1 : 0 })),
+};
+/** A project but no tasks: what a new owner sees after creating their first board. */
+const emptyStats: DashboardStats = {
+  completedPerDay: stats.completedPerDay.map(({ date }) => ({ date, count: 0 })),
+  openByPriority: { HIGH: 0, MEDIUM: 0, LOW: 0 },
+  next7Days: stats.next7Days.map(({ date }) => ({ date, count: 0 })),
+};
+const noTasks: MyTasksResponse = { groups: [], completedThisWeek: [] };
+const myProjects = [
+  projectSummary("p1", { name: "Website relaunch", me: { lastOpenedAt: "2026-11-20T10:00:00.000Z" } }),
+  projectSummary("p2", { name: "Mobile app", me: { lastOpenedAt: "2026-11-22T10:00:00.000Z" } }),
+];
+
+type DashboardMocks = {
+  summary?: DashboardSummary;
+  myTasks?: MyTasksResponse;
+  stats?: DashboardStats;
+  activity?: unknown[];
+  projects?: ProjectSummary[];
+  onMove?: () => Response | Promise<Response>;
+};
+
 /** Answers like the API; the task move answers through `onMove`. */
-function mockDashboard(overrides: { summary?: DashboardSummary; onMove?: () => Response | Promise<Response> } = {}) {
+function mockDashboard(overrides: DashboardMocks = {}) {
   return mockFetch((request) => {
     const path = new URL(request.url).pathname;
     if (request.method === "PATCH") return overrides.onMove?.() ?? jsonResponse(200, {});
     if (path === "/api/dashboard/summary") return jsonResponse(200, overrides.summary ?? summary);
-    if (path === "/api/me/tasks") return jsonResponse(200, myTasks);
+    if (path === "/api/me/tasks") return jsonResponse(200, overrides.myTasks ?? myTasks);
+    if (path === "/api/projects") return jsonResponse(200, overrides.projects ?? myProjects);
     if (path === "/api/dashboard/projects") {
       return jsonResponse(200, [
         { ...project, taskCount: 10, doneCount: 4, overdueCount: 2, nextDueDate: addDays(1), members: [] },
       ]);
     }
-    if (path === "/api/dashboard/stats") {
-      return jsonResponse(200, {
-        completedPerDay: Array.from({ length: 14 }, (_, i) => ({ date: addDays(i - 13), count: i === 13 ? 2 : 0 })),
-        openByPriority: { HIGH: 1, MEDIUM: 1, LOW: 1 },
-        next7Days: Array.from({ length: 7 }, (_, i) => ({ date: addDays(i), count: i === 0 ? 1 : 0 })),
-      });
+    if (path === "/api/dashboard/stats") return jsonResponse(200, overrides.stats ?? stats);
+    if (path === "/api/dashboard/activity") {
+      return jsonResponse(200, { items: overrides.activity ?? activity, nextCursor: null });
     }
-    if (path === "/api/dashboard/activity") return jsonResponse(200, activity);
     return jsonResponse(200, {
       id: "ada-me",
       name: "Alex Morgan",
@@ -202,5 +227,68 @@ describe("DashboardContent", () => {
       "false"
     );
     expect(screen.getByText("Review pricing")).not.toHaveClass("line-through");
+  });
+});
+
+describe("DashboardContent: empty states (a project, no tasks)", () => {
+  const region = (name: string) => screen.getByRole("region", { name });
+
+  it("every card still renders and says what it's waiting for", async () => {
+    mockDashboard({
+      summary: {
+        ...summary,
+        assignedOpen: 0,
+        dueThisWeek: 0,
+        overdue: 0,
+        oldestOverdueDays: null,
+        completedThisWeek: 0,
+      },
+      myTasks: noTasks,
+      stats: emptyStats,
+      activity: [],
+    });
+    renderDashboard();
+
+    expect(await screen.findByText("You're all clear.")).toBeInTheDocument();
+    expect(within(myTasksCard()).getByText("Nothing is assigned to you right now.")).toBeInTheDocument();
+    // "Open a board" goes to the project I opened most recently.
+    expect(await within(myTasksCard()).findByRole("link", { name: "Open a board" })).toHaveAttribute(
+      "href",
+      "/projects/p2"
+    );
+
+    const completed = await screen.findByRole("region", { name: "Completed, last 14 days" });
+    expect(
+      await within(completed).findByText("Tick a task when it's done, and your progress shows up here.")
+    ).toBeInTheDocument();
+    expect(completed).toHaveTextContent("0 tasks done");
+    expect(within(region("Next 7 days")).getByText("Nothing due this week.")).toBeInTheDocument();
+    expect(within(region("Open work by priority")).getByText("No open work.")).toBeInTheDocument();
+    expect(
+      await within(region("Team activity")).findByText("When you or your teammates change something, it shows up here.")
+    ).toBeInTheDocument();
+  });
+
+  it("hides Open a board when I have no project to go to", async () => {
+    mockDashboard({ myTasks: noTasks, projects: [] });
+    renderDashboard();
+
+    expect(await screen.findByText("You're all clear.")).toBeInTheDocument();
+    expect(within(myTasksCard()).queryByRole("link", { name: "Open a board" })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["overdue", "No overdue tasks"],
+    ["week", "Nothing due this week"],
+    ["done", "Nothing completed this week"],
+  ] as const)("the %s filter with no matches says so, and Show all clears it", async (filter, message) => {
+    mockDashboard({ myTasks: noTasks });
+    renderDashboard(filter);
+
+    expect(
+      await within(await screen.findByRole("region", { name: "My tasks" })).findByText(message)
+    ).toBeInTheDocument();
+    await userEvent.click(within(myTasksCard()).getByRole("button", { name: "Show all" }));
+    expect(replace).toHaveBeenCalledWith("/dashboard", { scroll: false });
   });
 });

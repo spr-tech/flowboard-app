@@ -2,12 +2,15 @@
 
 import { X } from "lucide-react";
 
+import { ButtonLink } from "@/components/ui/button/buttonLink";
 import { Skeleton } from "@/components/ui/skeleton/skeleton";
 import type { DashboardQuery } from "@/models/validations/dashboardValidation";
 import type { DueGroupKey, MyTask } from "@/models/responses/dashboardResponses";
 import { useMyTasks } from "@/services/dashboardService";
+import { useProjects } from "@/services/projectsService";
 import { cn } from "@/utilities/helpers/cn";
 import { DASHBOARD_FILTER_LABELS, groupsForFilter, type DashboardFilter } from "@/utilities/helpers/dashboardFilter";
+import { mostRecentlyOpened } from "@/utilities/helpers/projectOrder";
 import { DashboardCard } from "./dashboardCard";
 import { MyTaskRow } from "./myTaskRow";
 
@@ -19,11 +22,20 @@ const GROUP_NAMES: Record<DueGroupKey, { name: string; className: string }> = {
   none: { name: "No due date", className: "text-fg-secondary" },
 };
 
+/** What a stat-card filter says when nothing matches. */
+const NO_MATCHES: Record<Exclude<DashboardFilter, "all">, string> = {
+  overdue: "No overdue tasks",
+  week: "Nothing due this week",
+  done: "Nothing completed this week",
+};
+
 type MyTasksSectionProps = { day: DashboardQuery; filter: DashboardFilter; onClearFilter: () => void };
 
 /** My tasks grouped Overdue / Today / This week / Later / No due date, or the stat card's filter. */
 export function MyTasksSection({ day, filter, onClearFilter }: MyTasksSectionProps) {
   const { data, isLoading, isError, refetch } = useMyTasks(day);
+  const { data: projects } = useProjects();
+  const lastBoard = mostRecentlyOpened(projects ?? []);
 
   const groups: { key: string; name: string; className: string; tasks: MyTask[]; isReadOnly?: boolean }[] =
     filter === "done"
@@ -73,8 +85,27 @@ export function MyTasksSection({ day, filter, onClearFilter }: MyTasksSectionPro
         </div>
       }
     >
-      {groups.length === 0 ? (
-        <p className="py-6 text-center text-fg-secondary">Nothing here. Enjoy the clear desk.</p>
+      {groups.length === 0 && filter !== "all" ? (
+        <div className="flex flex-col items-center gap-2 py-8 text-center">
+          <p className="font-semibold">{NO_MATCHES[filter]}</p>
+          <button
+            type="button"
+            onClick={onClearFilter}
+            className="cursor-pointer text-sm font-semibold text-fg-secondary underline underline-offset-4 hover:text-fg-primary"
+          >
+            Show all
+          </button>
+        </div>
+      ) : groups.length === 0 ? (
+        <div className="flex flex-col items-center gap-4 py-8 text-center">
+          <p className="max-w-xs text-fg-secondary">
+            <strong className="block text-fg-primary">You&apos;re all clear.</strong>
+            Nothing is assigned to you right now.
+          </p>
+          {lastBoard && (
+            <ButtonLink href={`/projects/${lastBoard.id}`} text="Open a board" variant="secondary" size="sm" />
+          )}
+        </div>
       ) : (
         <div className="flex flex-col gap-5">
           {groups.map((group) => (

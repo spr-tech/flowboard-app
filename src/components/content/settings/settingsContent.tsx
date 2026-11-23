@@ -1,12 +1,13 @@
 "use client";
 
-import { signOut } from "next-auth/react";
 import { LogOut, Monitor } from "lucide-react";
 
 import { SettingsSection } from "@/components/content/projects/settings/settingsSection";
 import { Button } from "@/components/ui/button/button";
 import { Skeleton, SkeletonScreen } from "@/components/ui/skeleton/skeleton";
 import { useMe } from "@/services/accountService";
+import { useAppDispatch } from "@/stores/hooks";
+import { dialogOpened } from "@/stores/uiSlice";
 import { useDelayedFlag } from "@/utilities/hooks/useDelayedFlag";
 import { ChangePasswordForm } from "./forms/changePasswordForm";
 import { ProfileForm } from "./forms/profileForm";
@@ -27,6 +28,7 @@ const SECTIONS = {
 
 /** /settings (docs/designs/app-screens.md, "Account settings"): Profile, Password, Session. */
 export default function SettingsContent() {
+  const dispatch = useAppDispatch();
   const { data: me, isLoading } = useMe();
   const showSkeleton = useDelayedFlag(isLoading);
 
@@ -85,7 +87,7 @@ export default function SettingsContent() {
             variant="outline"
             startIcon={<LogOut aria-hidden />}
             className="border-danger text-danger hover:bg-danger/10"
-            onClick={() => void signOut({ redirectTo: "/login" })}
+            onClick={() => dispatch(dialogOpened({ kind: "signOut" }))}
           />
         </div>
       </SettingsSection>

@@ -3,12 +3,13 @@
 // browser's day and time zone; they're part of the cache key, so a new day is a new entry.
 import type {
   ActivityItem,
+  ActivityPage,
   DashboardProject,
   DashboardStats,
   DashboardSummary,
   MyTasksResponse,
 } from "@/models/responses/dashboardResponses";
-import type { DashboardQuery } from "@/models/validations/dashboardValidation";
+import { ACTIVITY_PAGE_SIZE, type DashboardQuery } from "@/models/validations/dashboardValidation";
 import { baseApi } from "@/configs/serviceConfig";
 import { ACTIVITY_POLLING, CACHE } from "@/utilities/constants/cacheTimes";
 import { ApiTag } from "@/utilities/enums/apiTags";
@@ -39,8 +40,10 @@ export const dashboardService = baseApi.injectEndpoints({
       providesTags: [ApiTag.Dashboard],
       ...CACHE.dashboard.endpoint,
     }),
-    getTeamActivity: builder.query<ActivityItem[], void>({
-      query: () => "/dashboard/activity",
+    /** One page of 5; cursor null is the first page (the newest). */
+    getTeamActivity: builder.query<ActivityPage, { cursor: string | null }>({
+      query: ({ cursor }) =>
+        `/dashboard/activity?limit=${ACTIVITY_PAGE_SIZE}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`,
       providesTags: [ApiTag.Activity],
       ...CACHE.activity.endpoint,
     }),
@@ -73,13 +76,15 @@ export function useDashboardStats(day: DashboardQuery, options: { skip?: boolean
   return dashboardService.useGetStatsQuery(day, { ...CACHE.dashboard.subscription, ...options });
 }
 
-/** Polls every 30 seconds while the tab is visible, and refetches when it regains focus. */
-export function useTeamActivity(options: { skip?: boolean } = {}) {
-  return dashboardService.useGetTeamActivityQuery(undefined, {
-    ...CACHE.activity.subscription,
-    ...ACTIVITY_POLLING,
-    ...options,
-  });
+/**
+ * One page of team activity. Only the first page (cursor null) polls, every 30 seconds while the
+ * tab is visible: an older page never moves under the reader.
+ */
+export function useTeamActivity(cursor: string | null, options: { skip?: boolean } = {}) {
+  return dashboardService.useGetTeamActivityQuery(
+    { cursor },
+    { ...CACHE.activity.subscription, ...(cursor === null ? ACTIVITY_POLLING : {}), ...options }
+  );
 }
 
 export function useTaskActivity(taskId: string) {

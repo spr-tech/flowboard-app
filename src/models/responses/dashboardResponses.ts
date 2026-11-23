@@ -76,6 +76,9 @@ export type DashboardStats = {
   next7Days: DayCount[];
 };
 
+/** GET /api/dashboard/activity: one page, newest first. nextCursor is null on the last page. */
+export type ActivityPage = { items: ActivityItem[]; nextCursor: string | null };
+
 /** One Activity row, as the feeds show it. `meta` is whatever the action recorded. */
 export type ActivityItem = {
   id: string;

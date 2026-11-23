@@ -57,6 +57,17 @@ export function selectSidebarProjects<T extends Orderable>(
   return [...pinnedInPinOrder(projects), ...recent].slice(0, limit);
 }
 
+/**
+ * The project I opened most recently (pinned or not); one I've never opened counts from when I
+ * joined. The dashboard's "Open a board" goes here. Null when I have no projects.
+ */
+export function mostRecentlyOpened<T extends Orderable>(projects: readonly T[]): T | null {
+  return projects.reduce<T | null>(
+    (best, project) => (best === null || newestFirst(lastOpened(project), lastOpened(best)) < 0 ? project : best),
+    null
+  );
+}
+
 /** How many of my projects are pinned (the toast after a pin says whether it reached the sidebar). */
 export function countPinned(projects: readonly Orderable[]): number {
   return projects.filter((project) => project.me.pinnedAt !== null).length;

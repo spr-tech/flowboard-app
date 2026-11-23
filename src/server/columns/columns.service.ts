@@ -9,7 +9,7 @@
 import type { Prisma } from "@/lib/generated/prisma";
 import type { BoardColumn, DeletedResponse } from "@/models/responses/boardResponses";
 import { ApiError } from "@/server/lib/errors";
-import { prisma } from "@/server/lib/prisma";
+import { transaction } from "@/server/lib/transaction";
 import { ownerOnly, requireMember, type Db, type Membership } from "@/server/projects/projectAccess";
 import { ActivityAction } from "@/utilities/enums/activityActions";
 import { aboveIndexFor, placeAt, positionBetween } from "@/utilities/helpers/position";
@@ -116,7 +116,7 @@ async function assertMayAddColumn(db: Db, projectId: string, isOwner: boolean) {
 
 /** New columns go just before the done column in the team order. */
 export async function createColumn(userId: string, projectId: string, input: { name: string }): Promise<BoardColumn> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const membership = await requireMember(tx, userId, projectId);
     await assertMayAddColumn(tx, projectId, membership.role === "OWNER");
 
@@ -147,7 +147,7 @@ export async function updateColumn(
   changes: ColumnChanges,
   now = new Date()
 ): Promise<BoardColumn> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const access = await requireColumnAccess(tx, userId, columnId);
     let { column } = access;
     const { isOwner } = access;
@@ -183,7 +183,7 @@ export type MoveColumnInput = { afterColumnId?: string; beforeColumnId?: string 
  * positions, re-spacing all of the project's columns first when the gap is too small.
  */
 export async function moveColumn(userId: string, columnId: string, input: MoveColumnInput): Promise<BoardColumn> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const { column, isOwner } = await requireColumnAccess(tx, userId, columnId);
     if (!isOwner) throw ownerOnly();
 
@@ -226,7 +226,7 @@ export async function deleteColumn(
   input: DeleteColumnInput,
   now = new Date()
 ): Promise<DeletedResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const { column, isOwner } = await requireColumnAccess(tx, userId, columnId);
     if (!isOwner) throw ownerOnly();
     const { projectId } = column;

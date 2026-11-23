@@ -26,15 +26,17 @@ const sectionLinks = [
 ];
 
 const MENU_ID = "landing-menu";
-/** Tailwind's md breakpoint: from here the menu button is gone, so an open menu closes. */
-const MD_UP = "(min-width: 48rem)";
+/** Tailwind's lg breakpoint (1024px): from here the menu button is gone, so an open menu closes. */
+const LG_UP = "(min-width: 64rem)";
 const FOCUSABLE = "a[href], button:not([disabled])";
 /** Space between the bottom of the nav bar and the menu's first row. */
 const PANEL_GAP_PX = 16;
 
 /**
- * Sticky on every screen. From md up: logo, section links, Sign in and Get started.
- * Under md: one row (logo, Get started, a round menu button). The menu is a full-screen cream
+ * Sticky on every screen. From lg (1024px) up: logo, section links, Sign in and Get started.
+ * Under lg (phones and tablets): just the logo and a round menu button. The full bar needs about
+ * 880px, so on tablets its links wrapped and Get started stuck out of the pill; under lg the menu
+ * offers the sections, "Create a free board" and "Sign in" instead. The menu is a full-screen cream
  * panel under the bar: the page behind it can't scroll and doesn't show through, focus stays
  * inside it, and a section link closes it and then scrolls to that section.
  * Its open state lives in the UI slice, like the app shell's drawer.
@@ -65,7 +67,7 @@ export function LandingNav() {
   useEffect(() => {
     if (isOpen) panelRef.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
     else if (wasOpen.current) {
-      const target = window.matchMedia(MD_UP).matches ? logoRef.current : buttonRef.current;
+      const target = window.matchMedia(LG_UP).matches ? logoRef.current : buttonRef.current;
       target?.focus({ preventScroll: true });
       const section = pendingSection.current;
       pendingSection.current = null;
@@ -75,7 +77,7 @@ export function LandingNav() {
   }, [isOpen]);
 
   // While open: Escape closes, Tab and Shift+Tab cycle through the X and the menu's items, and
-  // widening to md closes (the menu only exists under md).
+  // widening to lg closes (the menu only exists under lg).
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -93,7 +95,7 @@ export function LandingNav() {
       const next = index < 0 ? 0 : (index + step + items.length) % items.length;
       items[next]?.focus();
     };
-    const widened = window.matchMedia(MD_UP);
+    const widened = window.matchMedia(LG_UP);
     const onWiden = (event: MediaQueryListEvent) => {
       if (event.matches) dispatch(landingMenuClosed());
     };
@@ -118,16 +120,18 @@ export function LandingNav() {
 
   return (
     <header className="sticky top-3 z-50 px-6 pt-5">
-      <div className="relative mx-auto max-w-300">
+      {/* From lg the pill is a compact 960px; under lg (the phone bar) it's unchanged. */}
+      <div className="relative mx-auto max-w-300 lg:max-w-240">
         <nav
           ref={navRef}
           aria-label="Main"
-          className="relative z-10 flex items-center justify-between gap-3 rounded-full border border-line-subtle bg-surface-card/90 py-2.5 pr-2.5 pl-5.5 shadow-sm backdrop-blur md:gap-4"
+          className="relative z-10 flex items-center justify-between gap-3 rounded-full border border-line-subtle bg-surface-card/90 py-2.5 pr-2.5 pl-5.5 shadow-sm backdrop-blur lg:gap-4 lg:py-2"
         >
           <Link ref={logoRef} href="#top" onClick={close} className="shrink-0 rounded-lg">
             <Logo variant="onLight" />
           </Link>
-          <div className="hidden gap-7 text-[15px] md:flex">
+          {/* 4px between the links; each keeps its own padding for its hover pill. */}
+          <div className="hidden gap-1 text-[15px] lg:flex">
             {sectionLinks.map((link) => (
               <Link
                 key={link.href}
@@ -139,8 +143,18 @@ export function LandingNav() {
             ))}
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <ButtonLink href="/login" text="Sign in" variant="ghost" className={cn("max-md:hidden", buttonLift)} />
-            <ButtonLink href="/register" text="Get started" onClick={close} className={buttonLift} />
+            <ButtonLink
+              href="/login"
+              text="Sign in"
+              variant="ghost"
+              className={cn("max-lg:hidden lg:h-10", buttonLift)}
+            />
+            <ButtonLink
+              href="/register"
+              text="Get started"
+              onClick={close}
+              className={cn("max-lg:hidden lg:h-10", buttonLift)}
+            />
             <button
               ref={buttonRef}
               type="button"
@@ -148,7 +162,7 @@ export function LandingNav() {
               aria-expanded={isOpen}
               aria-controls={MENU_ID}
               aria-label={isOpen ? "Close menu" : "Open menu"}
-              className="relative inline-flex size-11 cursor-pointer items-center justify-center rounded-full bg-surface-sunken text-fg-primary transition-colors hover:bg-line-subtle md:hidden"
+              className="relative inline-flex size-11 cursor-pointer items-center justify-center rounded-full bg-surface-sunken text-fg-primary transition-colors hover:bg-line-subtle lg:hidden"
             >
               {/* Two lines that turn into an X. */}
               <span
@@ -175,7 +189,7 @@ export function LandingNav() {
           ref={panelRef}
           id={MENU_ID}
           hidden={!isOpen}
-          className="fixed inset-0 overflow-y-auto overscroll-contain bg-surface-page px-6 pb-10 motion-safe:animate-menu-cover-in md:hidden"
+          className="fixed inset-0 overflow-y-auto overscroll-contain bg-surface-page px-6 pb-10 motion-safe:animate-menu-cover-in lg:hidden"
         >
           <div className="mx-auto flex max-w-300 flex-col motion-safe:animate-menu-in">
             <nav aria-label="Sections">

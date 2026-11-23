@@ -16,9 +16,9 @@ const ada: MeResponse = { id: "u1", name: "Ada Okafor", email: "ada@team.dev", i
 
 function renderSettings(me: MeResponse, onWrite: (request: Request) => Response = () => jsonResponse(200, me)) {
   const fetchMock = mockFetch((request) => (request.method === "GET" ? jsonResponse(200, me) : onWrite(request)));
-  renderWithStore(<SettingsContent />);
+  const { store } = renderWithStore(<SettingsContent />);
   const writes = () => fetchMock.mock.calls.map(([r]) => r as Request).filter((r) => r.method !== "GET");
-  return { writes };
+  return { writes, store };
 }
 
 const section = (name: string) => screen.getByRole("region", { name });
@@ -116,12 +116,13 @@ describe("Account settings: Password", () => {
 });
 
 describe("Account settings: Session", () => {
-  it("says how I signed in and signs out", async () => {
-    renderSettings(ada);
+  it("says how I signed in, and Sign out asks first (the dialog itself: signOutDialog.test.tsx)", async () => {
+    const { store } = renderSettings(ada);
 
     expect(await screen.findByText("Signed in with email and password")).toBeInTheDocument();
     await userEvent.click(within(section("Session")).getByRole("button", { name: "Sign out" }));
 
-    expect(signOut).toHaveBeenCalledWith({ redirectTo: "/login" });
+    expect(store.getState().ui.openDialog).toEqual({ kind: "signOut" });
+    expect(signOut).not.toHaveBeenCalled();
   });
 });

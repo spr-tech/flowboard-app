@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 
-import { NewProjectDialog } from "@/components/content/projects/modals/newProjectDialog";
 import { Button } from "@/components/ui/button/button";
 import { Skeleton, SkeletonScreen } from "@/components/ui/skeleton/skeleton";
 import { useMe } from "@/services/accountService";
@@ -84,7 +83,6 @@ export default function DashboardContent({ filter }: { filter: DashboardFilter }
           Start with a project. You&apos;ll get a board with To do, In progress and Done, ready for your first task.
         </p>
         <Button text="Create your first project" startIcon={<Plus aria-hidden />} onClick={openNewProject} />
-        <NewProjectDialog />
       </section>
     );
   }

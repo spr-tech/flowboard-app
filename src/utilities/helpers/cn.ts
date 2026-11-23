@@ -9,7 +9,15 @@ import { extendTailwindMerge } from "tailwind-merge";
 const twMerge = extendTailwindMerge({
   extend: {
     theme: {
-      text: ["display-hero", "display-statement", "display-section", "display-why", "display-cta", "display-faq"],
+      text: [
+        "display-hero",
+        "display-statement",
+        "display-section",
+        "display-why",
+        "display-why-phone",
+        "display-cta",
+        "display-faq",
+      ],
     },
   },
 });

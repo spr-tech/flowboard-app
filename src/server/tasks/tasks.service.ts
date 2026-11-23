@@ -3,7 +3,7 @@
 import type { Prisma } from "@/lib/generated/prisma";
 import type { BoardTask, DeletedResponse, TaskPriority } from "@/models/responses/boardResponses";
 import { ApiError } from "@/server/lib/errors";
-import { prisma } from "@/server/lib/prisma";
+import { transaction } from "@/server/lib/transaction";
 import { requireMember, type Db } from "@/server/projects/projectAccess";
 import { ActivityAction } from "@/utilities/enums/activityActions";
 import { aboveIndexFor, placeAt, positionBetween } from "@/utilities/helpers/position";
@@ -39,7 +39,7 @@ export async function createTask(
   input: { title: string; columnId: string },
   now = new Date()
 ): Promise<BoardTask> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     await requireMember(tx, userId, projectId);
     const column = await requireColumn(tx, projectId, input.columnId);
     const task = await tx.task.create({
@@ -77,7 +77,7 @@ export type TaskChanges = {
 
 /** Drawer edits. Only fields that really changed are written; no change means no write. */
 export async function updateTask(userId: string, taskId: string, changes: TaskChanges): Promise<BoardTask> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const { task } = await requireTaskAccess(tx, userId, taskId);
 
     if (changes.assigneeId) {
@@ -139,7 +139,7 @@ const badNeighbour = () =>
  * clears completedAt, and writes one Activity row when the column changed.
  */
 export async function moveTask(userId: string, taskId: string, input: MoveInput, now = new Date()): Promise<BoardTask> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const { task } = await requireTaskAccess(tx, userId, taskId);
     const target = await requireColumn(tx, task.projectId, input.columnId);
     // The target column's other cards, in their current order.
@@ -195,7 +195,7 @@ export async function moveTask(userId: string, taskId: string, input: MoveInput,
 
 /** Deletes the task. Its activity stays (taskId becomes null); the title is kept in meta. */
 export async function deleteTask(userId: string, taskId: string): Promise<DeletedResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const { task } = await requireTaskAccess(tx, userId, taskId);
     await tx.activity.create({
       data: {

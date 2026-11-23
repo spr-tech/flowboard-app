@@ -32,10 +32,72 @@ beforeEach(() => {
 });
 afterEach(() => vi.useRealTimers());
 
+/**
+ * Holds the next prisma.$transaction open until release() is called, so a test can check what
+ * happened while it was still running (the callback itself has run; the commit hasn't).
+ */
+function holdTransaction() {
+  let release = () => {};
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  prismaMock.$transaction.mockImplementationOnce((async (arg: unknown) => {
+    const result = typeof arg === "function" ? await arg(prismaMock) : await Promise.all(arg as Promise<unknown>[]);
+    await gate;
+    return result;
+  }) as never);
+  return { release: () => release() };
+}
+
+/** Lets every already-settled promise run its callbacks (fake timers don't affect this). */
+const flush = async () => {
+  for (let i = 0; i < 20; i++) await Promise.resolve();
+};
+
 /** The token in the emailed link. */
 const sentToken = () => /\/invite\/([\w-]+)/.exec(vi.mocked(sendEmail).mock.calls[0][0].text)?.[1] ?? "";
 
 describe("createInvite", () => {
+  it("sends the email only after the transaction has committed, with the shared limits", async () => {
+    prismaMock.projectMember.findUnique.mockResolvedValue(owner as never);
+    prismaMock.projectMember.findFirst.mockResolvedValue(null);
+    prismaMock.invite.findFirst.mockResolvedValue(null);
+    prismaMock.invite.create.mockResolvedValue(saved as never);
+    const held = holdTransaction();
+
+    const result = createInvite("owner", "p1", "ada@team.dev");
+    await flush();
+
+    expect(prismaMock.invite.create).toHaveBeenCalled();
+    expect(sendEmail).not.toHaveBeenCalled();
+    held.release();
+    await result;
+    expect(sendEmail).toHaveBeenCalledOnce();
+    expect(prismaMock.$transaction).toHaveBeenCalledWith(expect.any(Function), { maxWait: 10_000, timeout: 15_000 });
+  });
+
+  it("keeps the checks and the email's details out of the transaction: only the writes are inside", async () => {
+    prismaMock.projectMember.findUnique.mockResolvedValue(owner as never);
+    prismaMock.projectMember.findFirst.mockResolvedValue(null);
+    prismaMock.invite.findFirst.mockResolvedValue(null);
+    prismaMock.invite.create.mockResolvedValue(saved as never);
+    const insideTransaction: string[] = [];
+    prismaMock.$transaction.mockImplementationOnce((async (fn: (tx: unknown) => Promise<unknown>) => {
+      const spy = new Proxy(prismaMock, {
+        get: (target, model: string) =>
+          new Proxy(target[model as keyof typeof target] as object, {
+            get: (methods, method: string) => {
+              insideTransaction.push(`${model}.${method}`);
+              return methods[method as keyof typeof methods];
+            },
+          }),
+      });
+      return fn(spy);
+    }) as never);
+
+    await createInvite("owner", "p1", "ada@team.dev");
+
+    expect(insideTransaction).toEqual(["invite.create", "activity.create"]);
+  });
+
   it("creates a 7-day invite for the lowercased email, stores only the token's hash, and emails the link", async () => {
     prismaMock.projectMember.findUnique.mockResolvedValue(owner as never);
     prismaMock.projectMember.findFirst.mockResolvedValue(null);
@@ -163,6 +225,22 @@ describe("listInvites", () => {
 
 describe("resendInvite and cancelInvite", () => {
   const pending = { ...saved, projectId: "p1", acceptedAt: null, cancelledAt: null };
+
+  it("resend: the email goes only after the transaction has committed", async () => {
+    prismaMock.invite.findUnique.mockResolvedValue(pending as never);
+    prismaMock.projectMember.findUnique.mockResolvedValue(owner as never);
+    prismaMock.invite.update.mockResolvedValue(saved as never);
+    const held = holdTransaction();
+
+    const result = resendInvite("owner", "inv1");
+    await flush();
+
+    expect(prismaMock.invite.update).toHaveBeenCalled();
+    expect(sendEmail).not.toHaveBeenCalled();
+    held.release();
+    await result;
+    expect(sendEmail).toHaveBeenCalledOnce();
+  });
 
   it("resend: a new token and 7 more days, the email again", async () => {
     prismaMock.invite.findUnique.mockResolvedValue(pending as never);

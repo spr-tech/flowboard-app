@@ -7,6 +7,7 @@ const DISPLAY_SIZES = [
   "text-display-statement",
   "text-display-section",
   "text-display-why",
+  "text-display-why-phone",
   "text-display-cta",
   "text-display-faq",
 ];

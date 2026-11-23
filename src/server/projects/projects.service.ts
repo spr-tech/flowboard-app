@@ -9,6 +9,7 @@ import type {
 } from "@/models/responses/projectResponses";
 import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
+import { transaction } from "@/server/lib/transaction";
 import { ActivityAction } from "@/utilities/enums/activityActions";
 import type { ProjectColour } from "@/utilities/enums/projectColours";
 import {
@@ -203,7 +204,7 @@ export async function createProject(
   userId: string,
   input: { name: string; colour: ProjectColour; description?: string | null }
 ): Promise<ProjectDetail> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const project = await tx.project.create({
       data: {
         name: input.name,
@@ -245,7 +246,7 @@ export async function updateProject(
   projectId: string,
   changes: ProjectChanges
 ): Promise<ProjectDetail> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     await requireOwner(tx, userId, projectId);
     const before = await tx.project.findUniqueOrThrow({
       where: { id: projectId },
@@ -303,7 +304,7 @@ export async function deleteProject(
   projectId: string,
   typedName: string
 ): Promise<DeleteProjectResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     await requireOwner(tx, userId, projectId);
     const project = await tx.project.findUniqueOrThrow({ where: { id: projectId }, select: { name: true } });
     if (typedName !== project.name) {
@@ -319,7 +320,7 @@ export async function deleteProject(
 
 /** Members only: the owner can't leave (they delete the project instead). Unassigns my tasks. */
 export async function leaveProject(userId: string, projectId: string): Promise<LeaveProjectResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const membership = await requireMember(tx, userId, projectId);
     if (membership.role === "OWNER") {
       throw new ApiError(403, "OWNER_CANNOT_LEAVE", "Owners can't leave their own project. Delete it instead.");
