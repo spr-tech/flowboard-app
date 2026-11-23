@@ -30,7 +30,14 @@ describe("AddColumnArea", () => {
   it("disables it with the limit message once every member slot is used", () => {
     render("MEMBER", true, 2);
     expect(screen.getByRole("button", { name: "+ Add column" })).toBeDisabled();
-    expect(screen.getByText("Column limit reached (2 of 2). The owner can raise it.")).toBeInTheDocument();
+    expect(screen.getByText("Column limit reached. The owner can raise it.")).toBeInTheDocument();
+  });
+
+  it("never shows a count over the limit after the owner lowers it", () => {
+    render("MEMBER", true, 5);
+    expect(screen.getByRole("button", { name: "+ Add column" })).toBeDisabled();
+    expect(screen.getByText("Column limit reached. The owner can raise it.")).toBeInTheDocument();
+    expect(screen.queryByText(/5 of 2/)).not.toBeInTheDocument();
   });
 
   it("shows members nothing while the switch is off", () => {

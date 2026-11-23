@@ -14,6 +14,7 @@ export function AddColumnArea({ project }: { project: Pick<ProjectDetail, "id" |
   if (!membersCanAddColumns) return null;
 
   const usage = `${memberColumnCount} of ${memberColumnLimit} member columns used`;
+  // At or over the limit (the owner may have lowered it below the count): no numbers, never "5 of 3".
   if (memberColumnCount >= memberColumnLimit) {
     return (
       <div className="flex w-full shrink-0 flex-col gap-1.5 rounded-card border-2 border-dashed border-line-strong p-3 md:w-[300px]">
@@ -21,7 +22,7 @@ export function AddColumnArea({ project }: { project: Pick<ProjectDetail, "id" |
           + Add column
         </button>
         <p role="note" className="text-sm text-fg-muted">
-          Column limit reached ({memberColumnCount} of {memberColumnLimit}). The owner can raise it.
+          Column limit reached. The owner can raise it.
         </p>
       </div>
     );
