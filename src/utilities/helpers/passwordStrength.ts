@@ -40,9 +40,10 @@ function characterKinds(password: string): number {
 
 /**
  * Longer is stronger: 0 points under 10 characters, 1 for 10–11, 2 for 12–13, 3 for 14–15,
- * and 4 from 16.
+ * 4 for 16–19, and 5 from 20.
  */
 export function lengthPoints(length: number): number {
+  if (length >= 20) return 5;
   if (length >= 16) return 4;
   if (length >= 14) return 3;
   if (length >= 12) return 2;
@@ -61,7 +62,7 @@ export function getPasswordStrength(password: string, who: Who = {}): PasswordSt
   if (hasRepetition(password)) points -= 2;
   if (hasSimpleSequence(password)) points -= 1;
 
-  if (points >= 5) return "strong";
-  if (points >= 3) return "fair";
+  if (points >= 6) return "strong";
+  if (points >= 4) return "fair";
   return "weak";
 }
