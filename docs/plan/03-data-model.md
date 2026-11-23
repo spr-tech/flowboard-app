@@ -1,24 +1,54 @@
 # 3. Data model (`prisma/schema.prisma`)
 
 ## Tables
-- **User**: name, email (unique), passwordHash (null for GitHub-only users), image, passwordChangedAt, timestamps.
-- **Account**: the Auth.js adapter table linking a GitHub login to a User.
-- **Project**: name, colour, timestamps. No `ownerId`.
-- **ProjectMember**: userId, projectId, role (OWNER | MEMBER), joinedAt. Unique on (userId, projectId).
-- **Column**: projectId, name, position, isDone (exactly one per project).
-- **Task**: projectId, columnId, title, description, priority (LOW | MEDIUM | HIGH), position (float), dueDate, assigneeId (nullable User), createdById, completedAt, timestamps.
-- **Invite**: projectId, email, tokenHash, invitedById, expiresAt, acceptedAt, createdAt.
+- **User**: name, email (unique, stored lowercase), emailVerified (required by the Auth.js adapter), passwordHash (null for GitHub-only users), image, passwordChangedAt, timestamps.
+- **Account**: the Auth.js adapter table linking a GitHub login to a User. Unique on (provider, providerAccountId). No Session or VerificationToken tables: sessions are JWTs (JSON Web Tokens) and there are no magic links.
+- **Project**: name, description (optional, max 200, null when empty), colour, membersCanAddColumns (default false), memberColumnLimit (default 3; the API allows 1 to 10), timestamps. No `ownerId`. `colour` is the enum `ProjectColour`: `vermilion | espresso | lime | blue | teal | plum | amber | rose` (default `vermilion`). It stores a key, not hex; the frontend maps each key to a token and a readable text colour.
+- **ProjectMember**: userId, projectId, role (OWNER | MEMBER, default MEMBER), joinedAt, pinnedAt (nullable DateTime), lastOpenedAt (nullable DateTime), columnOrder (nullable JSON list of column ids: my own column order; null = the team order). Primary key (userId, projectId). `pinnedAt` and `lastOpenedAt` are this user's own preferences (milestone 5).
+- **Column**: projectId, name, position (spaced float: the team order), isDone (exactly one per project), createdById (User, required: who added it), createdAt.
+- **Task**: projectId, columnId, title, description, priority (LOW | MEDIUM | HIGH, default MEDIUM), position (float), dueDate (a calendar day, `@db.Date`, no time), assigneeId (nullable User), createdById, completedAt, timestamps.
+- **Invite**: projectId, email (stored lowercase), tokenHash, invitedById, expiresAt, acceptedAt, cancelledAt (milestone 7: cancelling stamps it and keeps the row, so the link can say it was cancelled), createdAt. Pending = not accepted and not cancelled (expired ones included).
 - **PasswordResetToken**: userId, tokenHash, expiresAt, usedAt, createdAt.
-- **Activity**: projectId, actorId, action (`task.created`, `task.moved`, `task.completed`, `member.joined`, `member.removed`, `project.created`, ...), taskId (nullable), meta (JSON, e.g. `{ "from": "In progress", "to": "Done" }`), createdAt.
+- **SignInAttempt** (milestone 9): email (lowercase), createdAt; one row per failed email-and-password sign-in, indexed on (email, createdAt), for the 5-per-15-minutes limit. Not linked to User, so unknown emails count the same way. Rows older than the window are tidied away when a new failure is recorded, and a successful sign-in deletes the email's rows.
+- **Activity**: projectId, actorId, action (a string such as `task.created`, `task.moved`, `task.completed`, `member.joined`, `member.removed`, `project.created`, ...), taskId (nullable), meta (JSON, e.g. `{ "title": "Fix login", "from": "In progress", "to": "Done" }`), createdAt.
 
 ## Rules
 - Ownership lives only in ProjectMember.role. "My projects" = projects I'm a member of.
-- A task is done when it's in the column with `isDone`. Moving in sets `completedAt`; moving out clears it. Overdue = dueDate in the past and no completedAt.
-- Positions are spaced floats (1000, 2000, 3000). A moved card takes the midpoint of its neighbours; top = first − 1000; bottom = last + 1000; empty column = 1000. If a gap gets too small, re-space the whole column in the same transaction.
-- Invite and password-reset tokens are stored only as hashes.
-- Cascades: deleting a Project removes its members, columns, tasks, invites and activity. Deleting a Column removes its tasks (the UI guards this with a typed confirmation).
+- Emails are lowercased before saving (User and Invite), in the seed now and in every service that writes an email.
+- A task is done when it's in the column with `isDone`. Moving in sets `completedAt`; moving out clears it. Overdue = dueDate before today and no completedAt.
+- **`completedAt` always matches the done column** (milestone 6). Moving a task in sets it; moving it out clears it; reordering inside the done column keeps the original time. A task added straight into the done column is completed when it's added.
+- **Setting a column as done marks its tasks completed at that moment**, so the dashboard counts them as completed that day. The old done column's tasks lose their `completedAt`. Deleting the done column hands the flag to the column its tasks were moved to, or else to the last remaining column, with the same rule.
+- **Activity for tasks and columns** (milestone 6): `task.created`, `task.updated` (changed field names in meta), `task.deleted` (title in meta), `task.moved` (column changed; from/to in meta), and `task.completed` instead of `task.moved` when a task enters the done column (one feed line per drag). Reordering within a column writes nothing. Columns: `column.created`, `column.renamed`, `column.moved`, `column.done_set`, `column.deleted`.
+- **"Today" is the browser's calendar day.** The server runs in UTC, but "today" depends on the user's time zone. So every request whose answer depends on today (overdue counts, next due date, and in milestone 8 the dashboard's "Today" and due-this-week) takes `?today=YYYY-MM-DD`, the browser's own local date. Zod checks it is a real date. The server never works out "today" itself. Decided in milestone 5; this also settles the dashboard (milestone 8).
+- **Pinning (per user).** Pinning sets my `ProjectMember.pinnedAt` to now; unpinning sets it to null. Any member can pin, not just the owner. Pinning an already-pinned project keeps the original time, so the pin order holds. There's no cap on the number of pins. Pins order "oldest pin first".
+- **Last opened.** Opening a project (GET `/api/projects/:projectId`) sets my `lastOpenedAt` to now, but at most once a minute per user and project: one conditional update (`where lastOpenedAt is null or older than 60 seconds`), so refreshes inside the minute write nothing and two tabs can't both write. "Recent" means opened by me, not changed by anyone. A project I've never opened uses `joinedAt` instead.
+- **Pins and visits write no Activity row.** They change nothing anyone else sees. They are the exception to "every service that changes data writes an Activity row".
+- **"Updated" on a project card** is the latest of the project's own `updatedAt` and its newest Activity row. It is only used for the "Updated …" line and the projects page's default order, not for the sidebar.
+- **Member-created columns** are columns whose `createdById` isn't the project's owner. They count toward `memberColumnLimit` together, whoever added them. Deleting one frees a slot.
+- **Column order.** `Column.position` is the team order; only the owner changes it (same position rules as tasks). A member's `columnOrder` is their own view and writes no Activity row (personal, like pins); the owner never has one. To show a member's columns: follow their list, ignore ids of deleted columns, and put any column missing from it (added later) right after the column that precedes it in the team order (`src/utilities/helpers/columnOrder.ts`).
+- **Activity for column permissions**: `project.column_permissions_changed` (meta: the switch and the limit) when either changes; `column.created` has the creator, owner or member, as the actor.
+- **Sidebar "Your projects"** (at most 3): my pinned projects first, oldest pin first; then the remaining slots filled with my other projects by `lastOpenedAt` (falling back to `joinedAt`), most recent first; no duplicates. Computed in the browser from the GET `/api/projects` list.
+- **One done column per project.** A partial unique index (`Column_one_done_per_project`, on projectId where isDone) makes a second done column impossible; services make sure there is always one. So "Set as done column" must clear the old done column **before** setting the new one, in one transaction, or the index rejects it.
+- Positions are spaced floats (1000, 2000, 3000). A moved card takes the midpoint of its neighbours; top = first − 1000; bottom = last + 1000; empty column = 1000. If the gap between the neighbours is under 0.002 (so a midpoint would be closer than 0.001 to either), re-space the whole column to 1000, 2000, … in the same transaction first. The rules are `src/utilities/helpers/position.ts` (shared: the browser uses them for the temporary position of an optimistic move); columns use the same rules (a new column goes between the done column and the one before it).
+- Invite and password-reset tokens are stored only as hashes (SHA-256). Reset tokens are 32 random bytes, sent only in the email link.
+- **Password reset rate limit:** at most 3 emails per address per hour, counted from PasswordResetToken rows created in the last hour. So rows are never deleted: "cancelling" an older link sets its `usedAt`. A GitHub-only user (no passwordHash) gets a "sign in with GitHub" email instead of a link; that also writes a row, born used, with the hash of a token nobody holds, so those emails count toward the limit too.
+- **Sessions after a password change:** the session token records `authTime` (when it signed in). On every Node-side `auth()` call, the jwt callback (`src/server/auth/sessionToken.ts`) reloads the user and ends the session if `authTime < passwordChangedAt`. Middleware can't do this (Edge, no Prisma); the app layout sends such a session to `/auth/session-ended`, which clears the cookie.
+- **One pending invite per email per project.** Inviting an email that already has a pending invite for the same project resends that invite (new token and expiry on the same row) instead of creating a second row. Enforced in the service (milestone 7).
+- **Activity for members and invites** (milestone 7): `member.invited` (meta: email; `resent: true` when a pending invite is sent again), `member.joined` (meta: the inviter's name), `member.removed` (meta: the removed member's name and how many tasks were unassigned), `invite.cancelled` (meta: email).
+- `Activity.action` is a string, not a Prisma enum: enum values can't contain dots and each new action would need a migration. The allowed values live in a TypeScript type in `src/utilities/enums/`.
+- Cascades: deleting a Project removes its members, columns, tasks, invites and activity. Deleting a Column removes its tasks (the UI guards this with a typed confirmation). Deleting a Task keeps its activity rows (taskId becomes null; meta still holds the title).
+- Deleting a User is not a v1 feature. Their accounts, memberships and reset tokens would cascade, but the database blocks it (Restrict) while they created tasks, invites or activity, so history is never lost silently.
 - Removing a member is not a database cascade: the service sets `assigneeId = null` on that user's tasks in that project, in the same transaction.
-- On every request, Auth.js treats a session token issued before `passwordChangedAt` as signed out.
+- On every Node-side request, a session whose `authTime` is before `passwordChangedAt` is treated as signed out (see "Sessions after a password change" above). The token's own `iat` isn't used, because Auth.js refreshes it whenever it re-issues the cookie.
 
-## Changes from the current schema
-Add Account, Invite, PasswordResetToken, Activity; drop Project.ownerId; add ProjectMember.role; add Column.isDone; add Task.dueDate, assigneeId, createdById, completedAt; switch positions to spaced floats; add User.passwordChangedAt.
+## Changes from the old schema
+Add Account, Invite, PasswordResetToken, Activity; rename Member to ProjectMember with a role enum; drop Project.ownerId, description, status, dueDate; Project.color (hex string) becomes colour (enum); add Column.isDone; Column.order becomes position (float); add Task.projectId, createdById, completedAt; drop Task.status and label; Task.dueDate becomes date-only; switch positions to spaced floats; User.password becomes passwordHash; add User.emailVerified and passwordChangedAt.
+
+Milestone 7 adds `Invite.cancelledAt` (migration `invite_cancelled_at`). Milestone 9 adds `SignInAttempt` (migration `sign_in_attempts`). Milestone 5 adds `ProjectMember.pinnedAt` and `lastOpenedAt` (migration `project_member_pin_and_recency`). Milestone 6 adds `Project.description`, `membersCanAddColumns`, `memberColumnLimit`, `Column.createdById` and `createdAt`, and `ProjectMember.columnOrder` (migration `column_permissions_and_order`). Existing columns are backfilled with their project's owner and the project's createdAt: `createdById` is added nullable, filled, then made required.
+
+## Local database commands
+- `pnpm db:migrate`: create and apply a new migration after a schema change (`prisma migrate dev`).
+- `pnpm db:seed`: wipe all tables and load the demo data (`prisma/seed.ts`).
+- `pnpm db:reset`: drop everything, re-apply all migrations, then seed.
+- `db:seed` and `db:reset` refuse to run unless `ALLOW_DB_RESET=true` is set, and print the database host before wiping. Set it only in your local `.env`, never on Vercel.
+- Demo sign-in after seeding: `demo@example.com` (owner) or `sam@example.com` (member), password `Flowboard123!`.

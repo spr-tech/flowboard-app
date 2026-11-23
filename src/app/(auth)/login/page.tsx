@@ -1,7 +1,17 @@
-import LoginForm from "@/components/forms/LoginForm";
+import type { Metadata } from "next";
 
-const page = () => {
-  return <LoginForm />;
-};
+import SignInContent from "@/components/content/auth/signInContent";
+import { searchParam, type SearchParams } from "@/utilities/helpers/searchParam";
 
-export default page;
+export const metadata: Metadata = { title: "Sign in" };
+
+export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const params = await searchParams;
+  return (
+    <SignInContent
+      callbackUrl={searchParam(params, "callbackUrl")}
+      error={searchParam(params, "error")}
+      reason={searchParam(params, "reason")}
+    />
+  );
+}

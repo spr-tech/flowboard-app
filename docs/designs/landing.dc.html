@@ -29,8 +29,8 @@ a{color:#D23F27}a:hover{color:#8E2614}
 @keyframes fbTilt{from{transform:perspective(1400px) rotateX(32deg) scale(0.86)}to{transform:perspective(1400px) rotateX(0deg) scale(1)}}
 .fb-pill{transition:background .25s,color .25s,transform .25s}
 .fb-pill:hover{background:var(--h)!important;color:var(--hc,#1E1512)!important;transform:rotate(-3deg)}
-.fb-deck{position:relative;height:420px}
-.fb-c{position:absolute;left:50%;top:50%;width:190px;height:250px;margin:-125px 0 0 -95px;border-radius:22px;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;transform:translate(var(--x0),var(--y0)) rotate(var(--r0));transition:transform .6s cubic-bezier(.2,.8,.2,1);box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.fb-deck{position:relative;height:380px}
+.fb-c{position:absolute;left:50%;top:50%;width:170px;height:224px;margin:-112px 0 0 -85px;border-radius:22px;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;transform:translate(var(--x0),var(--y0)) rotate(var(--r0));transition:transform .6s cubic-bezier(.2,.8,.2,1);box-shadow:0 18px 40px rgba(0,0,0,.35)}
 .fb-deck:hover .fb-c{transform:translate(var(--x1),var(--y1)) rotate(var(--r1))}
 .fb-sway{animation:fbSway 7s ease-in-out infinite;height:100%}
 @keyframes fbSway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
@@ -51,7 +51,7 @@ a{color:#D23F27}a:hover{color:#8E2614}
 <div class="fb-hide-sm" style="display: flex; gap: 28px; font-size: 15px">
 <a class="fb-pill" href="#how" style="--h: #D4F04A; color: #5A4A42; text-decoration: none; padding: 8px 14px; border-radius: 999px">How it works</a>
 <a class="fb-pill" href="#features" style="--h: #D23F27; --hc: #FFFFFF; color: #5A4A42; text-decoration: none; padding: 8px 14px; border-radius: 999px">Features</a>
-<a class="fb-pill" href="#stack" style="--h: #1E1512; --hc: #D4F04A; color: #5A4A42; text-decoration: none; padding: 8px 14px; border-radius: 999px">Built with</a>
+<a class="fb-pill" href="#why" style="--h: #1E1512; --hc: #D4F04A; color: #5A4A42; text-decoration: none; padding: 8px 14px; border-radius: 999px">Why Flowboard</a>
 <a class="fb-pill" href="#faq" style="--h: #F4EADF; color: #5A4A42; text-decoration: none; padding: 8px 14px; border-radius: 999px">FAQ</a>
 </div>
 <div style="display: flex; gap: 8px">
@@ -61,24 +61,24 @@ a{color:#D23F27}a:hover{color:#8E2614}
 </nav>
 </header>
 
-<section id="top" style="padding: 72px 24px 40px; position: relative">
+<section id="top" style="padding: 56px 24px 32px; position: relative">
 <div style="max-width: 1200px; margin: 0 auto; text-align: center; position: relative">
 <div style="display: inline-flex; align-items: center; gap: 10px; background: #FFFFFF; border: 1px solid #EADFD3; border-radius: 999px; padding: 6px 16px 6px 6px; font-size: 14px; color: #5A4A42">
 <span style="background: #1E1512; color: {{lime}}; border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600">New</span>
-Rebuilt with Redux Toolkit and a fresh look
+Due dates, assignees and a done column on every board
 </div>
 <span class="fb-wiggle fb-hide-sm" aria-hidden="true" style="--r: -14deg; position: absolute; left: 2%; top: 120px; width: 64px; height: 64px; border-radius: 50%; background: {{accent}}; display: flex; align-items: center; justify-content: center; z-index: 2"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5l4.5 4.5-3 1.5-3.5 3.5-.5 3.5L4 9.5l3.5-.5L11 5.5l1.5-3z"></path><path d="M8.5 15.5L4 20"></path></svg></span>
 <span class="fb-wiggle fb-hide-sm" aria-hidden="true" style="--r: 10deg; animation-delay: -1.2s; position: absolute; right: 3%; top: 96px; background: #1E1512; color: {{lime}}; border-radius: 14px; padding: 10px 14px; font-size: 14px; font-weight: 600; z-index: 2">High priority</span>
 <span class="fb-wiggle fb-hide-sm" aria-hidden="true" style="--r: 8deg; animation-delay: -2.1s; position: absolute; left: 7%; top: 300px; width: 56px; height: 56px; border-radius: 18px; background: {{lime}}; display: flex; align-items: center; justify-content: center; z-index: 2"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E1512" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg></span>
 <span class="fb-wiggle fb-hide-sm" aria-hidden="true" style="--r: -8deg; animation-delay: -0.6s; position: absolute; right: 8%; top: 290px; display: flex; align-items: center; gap: 0; z-index: 2"><span style="width: 40px; height: 40px; border-radius: 50%; background: #FBE1DA; color: #8E2614; border: 3px solid #FBF5EE; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">AO</span><span style="width: 40px; height: 40px; border-radius: 50%; background: #1E1512; color: #FBF5EE; border: 3px solid #FBF5EE; margin-left: -12px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">MJ</span><span style="width: 40px; height: 40px; border-radius: 50%; background: {{lime}}; color: #1E1512; border: 3px solid #FBF5EE; margin-left: -12px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">+</span></span>
-<h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(44px, 7.2vw, 104px); line-height: 0.98; letter-spacing: -0.045em; margin: 28px auto 0; max-width: 1060px"><span class="fb-rise" style="animation-delay: 0.05s">Move</span> <span class="fb-rise" style="animation-delay: 0.12s">your</span> <span class="fb-rise" style="animation-delay: 0.19s">team's</span> <span class="fb-rise" style="animation-delay: 0.26s">work</span> <span class="fb-rise" style="animation-delay: 0.33s">from</span> <span class="fb-rise" style="animation-delay: 0.45s"><span style="display: inline-block; background: {{lime}}; padding: 0 0.16em; border-radius: 0.14em; transform: rotate(-2.5deg)">idea</span></span> <span class="fb-rise" style="animation-delay: 0.52s">to</span> <span class="fb-rise" style="position: relative; animation-delay: 0.62s">done.<svg viewBox="0 0 300 30" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; left: -2%; bottom: -0.12em; width: 104%; height: 0.32em"><path d="M4 20 C 70 4, 160 6, 296 14" stroke="{{accent}}" stroke-width="8" fill="none" stroke-linecap="round"></path></svg></span></h1>
-<p style="font-size: 19px; line-height: 1.6; color: #5A4A42; max-width: 600px; margin: 28px auto 0">Flowboard is a Kanban workspace for small teams. Make a project, invite your people by email, and drag tasks across the board until they're shipped.</p>
+<h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(38px, 5.6vw, 80px); line-height: 0.98; letter-spacing: -0.045em; margin: 28px auto 0; max-width: 1060px"><span class="fb-rise" style="animation-delay: 0.05s">Move</span> <span class="fb-rise" style="animation-delay: 0.12s">your</span> <span class="fb-rise" style="animation-delay: 0.19s">team's</span> <span class="fb-rise" style="animation-delay: 0.26s">work</span> <span class="fb-rise" style="animation-delay: 0.33s">from</span> <span class="fb-rise" style="animation-delay: 0.45s"><span style="display: inline-block; background: {{lime}}; padding: 0 0.16em; border-radius: 0.14em; transform: rotate(-2.5deg)">idea</span></span> <span class="fb-rise" style="animation-delay: 0.52s">to</span> <span class="fb-rise" style="position: relative; animation-delay: 0.62s">done.<svg viewBox="0 0 300 30" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; left: -2%; bottom: -0.12em; width: 104%; height: 0.32em"><path d="M4 20 C 70 4, 160 6, 296 14" stroke="{{accent}}" stroke-width="8" fill="none" stroke-linecap="round"></path></svg></span></h1>
+<p style="font-size: 18px; line-height: 1.6; color: #5A4A42; max-width: 580px; margin: 28px auto 0">Flowboard is a Kanban workspace for small teams. Make a project, invite your people by email, and drag tasks across the board until they're shipped.</p>
 <div id="start" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 36px">
 <a href="Signup.dc.html" style="display: inline-flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 28px; border-radius: 999px; background: #1E1512; color: #FBF5EE; text-decoration: none; font-size: 16px; font-weight: 600">Create a free board <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: {{lime}}; color: #1E1512; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a>
-<a href="https://github.com/spr-tech/flowboard-app" style="display: inline-flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 26px; border-radius: 999px; border: 1.5px solid #1E1512; color: #1E1512; text-decoration: none; font-size: 16px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"></path></svg>View on GitHub</a>
+<a href="#how" style="display: inline-flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 26px; border-radius: 999px; border: 1.5px solid #1E1512; color: #1E1512; text-decoration: none; font-size: 16px; font-weight: 600">See how it works</a>
 </div>
 
-<div style="position: relative; max-width: 1040px; margin: 72px auto 0">
+<div style="position: relative; max-width: 960px; margin: 56px auto 0">
 <div class="fb-float fb-hide-sm" style="--r: -6deg; position: absolute; left: -36px; top: -34px; z-index: 3; background: {{lime}}; color: #1E1512; border-radius: 14px; padding: 12px 16px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>Moved to Done
 </div>
@@ -102,18 +102,18 @@ Rebuilt with Redux Toolkit and a fresh look
 <div style="background: #2A1F1A; border-radius: 18px; padding: 14px">
 <p style="margin: 0 0 12px; font-size: 13px; color: #BFAEA3; font-weight: 500">To do · 3</p>
 <div style="background: #FBF5EE; border-radius: 12px; padding: 14px; margin-bottom: 10px"><p style="margin: 0 0 10px; font-size: 14px; font-weight: 600">Write pricing page copy</p><span style="font-size: 12px; background: #E3EEF9; color: #1D4E86; padding: 3px 9px; border-radius: 999px; font-weight: 600">Low</span></div>
-<div style="background: #FBF5EE; border-radius: 12px; padding: 14px; margin-bottom: 10px"><p style="margin: 0 0 10px; font-size: 14px; font-weight: 600">Fix GitHub sign-in</p><span style="font-size: 12px; background: #FBE1DA; color: #8E2614; padding: 3px 9px; border-radius: 999px; font-weight: 600">High</span></div>
+<div style="background: #FBF5EE; border-radius: 12px; padding: 14px; margin-bottom: 10px"><p style="margin: 0 0 10px; font-size: 14px; font-weight: 600">Fix the checkout bug</p><span style="font-size: 12px; background: #FBE1DA; color: #8E2614; padding: 3px 9px; border-radius: 999px; font-weight: 600">High</span></div>
 <div style="border: 1.5px dashed rgba(255,255,255,0.18); border-radius: 12px; height: 54px"></div>
 </div>
 <div style="background: #2A1F1A; border-radius: 18px; padding: 14px">
 <p style="margin: 0 0 12px; font-size: 13px; color: #BFAEA3; font-weight: 500">In progress · 2</p>
-<div style="background: #FBF5EE; border-radius: 12px; padding: 14px; margin-bottom: 10px"><p style="margin: 0 0 10px; font-size: 14px; font-weight: 600">Move actions to API routes</p><span style="font-size: 12px; background: #FFF0C2; color: #7A5600; padding: 3px 9px; border-radius: 999px; font-weight: 600">Medium</span></div>
+<div style="background: #FBF5EE; border-radius: 12px; padding: 14px; margin-bottom: 10px"><p style="margin: 0 0 10px; font-size: 14px; font-weight: 600">Plan the launch email</p><span style="font-size: 12px; background: #FFF0C2; color: #7A5600; padding: 3px 9px; border-radius: 999px; font-weight: 600">Medium</span></div>
 <div style="background: #FBF5EE; border-radius: 12px; padding: 14px"><p style="margin: 0 0 10px; font-size: 14px; font-weight: 600">Design the invite email</p><span style="font-size: 12px; background: #FFF0C2; color: #7A5600; padding: 3px 9px; border-radius: 999px; font-weight: 600">Medium</span></div>
 </div>
 <div style="background: #2A1F1A; border-radius: 18px; padding: 14px">
 <p style="margin: 0 0 12px; font-size: 13px; color: #BFAEA3; font-weight: 500">Done · 2</p>
-<div style="background: #FBF5EE; border-radius: 12px; padding: 14px; margin-bottom: 10px; opacity: 1"><p style="margin: 0 0 10px; font-size: 14px; font-weight: 600; text-decoration: line-through; color: #7A675D">Set up Redux store</p><span style="font-size: 12px; background: #E2F3E6; color: #1E5B30; padding: 3px 9px; border-radius: 999px; font-weight: 600">Done</span></div>
-<div style="background: #FBF5EE; border-radius: 12px; padding: 14px"><p style="margin: 0 0 10px; font-size: 14px; font-weight: 600; text-decoration: line-through; color: #7A675D">New brand tokens</p><span style="font-size: 12px; background: #E2F3E6; color: #1E5B30; padding: 3px 9px; border-radius: 999px; font-weight: 600">Done</span></div>
+<div style="background: #FBF5EE; border-radius: 12px; padding: 14px; margin-bottom: 10px; opacity: 1"><p style="margin: 0 0 10px; font-size: 14px; font-weight: 600; text-decoration: line-through; color: #7A675D">Launch checklist</p><span style="font-size: 12px; background: #E2F3E6; color: #1E5B30; padding: 3px 9px; border-radius: 999px; font-weight: 600">Done</span></div>
+<div style="background: #FBF5EE; border-radius: 12px; padding: 14px"><p style="margin: 0 0 10px; font-size: 14px; font-weight: 600; text-decoration: line-through; color: #7A675D">New brand colours</p><span style="font-size: 12px; background: #E2F3E6; color: #1E5B30; padding: 3px 9px; border-radius: 999px; font-weight: 600">Done</span></div>
 </div>
 <div class="fb-hide-sm" style="position: absolute; left: 30%; top: 150px; width: 230px; background: #FFFFFF; border-radius: 12px; padding: 14px; transform: rotate(-5deg); box-shadow: 0 24px 40px rgba(0,0,0,0.35); border: 2px solid {{lime}}">
 <p style="margin: 0 0 10px; font-size: 14px; font-weight: 600">Ship the new landing page</p><span style="font-size: 12px; background: #FBE1DA; color: #8E2614; padding: 3px 9px; border-radius: 999px; font-weight: 600">High</span>
@@ -126,35 +126,35 @@ Rebuilt with Redux Toolkit and a fresh look
 </section>
 
 <section aria-label="Plan the work, move the cards, ship it" style="padding: 120px 24px 40px">
-<div style="max-width: 1200px; margin: 0 auto; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(46px, 9.4vw, 150px); line-height: 1; letter-spacing: -0.055em; display: flex; flex-direction: column; gap: 0.06em">
+<div style="max-width: 1200px; margin: 0 auto; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(40px, 7vw, 110px); line-height: 1; letter-spacing: -0.055em; display: flex; flex-direction: column; gap: 0.06em">
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.18em; padding-left: 4%">Plan<span class="fb-wiggle" aria-hidden="true" style="--r: -10deg; display: inline-flex; width: 0.78em; height: 0.78em; border-radius: 50%; background: {{accent}}; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width: 52%; height: 52%"><path d="M15 4.5l4.5 4.5-3 1.5-3.5 3.5-.5 3.5L4 9.5l3.5-.5L11 5.5l1.5-3z"></path><path d="M8.5 15.5L4 20"></path></svg></span>the work</div>
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.18em; justify-content: center">move<span class="fb-flipwrap" aria-hidden="true" style="width: 2.3em; height: 0.82em"><span class="fb-flip" style="display: block"><span class="fb-face" style="background: #FFFFFF; border: 0.025em solid #1E1512; font-family: Inter, sans-serif; font-weight: 600; letter-spacing: 0; font-size: 0.17em; color: #1E1512; border-radius: 1.2em"><span style="background: #FBE1DA; color: #8E2614; padding: 0.3em 0.8em; border-radius: 999px">To do</span>Fix sign-in</span><span class="fb-face fb-back" style="background: {{lime}}; font-family: Inter, sans-serif; font-weight: 600; letter-spacing: 0; font-size: 0.17em; color: #1E1512; border-radius: 1.2em"><svg viewBox="0 0 24 24" fill="none" stroke="#1E1512" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width: 1.6em; height: 1.6em"><path d="M5 12l5 5L20 7"></path></svg>Done</span></span></span>the cards</div>
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.18em; justify-content: flex-end; padding-right: 4%"><span style="color: {{accent}}">ship</span>it<span class="fb-wiggle" aria-hidden="true" style="--r: 12deg; animation-delay: -1.5s; display: inline-flex; width: 0.8em; height: 0.8em; border-radius: 0.24em; background: #1E1512; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" fill="none" stroke="{{lime}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width: 52%; height: 52%"><path d="M4 13.5L9 18.5L20 6"></path><path d="M14 18.5L20 12.5"></path></svg></span></div>
 </div>
 </section>
 
-<section id="how" style="padding: 96px 24px">
+<section id="how" style="padding: 80px 24px">
 <div style="max-width: 1200px; margin: 0 auto">
 <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 48px">
-<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em; margin: 0; max-width: 640px">Three steps. <span style="color: {{accent}}">No setup call.</span></h2>
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 4vw, 52px); line-height: 1; letter-spacing: -0.04em; margin: 0; max-width: 640px">Three steps. <span style="color: {{accent}}">No setup call.</span></h2>
 <p style="font-size: 17px; line-height: 1.6; color: #5A4A42; max-width: 380px; margin: 0">From an empty account to a team moving tasks in a few minutes.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px">
 
 <div style="background: #FFFFFF; border: 1px solid #EADFD3; border-radius: 28px; padding: 28px; position: relative; overflow: hidden">
-<span aria-hidden="true" style="position: absolute; right: 20px; top: 6px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 120px; line-height: 1; color: #F4EADF">01</span>
+<span aria-hidden="true" style="position: absolute; right: 20px; top: 6px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 92px; line-height: 1; color: #F4EADF">01</span>
 <div style="position: relative; background: #FBF5EE; border-radius: 18px; padding: 18px; margin-bottom: 26px">
 <label style="display: block; font-size: 13px; color: #5A4A42; margin-bottom: 8px" for="fb-pname">Project name</label>
 <input id="fb-pname" value="Website relaunch" style="width: 100%; box-sizing: border-box; height: 44px; border: 1.5px solid #1E1512; border-radius: 10px; padding: 0 12px; font: inherit; font-size: 15px; background: #FFFFFF; color: #1E1512">
 <div style="display: flex; gap: 8px; margin-top: 12px"><span style="width: 24px; height: 24px; border-radius: 50%; background: {{accent}}"></span><span style="width: 24px; height: 24px; border-radius: 50%; background: {{lime}}; outline: 2px solid #1E1512; outline-offset: 2px"></span><span style="width: 24px; height: 24px; border-radius: 50%; background: #1D4E86"></span></div>
 </div>
 <p style="position: relative; margin: 0 0 6px; font-size: 13px; font-weight: 600; color: {{accent}}">Step 1 of 3</p>
-<h3 style="position: relative; font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px">Create a project</h3>
+<h3 style="position: relative; font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px">Create a project</h3>
 <p style="position: relative; margin: 0; font-size: 16px; line-height: 1.6; color: #5A4A42">Name it, pick a colour, and you get a board with To do, In progress and Done ready to go.</p>
 </div>
 
 <div style="background: {{accent}}; border-radius: 28px; padding: 28px; position: relative; overflow: hidden; color: #FFFFFF">
-<span aria-hidden="true" style="position: absolute; right: 20px; top: 6px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 120px; line-height: 1; color: rgba(255,255,255,0.14)">02</span>
+<span aria-hidden="true" style="position: absolute; right: 20px; top: 6px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 92px; line-height: 1; color: rgba(255,255,255,0.14)">02</span>
 <div style="position: relative; background: #1E1512; border-radius: 18px; padding: 18px; margin-bottom: 26px">
 <label style="display: block; font-size: 13px; color: #BFAEA3; margin-bottom: 8px" for="fb-invite">Invite by email</label>
 <div style="display: flex; gap: 8px">
@@ -163,19 +163,19 @@ Rebuilt with Redux Toolkit and a fresh look
 </div>
 </div>
 <p style="position: relative; margin: 0 0 6px; font-size: 13px; font-weight: 600; color: #FFFFFF">Step 2 of 3</p>
-<h3 style="position: relative; font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px">Invite your team</h3>
+<h3 style="position: relative; font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px">Invite your team</h3>
 <p style="position: relative; margin: 0; font-size: 16px; line-height: 1.6; color: #FFFFFF">Send an email invite. Teammates join the project as members and see the same board.</p>
 </div>
 
 <div style="background: #1E1512; border-radius: 28px; padding: 28px; position: relative; overflow: hidden; color: #F6EDE4">
-<span aria-hidden="true" style="position: absolute; right: 20px; top: 6px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 120px; line-height: 1; color: rgba(255,255,255,0.07)">03</span>
+<span aria-hidden="true" style="position: absolute; right: 20px; top: 6px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 92px; line-height: 1; color: rgba(255,255,255,0.07)">03</span>
 <div style="position: relative; display: flex; gap: 10px; align-items: center; background: #2A1F1A; border-radius: 18px; padding: 18px; margin-bottom: 26px">
-<div style="flex: 1; background: #FBF5EE; color: #1E1512; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; transform: rotate(-3deg)">Fix GitHub sign-in</div>
+<div style="flex: 1; background: #FBF5EE; color: #1E1512; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; transform: rotate(-3deg)">Fix the checkout bug</div>
 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{{lime}}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
 <div style="background: {{lime}}; color: #1E1512; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600">Done</div>
 </div>
 <p style="position: relative; margin: 0 0 6px; font-size: 13px; font-weight: 600; color: {{lime}}">Step 3 of 3</p>
-<h3 style="position: relative; font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px">Drag it to done</h3>
+<h3 style="position: relative; font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px">Drag it to done</h3>
 <p style="position: relative; margin: 0; font-size: 16px; line-height: 1.6; color: #BFAEA3">Grab a card, drop it in the next column. The order saves for everyone on the project.</p>
 </div>
 
@@ -186,13 +186,13 @@ Rebuilt with Redux Toolkit and a fresh look
 <section id="features" style="padding: 40px 24px 112px">
 <div style="max-width: 1200px; margin: 0 auto">
 <div style="text-align: center; margin-bottom: 56px; position: relative">
-<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em; margin: 0 auto; max-width: 760px">Everything a small team <span style="position: relative; display: inline-block">actually<span aria-hidden="true" style="position: absolute; left: 50%; top: -0.55em; transform: translateX(-50%) rotate(8deg); background: #1E1512; color: {{lime}}; font-family: Inter, sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0; padding: 6px 12px; border-radius: 999px; white-space: nowrap">Features</span></span> needs</h2>
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 4vw, 52px); line-height: 1; letter-spacing: -0.04em; margin: 0 auto; max-width: 760px">Everything a small team <span style="position: relative; display: inline-block">actually<span aria-hidden="true" style="position: absolute; left: 50%; top: -0.55em; transform: translateX(-50%) rotate(8deg); background: #1E1512; color: {{lime}}; font-family: Inter, sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0; padding: 6px 12px; border-radius: 999px; white-space: nowrap">Features</span></span> needs</h2>
 </div>
 <div class="fb-bento">
 
 <div class="fb-wide" style="background: #FFFFFF; border: 1px solid #EADFD3; border-radius: 28px; padding: 32px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center">
 <div style="flex: 1 1 260px">
-<h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px">A board you can grab</h3>
+<h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px">A board you can grab</h3>
 <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #5A4A42">Drag and drop between columns or reorder inside one. Every move lands exactly where you dropped it.</p>
 </div>
 <div style="flex: 1 1 280px; display: flex; gap: 10px; background: #FBF5EE; border-radius: 20px; padding: 16px">
@@ -203,7 +203,7 @@ Rebuilt with Redux Toolkit and a fresh look
 </div>
 
 <div style="background: {{lime}}; border-radius: 28px; padding: 32px">
-<h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px">Priority at a glance</h3>
+<h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px">Priority at a glance</h3>
 <p style="margin: 0 0 22px; font-size: 16px; line-height: 1.6; color: #2E3A00">Tag every task low, medium or high, and the board tells you what to pick up first.</p>
 <div style="display: flex; flex-wrap: wrap; gap: 8px">
 <span style="background: #1E1512; color: #FBF5EE; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 600">High</span>
@@ -213,7 +213,7 @@ Rebuilt with Redux Toolkit and a fresh look
 </div>
 
 <div style="background: #1E1512; color: #F6EDE4; border-radius: 28px; padding: 32px">
-<h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px">Owners and members</h3>
+<h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px">Owners and members</h3>
 <p style="margin: 0 0 22px; font-size: 16px; line-height: 1.6; color: #BFAEA3">The owner runs the project. Members work the board.</p>
 <div style="display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: center; justify-content: space-between; background: #2A1F1A; border-radius: 14px; padding: 10px 12px"><span style="display: flex; align-items: center; gap: 10px; font-size: 14px"><span style="width: 32px; height: 32px; border-radius: 50%; background: {{accent}}; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">MJ</span>Muizz</span><span style="font-size: 12px; background: {{lime}}; color: #1E1512; padding: 3px 10px; border-radius: 999px; font-weight: 600">Owner</span></div>
@@ -222,7 +222,7 @@ Rebuilt with Redux Toolkit and a fresh look
 </div>
 
 <div style="background: #FFFFFF; border: 1px solid #EADFD3; border-radius: 28px; padding: 32px">
-<h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px">Invites that land</h3>
+<h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px">Invites that land</h3>
 <p style="margin: 0 0 22px; font-size: 16px; line-height: 1.6; color: #5A4A42">Add a teammate's email and they get a link straight into the project.</p>
 <div style="background: #FBF5EE; border-radius: 16px; padding: 14px; font-size: 14px">
 <p style="margin: 0; font-weight: 600">You're invited to Website relaunch</p>
@@ -231,7 +231,7 @@ Rebuilt with Redux Toolkit and a fresh look
 </div>
 
 <div style="background: #F4EADF; border-radius: 28px; padding: 32px">
-<h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px">Sign in your way</h3>
+<h3 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 10px">Sign in your way</h3>
 <p style="margin: 0 0 22px; font-size: 16px; line-height: 1.6; color: #5A4A42">GitHub in one click, or email and password.</p>
 <div style="display: flex; flex-direction: column; gap: 10px">
 <span style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 12px; background: #1E1512; color: #FBF5EE; font-size: 14px; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"></path></svg>Continue with GitHub</span>
@@ -243,23 +243,23 @@ Rebuilt with Redux Toolkit and a fresh look
 </div>
 </section>
 
-<section id="stack" style="background: #1E1512; color: #F6EDE4; padding: 112px 24px; border-radius: 48px 48px 0 0">
+<section id="why" style="background: #1E1512; color: #F6EDE4; padding: 88px 24px; border-radius: 48px 48px 0 0">
 <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 56px; align-items: center">
 <div style="flex: 1 1 420px">
-<p style="margin: 0 0 18px; font-size: 14px; font-weight: 600; color: {{lime}}">Built in the open</p>
-<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(44px, 6.4vw, 92px); line-height: 0.95; letter-spacing: -0.045em; margin: 0">Plan it.<br><span style="color: {{accent}}">Drag it.</span><br><span style="display: inline-block; background: {{lime}}; color: #1E1512; padding: 0 0.14em; border-radius: 0.12em; transform: rotate(-2deg)">Ship it.</span></h2>
-<p style="font-size: 17px; line-height: 1.6; color: #BFAEA3; max-width: 460px; margin: 28px 0 32px">Flowboard is a real, working app, and every line of it is on GitHub. Read the code, open an issue, or fork it for your own team.</p>
-<a href="https://github.com/spr-tech/flowboard-app" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 26px; border-radius: 999px; background: {{lime}}; color: #1E1512; text-decoration: none; font-size: 16px; font-weight: 600">Read the code</a>
+<p style="margin: 0 0 18px; font-size: 14px; font-weight: 600; color: {{lime}}">Why teams pick it</p>
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(38px, 5vw, 72px); line-height: 0.95; letter-spacing: -0.045em; margin: 0">Plan it.<br><span style="color: {{accent}}">Drag it.</span><br><span style="display: inline-block; background: {{lime}}; color: #1E1512; padding: 0 0.14em; border-radius: 0.12em; transform: rotate(-2deg)">Ship it.</span></h2>
+<p style="font-size: 17px; line-height: 1.6; color: #BFAEA3; max-width: 460px; margin: 28px 0 32px">Everything lives on one board your whole team can see. No setup call, no training, no clutter. Just the work, who owns it and where it stands.</p>
+<a href="Signup.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 26px; border-radius: 999px; background: {{lime}}; color: #1E1512; text-decoration: none; font-size: 16px; font-weight: 600">Start your first board</a>
 </div>
 <div style="flex: 1 1 420px; min-width: 0">
-<div class="fb-deck" role="list" aria-label="The stack Flowboard is built with">
+<div class="fb-deck" role="list" aria-label="What your team gets">
 <div class="fb-sway">
-<div class="fb-c" role="listitem" style="--x0: -110px; --y0: 18px; --r0: -18deg; --x1: -300px; --y1: 40px; --r1: -14deg; background: #FBF5EE; color: #1E1512"><span style="font-size: 13px; font-weight: 600; color: #7A675D">Board</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1">dnd-kit</span></div>
-<div class="fb-c" role="listitem" style="--x0: -66px; --y0: 6px; --r0: -11deg; --x1: -180px; --y1: 8px; --r1: -8deg; background: #F4EADF; color: #1E1512"><span style="font-size: 13px; font-weight: 600; color: #7A675D">Styling</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1">Tailwind CSS</span></div>
-<div class="fb-c" role="listitem" style="--x0: -22px; --y0: 0px; --r0: -4deg; --x1: -60px; --y1: -6px; --r1: -3deg; background: #2A1F1A; color: #F6EDE4; border: 1px solid rgba(255,255,255,0.14)"><span style="font-size: 13px; font-weight: 600; color: #BFAEA3">Auth</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1">Auth.js and GitHub</span></div>
-<div class="fb-c" role="listitem" style="--x0: 22px; --y0: 0px; --r0: 4deg; --x1: 60px; --y1: -6px; --r1: 3deg; background: #FFFFFF; color: #1E1512"><span style="font-size: 13px; font-weight: 600; color: #7A675D">Data</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1">PostgreSQL and Prisma</span></div>
-<div class="fb-c" role="listitem" style="--x0: 66px; --y0: 6px; --r0: 11deg; --x1: 180px; --y1: 8px; --r1: 8deg; background: {{lime}}; color: #1E1512"><span style="font-size: 13px; font-weight: 600; color: #2E3A00">State</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1">Redux Toolkit</span></div>
-<div class="fb-c" role="listitem" style="--x0: 110px; --y0: 18px; --r0: 18deg; --x1: 300px; --y1: 40px; --r1: 14deg; background: {{accent}}; color: #FFFFFF"><span style="font-size: 13px; font-weight: 600; color: #FFFFFF">Framework</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1">Next.js</span></div>
+<div class="fb-c" role="listitem" style="--x0: -110px; --y0: 18px; --r0: -18deg; --x1: -300px; --y1: 40px; --r1: -14deg; background: #FBF5EE; color: #1E1512"><span style="font-size: 13px; font-weight: 600; color: #7A675D">Board</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05">Drag and drop</span></div>
+<div class="fb-c" role="listitem" style="--x0: -66px; --y0: 6px; --r0: -11deg; --x1: -180px; --y1: 8px; --r1: -8deg; background: #F4EADF; color: #1E1512"><span style="font-size: 13px; font-weight: 600; color: #7A675D">Focus</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05">Priority labels</span></div>
+<div class="fb-c" role="listitem" style="--x0: -22px; --y0: 0px; --r0: -4deg; --x1: -60px; --y1: -6px; --r1: -3deg; background: #2A1F1A; color: #F6EDE4; border: 1px solid rgba(255,255,255,0.14)"><span style="font-size: 13px; font-weight: 600; color: #BFAEA3">Deadlines</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05">Due dates</span></div>
+<div class="fb-c" role="listitem" style="--x0: 22px; --y0: 0px; --r0: 4deg; --x1: 60px; --y1: -6px; --r1: 3deg; background: #FFFFFF; color: #1E1512"><span style="font-size: 13px; font-weight: 600; color: #7A675D">Team</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05">Owners and members</span></div>
+<div class="fb-c" role="listitem" style="--x0: 66px; --y0: 6px; --r0: 11deg; --x1: 180px; --y1: 8px; --r1: 8deg; background: {{lime}}; color: #1E1512"><span style="font-size: 13px; font-weight: 600; color: #2E3A00">Invites</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05">Email invites</span></div>
+<div class="fb-c" role="listitem" style="--x0: 110px; --y0: 18px; --r0: 18deg; --x1: 300px; --y1: 40px; --r1: 14deg; background: {{accent}}; color: #FFFFFF"><span style="font-size: 13px; font-weight: 600; color: #FFFFFF">Progress</span><span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05">A real done column</span></div>
 </div>
 </div>
 <p style="margin: 8px 0 0; text-align: center; font-size: 14px; color: #BFAEA3">Hover the deck to fan it out</p>
@@ -269,7 +269,7 @@ Rebuilt with Redux Toolkit and a fresh look
 
 <section id="faq" style="background: #1E1512; padding: 0 24px 112px">
 <div style="max-width: 880px; margin: 0 auto; background: #FBF5EE; border-radius: 32px; padding: clamp(28px, 5vw, 56px)">
-<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 4vw, 52px); line-height: 1; letter-spacing: -0.04em; margin: 0 0 32px">Questions, answered</h2>
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(28px, 3.4vw, 44px); line-height: 1; letter-spacing: -0.04em; margin: 0 0 28px">Questions, answered</h2>
 <div style="display: flex; flex-direction: column; gap: 10px">
 <sc-for list="{{faqs}}" as="item" hint-placeholder-count="5">
 <div style="background: #FFFFFF; border: 1px solid #EADFD3; border-radius: 18px">
@@ -284,12 +284,12 @@ Rebuilt with Redux Toolkit and a fresh look
 </section>
 
 <section id="signin" style="background: #1E1512; padding: 0 24px 24px">
-<div style="max-width: 1200px; margin: 0 auto; background: {{accent}}; border-radius: 40px; padding: clamp(40px, 7vw, 96px) 32px; text-align: center; position: relative; overflow: hidden">
+<div style="max-width: 1200px; margin: 0 auto; background: {{accent}}; border-radius: 40px; padding: clamp(36px, 6vw, 80px) 32px; text-align: center; position: relative; overflow: hidden">
 <span aria-hidden="true" class="fb-float" style="--r: 10deg; position: absolute; right: 7%; top: 36px; background: {{lime}}; color: #1E1512; border-radius: 999px; padding: 8px 16px; font-size: 14px; font-weight: 600">Free to start</span>
-<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(40px, 6vw, 84px); line-height: 0.98; letter-spacing: -0.045em; margin: 0 auto; max-width: 860px; color: #FFFFFF">Your next sprint starts on a clean board.</h2>
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 4.6vw, 64px); line-height: 0.98; letter-spacing: -0.045em; margin: 0 auto; max-width: 860px; color: #FFFFFF">Your next sprint starts on a clean board.</h2>
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 40px">
 <a href="Signup.dc.html" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 30px; border-radius: 999px; background: #1E1512; color: #FBF5EE; text-decoration: none; font-size: 16px; font-weight: 600">Create a free board</a>
-<a href="https://github.com/spr-tech/flowboard-app" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 28px; border-radius: 999px; border: 1.5px solid #FFFFFF; color: #FFFFFF; text-decoration: none; font-size: 16px; font-weight: 600">View on GitHub</a>
+<a href="Signin.dc.html" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 28px; border-radius: 999px; border: 1.5px solid #FFFFFF; color: #FFFFFF; text-decoration: none; font-size: 16px; font-weight: 600">Sign in</a>
 </div>
 </div>
 </section>
@@ -305,7 +305,7 @@ Rebuilt with Redux Toolkit and a fresh look
 </div>
 <div style="display: flex; gap: 64px; flex-wrap: wrap; font-size: 15px">
 <div style="display: flex; flex-direction: column; gap: 12px"><span style="color: #F6EDE4; font-weight: 600">Product</span><a href="#how" style="color: #BFAEA3; text-decoration: none">How it works</a><a href="#features" style="color: #BFAEA3; text-decoration: none">Features</a><a href="#faq" style="color: #BFAEA3; text-decoration: none">FAQ</a></div>
-<div style="display: flex; flex-direction: column; gap: 12px"><span style="color: #F6EDE4; font-weight: 600">Project</span><a href="https://github.com/spr-tech/flowboard-app" style="color: #BFAEA3; text-decoration: none">GitHub</a><a href="https://flowboard-app-five.vercel.app" style="color: #BFAEA3; text-decoration: none">Live app</a></div>
+<div style="display: flex; flex-direction: column; gap: 12px"><span style="color: #F6EDE4; font-weight: 600">Account</span><a href="Signin.dc.html" style="color: #BFAEA3; text-decoration: none">Sign in</a><a href="Signup.dc.html" style="color: #BFAEA3; text-decoration: none">Create an account</a></div>
 </div>
 </div>
 <div style="max-width: 1200px; margin: 48px auto 0; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 14px">© 2026 Flowboard</div>
@@ -325,7 +325,7 @@ class Component extends DCLogic {
       { q: 'Can I sign in with GitHub?', a: 'Yes. Use GitHub in one click, or sign up with an email and password.' },
       { q: 'How do teammates join a project?', a: 'The project owner invites them by email. They follow the link and join as members.' },
       { q: 'Can I set task priorities?', a: 'Every task can be low, medium or high, and the label shows on its card.' },
-      { q: 'Is the code open?', a: 'Yes. The whole app is on GitHub at spr-tech/flowboard-app.' }
+      { q: 'Does it work on my phone?', a: 'Yes. Flowboard works in any modern browser, on desktop and on your phone.' }
     ];
     const open = this.state.open;
     return {

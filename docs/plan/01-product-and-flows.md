@@ -13,7 +13,8 @@ A Kanban workspace where a small team (about 2–10 people) plans a project and 
 ## In the first version
 - Accounts: email + password, GitHub. Forgot password.
 - Projects: create, rename, recolour, delete. Roles: OWNER and MEMBER.
-- Board: starts with To do, In progress, Done. The owner can add, rename, reorder and delete columns, and choose the done column.
+- Board: starts with To do, In progress, Done. The owner can add, rename, reorder (the team order) and delete columns, and choose the done column. The owner can let members add columns, up to a shared limit; every member can also reorder columns for their own view only.
+- Projects have an optional description (up to 200 characters), shown on the project card and under the board's name.
 - Tasks: title, description, priority (LOW, MEDIUM, HIGH), assignee, due date.
 - Members: invite by email, remove, leave.
 - Dashboard: summary line, stat cards, my tasks grouped by due date, project progress, 14-day completed chart, priority split, next-7-days strip, team activity.
@@ -38,6 +39,8 @@ Google sign-in, a workspace layer above projects, notifications, global search, 
 - Deleting a column with tasks: the dialog shows the task count and offers (a) move the tasks to another column (default), or (b) type the column name to delete the column and its tasks. The last column can never be deleted.
 - Removing a member unassigns their tasks in that project.
 - The owner cannot leave; they can only delete the project, by typing its name.
-- Column changes are owner-only; task changes are open to every member.
+- **Columns.** The owner can always add, rename, reorder, set done and delete columns, whatever the settings say. With "Members can add columns" on, any member can add columns until the project's member-created columns (any creator other than the owner) reach the limit (1 to 10, default 3, for all members together); members can rename only the columns they added. Set as done and delete stay owner-only. Turning the switch off, or lowering the limit, never deletes columns; it only blocks new ones.
+- **Column order: team order and personal order.** The team order is the owner's: dragging a column (or move left/right in settings) changes it for everyone. Every member can also drag columns, but for a member that changes only their own view ("Your order", with "Reset to team order"). Columns added later slot in after the column that precedes them in the team order. Card order inside a column, and moving cards between columns, stay shared for everyone. The done column can be moved anywhere and keeps its badge; new columns still go just before it in the team order.
+- Task changes are open to every member.
 - Forgot password: never reveal whether an email has an account; links expire after 1 hour and work once; requesting a new link cancels older ones; GitHub-only users get an email telling them to sign in with GitHub; at most 3 reset emails per address per hour.
 - After a password reset, other devices are signed out using `passwordChangedAt` (see the data model).

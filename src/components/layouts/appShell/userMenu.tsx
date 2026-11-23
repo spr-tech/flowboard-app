@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { signOut } from "next-auth/react";
 import { LogOut, UserRound } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar/avatar";
@@ -14,11 +13,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownmenu/dropdownMenu";
+import { useMe } from "@/services/accountService";
+import { useAppDispatch } from "@/stores/hooks";
+import { dialogOpened } from "@/stores/uiSlice";
 import type { AppShellUser } from "./appShell";
 
-type UserMenuProps = { user: AppShellUser };
+type UserMenuProps = {
+  /** From the server session, so the first paint already has a name (no loading flash). */
+  user: AppShellUser;
+};
 
-export function UserMenu({ user }: UserMenuProps) {
+export function UserMenu({ user: sessionUser }: UserMenuProps) {
+  // Read straight from the RTK Query cache on every render (never copied into state). Once
+  // /api/me answers, it wins: a later rename invalidates the Me tag and this updates by itself.
+  const { data: me } = useMe();
+  const dispatch = useAppDispatch();
+  const user = me ? { name: me.name || me.email, email: me.email, imageUrl: me.image } : sessionUser;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -40,7 +51,7 @@ export function UserMenu({ user }: UserMenuProps) {
             Account settings
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem className="px-2 py-2" onSelect={() => signOut({ redirectTo: "/login" })}>
+        <DropdownMenuItem className="px-2 py-2" onSelect={() => dispatch(dialogOpened({ kind: "signOut" }))}>
           <LogOut aria-hidden />
           Sign out
         </DropdownMenuItem>

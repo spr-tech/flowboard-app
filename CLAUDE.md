@@ -29,6 +29,12 @@ Server code (the backend lives in this same Next.js app for now):
 ## Departures from the structure guide (agreed for this project)
 - Forms use React Hook Form + Zod, not Formik + Yup, so one Zod schema in `src/models/validations/` validates both the form and the API route.
 - shadcn components are generated on Radix UI.
+- shadcn: we keep clsx + tailwind-merge. After any `shadcn add`, change the generated `cn` import to `@/utilities/helpers/cn` and uninstall any `cn` package it installed. The `text-display-*` classes rely on the custom tailwind-merge setup in `src/utilities/helpers/cn.ts`.
+
+## Database safety
+- The old live database (London, separate Neon account) is commented out in `.env`. Never touch it.
+- `.env` points at the new Neon project's **dev** branch: `DATABASE_URL` is pooled (the app), `DIRECT_URL` is direct (Prisma CLI: migrations, seed). Never run anything against the new project's production branch; it stays empty until cutover.
+- `pnpm db:seed` and `pnpm db:reset` wipe the database. They refuse to run unless `ALLOW_DB_RESET=true` is set, and print the host first. Set it in your local `.env` only, never on Vercel. Always ask before running either.
 
 ## Rules
 - Colours: role-named tokens from `src/app/globals.css` only. No raw hex or raw Tailwind colours in components.
@@ -44,8 +50,30 @@ Server code (the backend lives in this same Next.js app for now):
 - Projects a user is not a member of return 404, not 403.
 - No `: any`. No files over 400 lines.
 
+## Auth (built in milestone 3)
+- Auth.js v5 with JWT (JSON Web Token) sessions. `src/auth.config.ts` is the Edge-safe half (middleware: protected paths, signed-in users sent away from /login, /register, /forgot-password); `src/auth.ts` is the Node half (Prisma adapter, providers, callbacks).
+- The token carries our own `authTime` (Auth.js refreshes `iat` whenever it re-issues the cookie). `src/server/auth/sessionToken.ts` reloads the user on every Node-side `auth()` and ends the session if `authTime` is older than `passwordChangedAt`; the app layout then sends the browser to `/auth/session-ended`, which clears the cookie and goes to `/login?reason=signed-out`.
+- No automatic account linking: GitHub sign-in with an email that already has a password account lands on `/login?error=OAuthAccountNotLinked` with a "sign in with your email and password" message.
+- Links in emails use `APP_URL`, then `VERCEL_BRANCH_URL`, then `http://localhost:3000` in development only; never the request's Host header. `next start` locally needs `APP_URL` in `.env`.
+- `pnpm dev` and `next start` share `.next`: don't run both from the same folder at once.
+
+## Testing and CI
+- Vitest + Testing Library (jsdom). Config: `vitest.config.mts`; shared setup: `src/test/setup.ts`.
+- Name tests `<name>.test.ts(x)` and put them next to the file they test.
+- **No network, no database, no `.env` in tests.** Tests must pass anywhere: any laptop, GitHub Actions, any time zone, offline. The setup makes `fetch`, raw sockets, `@/server/lib/prisma` and any new Prisma client throw, and stops `dotenv` loading `.env`; every env value tests need is set in `vitest.config.mts`. Mock Prisma, `fetch` and email senders in the test that needs them. For Prisma, use the typed mock in `src/test/prismaMock.ts`; server tests start with `// @vitest-environment node`. For components and services that use the store, use `renderWithStore`, `mockFetch` and `jsonResponse` from `src/test/renderWithStore.tsx`; for route handlers, mock `@/auth`.
+- New API routes go through `route()` in `src/server/lib/route.ts` (see `docs/plan/04-api.md`); new RTK Query endpoints go through `baseApi.injectEndpoints` (see `docs/plan/05-state.md`).
+- **Time zone is fixed to America/New_York** (not Lagos), so date code that depends on the machine's zone fails instead of passing by luck. Use fake timers (`vi.useFakeTimers()`, `vi.setSystemTime()`) for anything time-based.
+- **Every new service or helper gets a test in the same branch.**
+- **Never send real email to addresses that can't receive it** (example.com, example.org, `.test`, `.invalid` and similar) in proofs or end-to-end checks: the bounces hurt the sending Gmail account's reputation. Use `adetoroshina434+<something>@gmail.com`, or mock `sendEmail`.
+- CI (`.github/workflows/ci.yml`) runs one job, `check`: install with the frozen lockfile, Prisma generate, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, with dummy env values that point at a host that can't exist. It must pass before merging into `rebuild` or `master`.
+
 ## Stack
-Next.js (App Router) · React · TypeScript · Redux Toolkit + RTK Query · Prisma + PostgreSQL (Neon) · Auth.js v5 with the Prisma adapter (email + password, GitHub) · Resend for email · dnd-kit · Tailwind CSS v4 · shadcn on Radix UI · React Hook Form + Zod · Vitest + Cypress.
+Next.js (App Router) · React · TypeScript · Redux Toolkit + RTK Query · Prisma + PostgreSQL (Neon) · Auth.js v5 with the Prisma adapter (email + password, GitHub) · Nodemailer over Gmail SMTP for email (`smtp.gmail.com` port 587, STARTTLS with `requireTLS`, certificate checks on; behind `sendEmail` in `src/server/lib/email.ts`, so a later move to Resend changes one file) · dnd-kit · Tailwind CSS v4 · shadcn on Radix UI · React Hook Form + Zod · Vitest + Cypress.
 
 ## Git
-See `docs/plan/07-git-workflow.md`. Merge with merge commits, never squash, never force-push `main`.
+See `docs/plan/07-git-workflow.md`. Merge with merge commits, never squash, never force-push `master`.
+
+Every push gets a description, without exception (milestones, small fixes, chores, follow-up commits):
+- Commit messages: a short summary line, then a blank line, then a body explaining what changed and why. No commit with only a summary line.
+- After pushing a branch, always give me in the chat: the compare link (base `rebuild`), a title, and a full PR description with What, Why (when it isn't obvious), Tests, and Checked in a browser (when there's UI). For stacked branches, say which branch must be merged first.
+- When pushing follow-up commits to a branch whose PR already exists, give me the updated PR description (or the lines to add), so the PR on GitHub matches what's in the branch.

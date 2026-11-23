@@ -31,6 +31,8 @@
   --brand-vermilion-dark: #8e2614;
   --brand-danger: #b3261e;
   --brand-lime: #d4f04a;
+  /* Deep plum: the sign-up story panel. White text on it is 12.6:1 (WCAG AA and AAA). */
+  --brand-plum-deep: #4b2740;
   --brand-olive: #2e3a00;
 
   --brand-chip-high: #fbe1da;
@@ -40,6 +42,13 @@
   --brand-chip-low-text: #1d4e86;
   --brand-chip-done: #e2f3e6;
   --brand-chip-done-text: #1e5b30;
+
+  /* Project colours not already above (from docs/designs/projects.dc.html). */
+  --brand-blue: #4f8be0;
+  --brand-teal: #0f7b6c;
+  --brand-plum: #7c3a8e;
+  --brand-amber: #e8b931;
+  --brand-rose: #f28fad;
 }
 
 /* ─── 2. Role tokens ─────────────────────────────────────────────────────────────
@@ -53,6 +62,8 @@
   --surface-card: var(--brand-white);
   --surface-inverse: var(--brand-espresso);
   --surface-inverse-raised: var(--brand-espresso-2);
+  /* A deep brand surface for story panels (sign-up), with white text */
+  --surface-brand-deep: var(--brand-plum-deep);
 
   /* Foreground (text and icons) */
   --fg-primary: var(--brand-espresso);
@@ -91,6 +102,24 @@
   --status-low-fg: var(--brand-chip-low-text);
   --status-done: var(--brand-chip-done);
   --status-done-fg: var(--brand-chip-done-text);
+
+  /* Project colours (the 8 ProjectColour keys), then the readable text on each */
+  --project-vermilion: var(--brand-vermilion);
+  --project-vermilion-fg: var(--brand-white);
+  --project-espresso: var(--brand-espresso);
+  --project-espresso-fg: var(--brand-cream);
+  --project-lime: var(--brand-lime);
+  --project-lime-fg: var(--brand-espresso);
+  --project-blue: var(--brand-blue);
+  --project-blue-fg: var(--brand-espresso);
+  --project-teal: var(--brand-teal);
+  --project-teal-fg: var(--brand-white);
+  --project-plum: var(--brand-plum);
+  --project-plum-fg: var(--brand-white);
+  --project-amber: var(--brand-amber);
+  --project-amber-fg: var(--brand-espresso);
+  --project-rose: var(--brand-rose);
+  --project-rose-fg: var(--brand-espresso);
 }
 
 /* ─── 3. shadcn compatibility ───────────────────────────────────────────────────
@@ -131,6 +160,7 @@
   --color-surface-card: var(--surface-card);
   --color-surface-inverse: var(--surface-inverse);
   --color-surface-inverse-raised: var(--surface-inverse-raised);
+  --color-surface-brand-deep: var(--surface-brand-deep);
 
   --color-fg-primary: var(--fg-primary);
   --color-fg-secondary: var(--fg-secondary);
@@ -163,6 +193,23 @@
   --color-status-done: var(--status-done);
   --color-status-done-fg: var(--status-done-fg);
 
+  --color-project-vermilion: var(--project-vermilion);
+  --color-project-vermilion-fg: var(--project-vermilion-fg);
+  --color-project-espresso: var(--project-espresso);
+  --color-project-espresso-fg: var(--project-espresso-fg);
+  --color-project-lime: var(--project-lime);
+  --color-project-lime-fg: var(--project-lime-fg);
+  --color-project-blue: var(--project-blue);
+  --color-project-blue-fg: var(--project-blue-fg);
+  --color-project-teal: var(--project-teal);
+  --color-project-teal-fg: var(--project-teal-fg);
+  --color-project-plum: var(--project-plum);
+  --color-project-plum-fg: var(--project-plum-fg);
+  --color-project-amber: var(--project-amber);
+  --color-project-amber-fg: var(--project-amber-fg);
+  --color-project-rose: var(--project-rose);
+  --color-project-rose-fg: var(--project-rose-fg);
+
   /* shadcn names (section 3) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -187,6 +234,10 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-bricolage), var(--font-inter), ui-sans-serif, sans-serif;
 
+  /* Hover shadows: buttons lifting (shadow-lift) and cards tilting up (shadow-tile) */
+  --shadow-lift: 0 10px 22px -8px color-mix(in srgb, var(--brand-espresso) 30%, transparent);
+  --shadow-tile: 0 22px 44px -14px color-mix(in srgb, var(--brand-espresso) 24%, transparent);
+
   /* Radii */
   --radius-input: 14px;
   --radius-card: 18px;
@@ -200,7 +251,331 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* ─── 5. Base styles ─────────────────────────────────────────────────────────── */
+/* ─── 5. Type scale ──────────────────────────────────────────────────────────────
+ * Display sizes for big headings; each becomes a `text-display-x` class. They scale with the
+ * viewport between a phone minimum and a desktop maximum. Also registered in
+ * src/utilities/helpers/cn.ts so class merging treats them as sizes, not colours.
+ */
+@theme {
+  --text-display-hero: clamp(38px, 5.6vw, 80px);
+  --text-display-statement: clamp(40px, 7vw, 110px);
+  --text-display-section: clamp(32px, 4vw, 52px);
+  --text-display-why: clamp(38px, 5vw, 72px);
+  /* The Why heading on phones (under md), where 38px looked small above the card stack: 48px at 390. */
+  --text-display-why-phone: clamp(44px, 12.3vw, 56px);
+  --text-display-cta: clamp(34px, 4.6vw, 64px);
+  --text-display-faq: clamp(28px, 3.4vw, 44px);
+}
+
+/* ─── 6. Motion ──────────────────────────────────────────────────────────────────
+ * Each --animate-x becomes an `animate-x` class. Stickers set their resting angle with an
+ * inline `--r` (style={{ "--r": "-8deg" }}) so one keyframe serves every angle.
+ * All of it is switched off for prefers-reduced-motion at the end of this file.
+ */
+@theme {
+  --animate-rise: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-wiggle: wiggle 3.4s ease-in-out infinite;
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-float-slow: float 6s ease-in-out infinite reverse;
+  --animate-sway: sway 7s ease-in-out infinite;
+  --animate-flip: flip 6s cubic-bezier(0.6, 0, 0.2, 1) infinite;
+  /* The landing phone menu: the cream cover fades in while its contents slide 12px down into place. */
+  --animate-menu-in: menu-in 0.25s var(--ease-entrance) both;
+  --animate-menu-cover-in: menu-cover-in 0.25s var(--ease-entrance) both;
+
+  /* Headline words come up from below with a slight twist. */
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.5em) rotate(6deg);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(var(--r, 0deg));
+    }
+    50% {
+      transform: rotate(calc(var(--r, 0deg) + 12deg)) scale(1.08);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(var(--r, 0deg));
+    }
+    50% {
+      transform: translateY(-10px) rotate(var(--r, 0deg));
+    }
+  }
+  @keyframes sway {
+    0%,
+    100% {
+      transform: rotate(-3deg);
+    }
+    50% {
+      transform: rotate(3deg);
+    }
+  }
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      translate: 0 -12px;
+    }
+  }
+  @keyframes menu-cover-in {
+    from {
+      opacity: 0;
+    }
+  }
+  /* A task card that turns over from "to do" to "done", rests, and turns back. */
+  @keyframes flip {
+    0%,
+    38% {
+      transform: rotateY(0);
+    }
+    50%,
+    88% {
+      transform: rotateY(180deg);
+    }
+    100% {
+      transform: rotateY(360deg);
+    }
+  }
+  @keyframes tilt {
+    from {
+      transform: perspective(1400px) rotateX(32deg) scale(0.86);
+    }
+    to {
+      transform: perspective(1400px) rotateX(0deg) scale(1);
+    }
+  }
+}
+
+/*
+ * The landing board lies back and stands up as it scrolls into view. It follows scroll
+ * position, not time; browsers without scroll timelines finish instantly and show it flat.
+ * `animation` must come before `animation-timeline`, because the shorthand resets it.
+ */
+@utility animate-tilt-on-scroll {
+  animation: tilt linear both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 40%;
+}
+
+/*
+ * The landing "stack" deck: cards sit in a tight pile and fan out on hover or keyboard focus.
+ * Each card sets its pile position (--x0, --y0, --r0) and fanned position (--x1, --y1, --r1).
+ * The card under the pointer, or focused (Tab, or a tap on a phone), comes to the front:
+ * upright, 22px above its fanned place, a little bigger, with a deeper shadow.
+ */
+@utility deck-card {
+  transform: translate(var(--x0), var(--y0)) rotate(var(--r0));
+  transition:
+    transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.35s ease;
+
+  :where(.deck:hover, .deck:focus-within) & {
+    transform: translate(var(--x1), var(--y1)) rotate(var(--r1));
+  }
+
+  &:hover,
+  &:focus {
+    z-index: 10;
+    transform: translate(var(--x1), calc(var(--y1) - 22px)) rotate(0deg) scale(1.08);
+    box-shadow: 0 34px 60px -18px color-mix(in srgb, var(--brand-espresso) 55%, transparent);
+    transition-duration: 0.35s;
+  }
+}
+
+/* The easing every entrance shares: quick start, long soft landing. */
+:root {
+  --ease-entrance: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@theme {
+  /* Hero load: rises (or drops, with a negative distance) into place and fades in. */
+  @keyframes load-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--load-from-y, 16px));
+    }
+  }
+  /* Hero stickers: pop from small and flat to their resting angle, overshooting a little. */
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.6) rotate(0deg);
+    }
+    70% {
+      opacity: 1;
+      transform: scale(1.06) rotate(var(--r, 0deg));
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotate(var(--r, 0deg));
+    }
+  }
+}
+
+/*
+ * Hero entrance on page load. Pure CSS with fill-mode both, so it also plays without
+ * JavaScript. Set --load-delay, and optionally --load-from-y and --load-duration, inline.
+ */
+@utility load-in {
+  animation: load-in var(--load-duration, 600ms) var(--ease-entrance) var(--load-delay, 0ms) both;
+}
+
+/*
+ * A sticker pops in, then starts its idle loop once it has landed. Two animations on one
+ * element: while the loop waits out its delay, the pop's end state holds; the loop starts at
+ * that same resting angle, so the hand-over is seamless and they never fight over transform.
+ */
+@utility pop-then-wiggle {
+  animation:
+    pop 500ms var(--ease-entrance) var(--pop-delay, 0ms) both,
+    wiggle 3.4s ease-in-out calc(var(--pop-delay, 0ms) + 500ms) infinite;
+}
+@utility pop-then-float {
+  animation:
+    pop 500ms var(--ease-entrance) var(--pop-delay, 0ms) both,
+    float 5s ease-in-out calc(var(--pop-delay, 0ms) + 500ms) infinite;
+}
+@utility pop-then-float-slow {
+  animation:
+    pop 500ms var(--ease-entrance) var(--pop-delay, 0ms) both,
+    float 6s ease-in-out calc(var(--pop-delay, 0ms) + 500ms) infinite reverse;
+}
+
+/*
+ * Skeleton loading blocks (components/ui/skeleton). A sunken cream block with a light band
+ * sweeping left to right every 1.4s. On a sunken surface (the board's columns) the "card" tone
+ * swaps them: a white block with a sunken band. Static under reduced motion (below).
+ * Top-level keyframes, for the same reason as the reveal ones: only a utility names them.
+ */
+@keyframes skeleton-shimmer {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 100% 0;
+  }
+}
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-sunken);
+  --skeleton-band: color-mix(in srgb, var(--surface-card) 65%, transparent);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    translate: -100% 0;
+    background-image: linear-gradient(90deg, transparent, var(--skeleton-band), transparent);
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  }
+}
+/* The board's horizontal row (md and up): a slim sand scrollbar. */
+@utility board-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: var(--line-strong);
+  }
+}
+@utility skeleton-on-sunken {
+  background-color: var(--surface-card);
+  --skeleton-band: color-mix(in srgb, var(--surface-sunken) 80%, transparent);
+}
+
+/*
+ * Scroll reveals. The server renders data-reveal with no state, so content is visible if
+ * JavaScript never runs. Reveal sets data-reveal-state="hidden" after mount (only below the
+ * fold), then "shown" when it scrolls into view. With data-reveal-stagger the direct children
+ * animate instead of the element, each delayed by its --i (set by Reveal) times the stagger.
+ */
+/*
+ * Reveal keyframes. Deliberately NOT inside @theme: Tailwind only outputs @theme keyframes
+ * that some used CSS names directly, and the rules below name them through
+ * var(--reveal-name), which Tailwind can't see. Inside @theme they were silently dropped from
+ * the build, so sections appeared without animating. Top-level keyframes always ship.
+ * Guarded by src/app/globals.test.ts.
+ */
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+}
+@keyframes reveal-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(-48px);
+  }
+}
+@keyframes reveal-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+}
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes reveal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+[data-reveal="rise"] {
+  --reveal-name: reveal-rise;
+}
+[data-reveal="slide-left"] {
+  --reveal-name: reveal-slide-left;
+}
+[data-reveal="slide-right"] {
+  --reveal-name: reveal-slide-right;
+}
+[data-reveal="scale"] {
+  --reveal-name: reveal-scale;
+}
+[data-reveal="fade"] {
+  --reveal-name: reveal-fade;
+}
+[data-reveal-state="hidden"]:not([data-reveal="fan"], [data-reveal-stagger]),
+[data-reveal-state="hidden"][data-reveal-stagger=""] > *,
+[data-reveal-state="hidden"][data-reveal-stagger="deep"] > * > * {
+  opacity: 0;
+}
+[data-reveal-state="shown"]:not([data-reveal="fan"], [data-reveal-stagger]),
+[data-reveal-state="shown"][data-reveal-stagger=""] > *,
+[data-reveal-state="shown"][data-reveal-stagger="deep"] > * > * {
+  animation: var(--reveal-name) 700ms var(--ease-entrance) both;
+  animation-delay: calc(var(--reveal-delay, 0ms) + var(--i, 0) * var(--reveal-stagger, 0ms));
+}
+/* "fan": the deck sits stacked while hidden; once shown, deck-card's own transition fans it out. */
+[data-reveal="fan"][data-reveal-state="hidden"] .deck-card {
+  transform: none;
+}
+
+/* ─── 7. Base styles ─────────────────────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border;
@@ -242,5 +617,58 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /*
+   * Named explicitly as well: shortening the duration isn't enough for the infinite loops
+   * (they'd still jump), and the scroll-driven tilt ignores duration altogether.
+   * Everything rests in its final, readable state.
+   */
+  .animate-rise,
+  .animate-wiggle,
+  .animate-float,
+  .animate-float-slow,
+  .animate-sway,
+  .animate-flip,
+  .animate-tilt-on-scroll,
+  .animate-menu-in,
+  .animate-menu-cover-in,
+  .load-in,
+  .pop-then-wiggle,
+  .pop-then-float,
+  .pop-then-float-slow {
+    animation: none !important;
+  }
+  /* Stickers keep their resting angle, which otherwise only exists inside the keyframes. */
+  .animate-wiggle,
+  .animate-float,
+  .animate-float-slow,
+  .pop-then-wiggle,
+  .pop-then-float,
+  .pop-then-float-slow {
+    transform: rotate(var(--r, 0deg));
+  }
+  .deck-card {
+    transition: none !important;
+  }
+  /* Loading skeletons stay still: no shimmer band at all. */
+  .skeleton::after {
+    animation: none !important;
+    display: none;
+  }
+  /* The front card keeps its fanned place: no lift, turn or growth; it still comes to the front. */
+  .deck-card:hover,
+  .deck-card:focus {
+    transform: translate(var(--x1), var(--y1)) rotate(var(--r1));
+  }
+  /* Reveal skips hiding under reduced motion; this is the safety net if it ever doesn't. */
+  [data-reveal-state],
+  [data-reveal-state] > *,
+  [data-reveal-state][data-reveal-stagger="deep"] > * > * {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+  [data-reveal="fan"][data-reveal-state] .deck-card {
+    transform: translate(var(--x0), var(--y0)) rotate(var(--r0));
   }
 }

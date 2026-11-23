@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Flowboard dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBF5EE}
+a{color:#D23F27}
+.fb-card{background:#FFFFFF;border:1px solid #EADFD3;border-radius:24px}
+.fb-stat{transition:transform .2s,border-color .2s;cursor:pointer}
+.fb-stat:hover{transform:translateY(-2px)}
+.fb-row{transition:background .15s}
+.fb-row:hover{background:#FBF5EE}
+.fb-check{transition:transform .15s}
+.fb-check:hover{transform:scale(1.08)}
+.fb-main-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+.fb-show-sm{display:none !important}
+@media (max-width:1100px){.fb-main-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:860px){.fb-side{display:none !important}.fb-show-sm{display:inline-flex !important}.fb-hide-sm{display:none !important}}
+.fb-rise{animation:fbRise .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes fbRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fb-rise{animation:none}.fb-stat,.fb-check{transition:none}}
+</style>
+</helmet>
+<div style="font-family: Inter, system-ui, sans-serif; color: #1E1512; background: #FBF5EE; min-height: 100vh; display: flex">
+
+<div class="fb-side" style="flex: none; position: sticky; top: 0; height: 100vh">
+<dc-import name="Sidebar" active="dashboard" hint-size="240px,100vh"></dc-import>
+</div>
+
+<div style="flex: 1; min-width: 0">
+<header style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 32px; border-bottom: 1px solid #EADFD3; background: #FBF5EE; position: sticky; top: 0; z-index: 5">
+<div style="display: flex; align-items: center; gap: 12px">
+<button type="button" class="fb-show-sm" aria-label="Open menu" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #D9C8B8; background: #FFFFFF; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E1512" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
+<span class="fb-hide-sm" style="font-size: 14px; color: #7A675D">Wednesday, 18 November</span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px">
+<a href="Projects.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; background: {{accent}}; color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Create</a>
+<button type="button" aria-label="Account menu" style="width: 44px; height: 44px; border-radius: 50%; border: 0; background: {{lime}}; color: #1E1512; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">MJ</button>
+</div>
+</header>
+
+<main style="padding: 32px; max-width: 1280px; box-sizing: border-box">
+
+<sc-if value="{{newUser}}" hint-placeholder-val="{{ false }}">
+<section class="fb-card" style="padding: clamp(32px, 6vw, 72px); text-align: center; position: relative; overflow: hidden">
+<div style="display: inline-flex; gap: 8px; margin-bottom: 28px" aria-hidden="true">
+<span style="width: 70px; height: 96px; border-radius: 14px; background: #F4EADF; transform: rotate(-8deg)"></span>
+<span style="width: 70px; height: 96px; border-radius: 14px; background: {{lime}}; transform: translateY(-10px)"></span>
+<span style="width: 70px; height: 96px; border-radius: 14px; background: {{accent}}; transform: rotate(8deg)"></span>
+</div>
+<h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 4vw, 52px); letter-spacing: -0.045em; line-height: 1; margin: 0">Welcome to Flowboard, Muizz.</h1>
+<p style="font-size: 17px; line-height: 1.6; color: #5A4A42; max-width: 460px; margin: 16px auto 28px">Start with a project. You'll get a board with To do, In progress and Done, ready for your first task.</p>
+<a href="Projects.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 26px; border-radius: 999px; background: #1E1512; color: #FBF5EE; text-decoration: none; font-size: 16px; font-weight: 600">Create your first project</a>
+</section>
+</sc-if>
+
+<sc-if value="{{returning}}" hint-placeholder-val="{{ true }}">
+<section class="fb-rise" style="margin-bottom: 28px">
+<h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(34px, 4vw, 52px); letter-spacing: -0.045em; line-height: 1; margin: 0">Morning, <span style="display: inline-block; background: {{lime}}; padding: 0 0.14em; border-radius: 0.14em; transform: rotate(-2deg)">Muizz</span>.</h1>
+<p style="font-size: 18px; color: #5A4A42; margin: 14px 0 0">You have <strong style="color: #8E2614">{{overdueCount}} overdue</strong> and <strong style="color: #1E1512">{{weekCount}} due this week</strong>.</p>
+</section>
+
+<section aria-label="Summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px">
+<sc-for list="{{stats}}" as="s" hint-placeholder-count="4">
+<button type="button" class="fb-stat" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="text-align: left; font: inherit; color: #1E1512; background: {{s.bg}}; border: {{s.border}}; border-radius: 22px; padding: 20px">
+<span style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; color: #5A4A42">{{s.label}}<sc-if value="{{s.on}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; background: #1E1512; color: {{lime}}; padding: 3px 8px; border-radius: 999px">Filtering</span></sc-if></span>
+<span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-size: 48px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; margin-top: 10px; color: {{s.color}}">{{s.value}}</span>
+<span style="display: block; font-size: 13px; color: #7A675D; margin-top: 4px">{{s.caption}}</span>
+</button>
+</sc-for>
+</section>
+
+<div class="fb-main-grid">
+
+<section class="fb-card" aria-label="My tasks" style="padding: 24px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px">
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0">My tasks</h2>
+<sc-if value="{{filtered}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{clearFilter}}" style="display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid #D9C8B8; background: #FFFFFF; font: inherit; font-size: 13px; font-weight: 600; color: #1E1512; cursor: pointer">{{filterLabel}}<span aria-hidden="true">×</span></button>
+</sc-if>
+</div>
+
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+<div style="margin-top: 18px">
+<p style="display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 13px; font-weight: 600; color: {{g.color}}">{{g.name}}<span style="font-size: 12px; background: #F4EADF; color: #5A4A42; padding: 1px 8px; border-radius: 999px">{{g.count}}</span></p>
+<sc-for list="{{g.tasks}}" as="t" hint-placeholder-count="2">
+<div class="fb-row" style="display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 14px">
+<sc-if value="{{t.done}}" hint-placeholder-val="{{ false }}">
+<button type="button" class="fb-check" onClick="{{t.toggle}}" aria-label="Mark {{t.title}} as not done" style="flex: none; width: 26px; height: 26px; border-radius: 8px; border: 0; background: {{lime}}; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E1512" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg></button>
+<span style="flex: 1; min-width: 0; font-size: 15px; color: #7A675D; text-decoration: line-through">{{t.title}}</span>
+</sc-if>
+<sc-if value="{{t.open}}" hint-placeholder-val="{{ true }}">
+<button type="button" class="fb-check" onClick="{{t.toggle}}" aria-label="Mark {{t.title}} as done" style="flex: none; width: 26px; height: 26px; border-radius: 8px; border: 2px solid #D9C8B8; background: #FFFFFF; cursor: pointer"></button>
+<span style="flex: 1; min-width: 0; font-size: 15px; font-weight: 500">{{t.title}}</span>
+</sc-if>
+<span class="fb-hide-sm" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #5A4A42; white-space: nowrap"><span style="width: 8px; height: 8px; border-radius: 2px; background: {{t.projectColor}}"></span>{{t.project}}</span>
+<span style="font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: {{t.chipBg}}; color: {{t.chipFg}}">{{t.priority}}</span>
+<span style="width: 74px; text-align: right; font-size: 13px; font-weight: 600; color: {{t.dueColor}}; white-space: nowrap">{{t.due}}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<sc-if value="{{noTasks}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 24px 0 8px; text-align: center; font-size: 15px; color: #5A4A42">Nothing here. Enjoy the clear desk.</p>
+</sc-if>
+</section>
+
+<div style="display: flex; flex-direction: column; gap: 20px">
+
+<section class="fb-card" aria-label="Project progress" style="padding: 24px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px">
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0">Projects</h2>
+<a href="Projects.dc.html" style="font-size: 14px; font-weight: 600">View all</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 18px">
+<sc-for list="{{projects}}" as="p" hint-placeholder-count="3">
+<div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px">
+<span style="display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 3px; background: {{p.color}}"></span>{{p.name}}</span>
+<span style="font-size: 13px; color: #5A4A42">{{p.done}}/{{p.total}}</span>
+</div>
+<div style="height: 8px; border-radius: 999px; background: #F4EADF; overflow: hidden"><div style="height: 100%; border-radius: 999px; width: {{p.pct}}%; background: {{p.bar}}"></div></div>
+<p style="margin: 8px 0 0; font-size: 13px; color: #7A675D">{{p.note}}</p>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section class="fb-card" aria-label="Next 7 days" style="padding: 24px">
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 16px">Next 7 days</h2>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+<div style="border-radius: 14px; padding: 10px 0; text-align: center; background: {{d.bg}}; color: {{d.fg}}">
+<span style="display: block; font-size: 11px; font-weight: 600; opacity: 0.8">{{d.dow}}</span>
+<span style="display: block; font-family: 'Bricolage Grotesque', sans-serif; font-size: 20px; font-weight: 700; margin: 2px 0 6px">{{d.date}}</span>
+<span style="display: flex; justify-content: center; gap: 3px; min-height: 6px"><sc-for list="{{d.dots}}" as="dot" hint-placeholder-count="1"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{d.dot}}"></span></sc-for></span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section class="fb-card" aria-label="My open work by priority" style="padding: 24px">
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 4px">Open work by priority</h2>
+<p style="margin: 0 0 16px; font-size: 13px; color: #7A675D">{{openCount}} open tasks assigned to you</p>
+<div style="display: flex; gap: 4px; height: 14px; border-radius: 999px; overflow: hidden">
+<sc-for list="{{split}}" as="x" hint-placeholder-count="3"><span style="flex: {{x.n}}; background: {{x.bg}}"></span></sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px">
+<sc-for list="{{split}}" as="x" hint-placeholder-count="3"><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #5A4A42"><span style="width: 10px; height: 10px; border-radius: 3px; background: {{x.bg}}"></span>{{x.label}} · <strong style="color: #1E1512">{{x.n}}</strong></span></sc-for>
+</div>
+</section>
+
+</div>
+</div>
+
+<div class="fb-main-grid" style="margin-top: 20px">
+
+<section class="fb-card" aria-label="Completed in the last 14 days" style="padding: 24px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 20px">
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0">Completed, last 14 days</h2>
+<span style="font-size: 14px; color: #5A4A42"><strong style="color: #1E1512">{{chartTotal}}</strong> tasks done</span>
+</div>
+<div style="display: flex; align-items: flex-end; gap: 8px; height: 150px; border-bottom: 1px solid #EADFD3">
+<sc-for list="{{chart}}" as="c" hint-placeholder-count="14">
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px">
+<span style="font-size: 11px; color: #7A675D">{{c.v}}</span>
+<span style="width: 100%; max-width: 30px; border-radius: 8px 8px 3px 3px; height: {{c.h}}px; background: {{c.bg}}"></span>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #7A675D"><span>5 Nov</span><span>Today</span></div>
+</section>
+
+<section class="fb-card" aria-label="Team activity" style="padding: 24px">
+<h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 14px">Team activity</h2>
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px">
+<sc-for list="{{activity}}" as="a" hint-placeholder-count="5">
+<li style="display: flex; gap: 12px; align-items: flex-start">
+<span style="flex: none; width: 34px; height: 34px; border-radius: 50%; background: {{a.bg}}; color: {{a.fg}}; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">{{a.initials}}</span>
+<span style="font-size: 14px; line-height: 1.5"><strong>{{a.who}}</strong> {{a.what}} <strong>{{a.target}}</strong><span style="display: block; font-size: 12px; color: #7A675D">{{a.where}} · {{a.when}}</span></span>
+</li>
+</sc-for>
+</ol>
+</section>
+
+</div>
+</sc-if>
+
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"newUser":{"editor":"boolean","default":false},"accent":{"editor":"color","default":"#D23F27","options":["#D23F27","#E8552B","#C2352F"]},"lime":{"editor":"color","default":"#D4F04A","options":["#D4F04A","#C8F169","#E4F58A"]},"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { filter: 'all', ticked: {} };
+  }
+  renderVals() {
+    const accent = this.props.accent ?? '#D23F27';
+    const lime = this.props.lime ?? '#D4F04A';
+    const newUser = this.props.newUser ?? false;
+    const P = {
+      web: { name: 'Website relaunch', color: accent },
+      app: { name: 'Mobile app MVP', color: '#B7D12C' },
+      cap: { name: 'Capstone: FoodBridge', color: '#4F8BE0' }
+    };
+    const chips = {
+      High: ['#FBE1DA', '#8E2614'],
+      Medium: ['#FFF0C2', '#7A5600'],
+      Low: ['#E3EEF9', '#1D4E86']
+    };
+    const all = [
+      { id: 't1', g: 'overdue', title: 'Fix GitHub sign-in', p: 'web', pr: 'High', due: '2 days late' },
+      { id: 't2', g: 'overdue', title: 'Write invite email copy', p: 'web', pr: 'Medium', due: 'Yesterday' },
+      { id: 't3', g: 'today', title: 'Review pricing page', p: 'app', pr: 'Medium', due: 'Today' },
+      { id: 't4', g: 'today', title: 'Seed demo data', p: 'cap', pr: 'Low', due: 'Today' },
+      { id: 't5', g: 'week', title: 'Design the task drawer', p: 'web', pr: 'High', due: 'Thu' },
+      { id: 't6', g: 'week', title: 'Set up RTK Query base', p: 'app', pr: 'High', due: 'Fri' },
+      { id: 't7', g: 'week', title: 'Team retro notes', p: 'cap', pr: 'Low', due: 'Sat' },
+      { id: 't8', g: 'later', title: 'Accessibility pass', p: 'web', pr: 'Medium', due: '28 Nov' },
+      { id: 't9', g: 'none', title: 'Explore WebSockets for the board', p: 'app', pr: 'Low', due: 'No date' }
+    ];
+    const doneBase = [
+      { id: 'd1', title: 'Set up Redux store', p: 'app', pr: 'High', due: 'Mon' },
+      { id: 'd2', title: 'New brand tokens', p: 'web', pr: 'Medium', due: 'Mon' },
+      { id: 'd3', title: 'Sign-in screen design', p: 'web', pr: 'Medium', due: 'Tue' },
+      { id: 'd4', title: 'Interview users', p: 'cap', pr: 'High', due: 'Tue' }
+    ];
+    const ticked = this.state.ticked;
+    const filter = this.state.filter;
+    const open = all.filter((t) => !ticked[t.id]);
+    const overdueCount = open.filter((t) => t.g === 'overdue').length;
+    const weekCount = open.filter((t) => t.g === 'today' || t.g === 'week').length;
+    const doneCount = 3 + doneBase.length + Object.keys(ticked).filter((k) => ticked[k]).length;
+
+    const toRow = (t, forceDone) => {
+      const done = forceDone || !!ticked[t.id];
+      return {
+        title: t.title,
+        project: P[t.p].name,
+        projectColor: P[t.p].color,
+        priority: t.pr,
+        chipBg: chips[t.pr][0],
+        chipFg: chips[t.pr][1],
+        due: done && !forceDone ? 'Done' : t.due,
+        dueColor: t.g === 'overdue' && !done ? '#8E2614' : '#5A4A42',
+        done: done,
+        open: !done,
+        toggle: forceDone ? () => {} : () => this.setState({ ticked: { ...ticked, [t.id]: !ticked[t.id] } })
+      };
+    };
+
+    const defs = [
+      { key: 'overdue', name: 'Overdue', color: '#8E2614' },
+      { key: 'today', name: 'Today', color: '#1E1512' },
+      { key: 'week', name: 'This week', color: '#1E1512' },
+      { key: 'later', name: 'Later', color: '#5A4A42' },
+      { key: 'none', name: 'No due date', color: '#5A4A42' }
+    ];
+    let groups;
+    if (filter === 'done') {
+      const tickedRows = all.filter((t) => ticked[t.id]).map((t) => toRow(t, true));
+      const rows = tickedRows.concat(doneBase.map((t) => toRow(t, true)));
+      groups = [{ name: 'Completed this week', color: '#1E5B30', count: rows.length, tasks: rows }];
+    } else {
+      const keys = filter === 'week' ? ['today', 'week'] : filter === 'overdue' ? ['overdue'] : defs.map((d) => d.key);
+      groups = defs.filter((d) => keys.includes(d.key)).map((d) => {
+        const rows = all.filter((t) => t.g === d.key && (filter === 'all' || !ticked[t.id] || true)).map((t) => toRow(t, false));
+        return { name: d.name, color: d.color, count: rows.filter((r) => r.open).length, tasks: rows };
+      }).filter((g) => g.tasks.length > 0);
+    }
+
+    const pick = (key) => () => this.setState({ filter: filter === key ? 'all' : key });
+    const statDefs = [
+      { key: 'all', label: 'Assigned to me', value: open.length, caption: 'across 3 projects', color: '#1E1512' },
+      { key: 'week', label: 'Due this week', value: weekCount, caption: 'including today', color: '#1E1512' },
+      { key: 'overdue', label: 'Overdue', value: overdueCount, caption: overdueCount ? 'oldest is 2 days late' : 'all caught up', color: overdueCount ? '#B3261E' : '#1E5B30' },
+      { key: 'done', label: 'Completed this week', value: doneCount, caption: 'nice momentum', color: '#1E1512' }
+    ];
+    const stats = statDefs.map((s) => {
+      const on = s.key !== 'all' && filter === s.key;
+      return {
+        ...s,
+        on: on,
+        bg: s.key === 'done' ? lime : '#FFFFFF',
+        border: on ? '2px solid #1E1512' : (s.key === 'done' ? '2px solid ' + lime : '2px solid #EADFD3'),
+        pick: s.key === 'all' ? () => this.setState({ filter: 'all' }) : pick(s.key)
+      };
+    });
+    const filterLabels = { week: 'Due this week', overdue: 'Overdue', done: 'Completed this week' };
+
+    const projects = [
+      { name: P.web.name, color: P.web.color, bar: P.web.color, done: 14, total: 22, note: 'Next due Thu · 2 overdue' },
+      { name: P.app.name, color: P.app.color, bar: P.app.color, done: 6, total: 18, note: 'Next due today' },
+      { name: P.cap.name, color: P.cap.color, bar: P.cap.color, done: 21, total: 24, note: 'Next due today · almost there' }
+    ].map((p) => ({ ...p, pct: Math.round((p.done / p.total) * 100) }));
+
+    const dayDefs = [['Wed', 18, 2], ['Thu', 19, 1], ['Fri', 20, 1], ['Sat', 21, 1], ['Sun', 22, 0], ['Mon', 23, 2], ['Tue', 24, 0]];
+    const days = dayDefs.map((d, i) => ({
+      dow: d[0], date: d[1],
+      dots: Array.from({ length: d[2] }, (_, k) => k),
+      bg: i === 0 ? '#1E1512' : '#FBF5EE',
+      fg: i === 0 ? '#FBF5EE' : '#1E1512',
+      dot: i === 0 ? lime : accent
+    }));
+
+    const counts = { High: 0, Medium: 0, Low: 0 };
+    open.forEach((t) => { counts[t.pr] += 1; });
+    const split = [
+      { label: 'High', n: counts.High, bg: accent },
+      { label: 'Medium', n: counts.Medium, bg: '#E8B931' },
+      { label: 'Low', n: counts.Low, bg: '#4F8BE0' }
+    ];
+
+    const extra = Object.keys(ticked).filter((k) => ticked[k]).length;
+    const vals = [2, 1, 3, 0, 2, 4, 1, 3, 2, 0, 1, 3, 4, 2 + extra];
+    const max = Math.max.apply(null, vals);
+    const chart = vals.map((v, i) => ({ v: v, h: Math.max(4, Math.round((v / max) * 110)), bg: i === vals.length - 1 ? lime : '#1E1512' }));
+
+    const activity = [
+      { initials: 'AO', who: 'Ada', what: 'moved', target: 'Landing hero copy', where: 'to Done in Website relaunch', when: '12m ago', bg: '#FBE1DA', fg: '#8E2614' },
+      { initials: 'TK', who: 'Tobi', what: 'was assigned', target: 'Push notifications spike', where: 'Mobile app MVP', when: '1h ago', bg: '#1E1512', fg: '#FBF5EE' },
+      { initials: 'BI', who: 'Bisi', what: 'joined', target: 'Capstone: FoodBridge', where: 'Invited by you', when: '3h ago', bg: '#E3EEF9', fg: '#1D4E86' },
+      { initials: 'AO', who: 'Ada', what: 'created', target: 'Write invite email copy', where: 'Website relaunch', when: 'Yesterday', bg: '#FBE1DA', fg: '#8E2614' },
+      { initials: 'MJ', who: 'You', what: 'added the column', target: 'Review', where: 'Website relaunch', when: 'Yesterday', bg: lime, fg: '#1E1512' }
+    ];
+
+    return {
+      accent: accent,
+      lime: lime,
+      newUser: newUser,
+      returning: !newUser,
+      overdueCount: overdueCount,
+      weekCount: weekCount,
+      stats: stats,
+      groups: groups,
+      noTasks: groups.length === 0,
+      filtered: filter !== 'all',
+      filterLabel: filterLabels[filter] || '',
+      clearFilter: () => this.setState({ filter: 'all' }),
+      projects: projects,
+      days: days,
+      split: split,
+      openCount: open.length,
+      chart: chart,
+      chartTotal: vals.reduce((a, b) => a + b, 0),
+      activity: activity
+    };
+  }
+}
+</script>
+</body>
+</html>

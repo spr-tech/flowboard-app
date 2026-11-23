@@ -1,5 +1,8 @@
-import MembersList from "@/components/projects/project/members/MembersList";
+import RebuildingContent from "@/components/content/rebuilding/rebuildingContent";
+import { projectNameOrNotFound } from "@/server/projects/projectPage";
 
-export default function MembersPage() {
-  return <MembersList />;
+export default async function Page({ params }: { params: Promise<{ projectId: string }> }) {
+  const { projectId } = await params;
+  await projectNameOrNotFound(projectId);
+  return <RebuildingContent />;
 }

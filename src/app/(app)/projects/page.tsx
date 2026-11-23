@@ -1,9 +1,12 @@
-import { getProjects } from "@/app/actions/projects";
-import ProjectsView from "@/components/projects/ProjectsView";
+import type { Metadata } from "next";
 
-export default async function ProjectPage() {
-  const results = await getProjects();
-  const projects = results?.projects ?? [];
+import ProjectsContent from "@/components/content/projects/projectsContent";
+import { toProjectFilter } from "@/utilities/helpers/projectOrder";
+import { searchParam, type SearchParams } from "@/utilities/helpers/searchParam";
 
-  return <ProjectsView projects={projects} />;
+export const metadata: Metadata = { title: "Projects" };
+
+export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const params = await searchParams;
+  return <ProjectsContent filter={toProjectFilter(searchParam(params, "filter"))} />;
 }
