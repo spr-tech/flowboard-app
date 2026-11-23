@@ -16,14 +16,23 @@
 - Locally, `next start` (production mode) needs `APP_URL=http://localhost:3000` in `.env`; `pnpm dev` falls back to localhost by itself.
 
 ## Cutover day
-The rebuild starts from a fresh `init` migration on a new Neon project (Frankfurt). The old live database (London, separate Neon account) is never migrated in place; it stays untouched as the fallback.
+A fresh start: the rebuild begins with an empty database on the new Neon project (Frankfurt). **No data is copied** from the old live database (London, separate Neon account); it only holds test data. Anyone using the old app makes a new account after cutover.
 
-1. Back up: create a Neon branch of the old London database (the restore point), and make no changes to it.
-2. `prisma migrate deploy` on the **empty Frankfurt production branch**. Never seed it.
-3. Copy data across, only if the old database has data worth keeping (skip if it only has test data). A one-off script reads London and writes Frankfurt: lowercase emails; password → passwordHash; ownerId → OWNER ProjectMember rows, old Member rows → MEMBER; hex colour → nearest colour key; the "Done" (or last) column gets isDone; re-space column and task positions; set Task.projectId and createdById (the project owner); set completedAt for tasks in the done column.
-4. Point Vercel's Production `DATABASE_URL` (pooled) and `DIRECT_URL` (direct) at the Frankfurt production branch, and set `APP_URL` to the live domain (e.g. `https://flowboard.example`): links in emails are built from it, never from the request's Host header.
-5. Merge `rebuild` into `master` with a merge commit. Vercel deploys.
-6. Test on production: email sign in, GitHub sign in, open a board, drag a card.
+The old London database is never migrated, written to or deleted on cutover day. It stays untouched as the rollback for a few weeks, then gets deleted (see "After the rollback window" below).
+
+Step by step, with every Production variable and where its value comes from: [`docs/cutover-checklist.md`](../cutover-checklist.md). In short:
+
+1. Write down the current Production values of `DATABASE_URL` and `DIRECT_URL` (the London ones) somewhere safe, such as a password manager. They are the rollback.
+2. `prisma migrate deploy` against the **empty Frankfurt production branch**, from a laptop, with its direct URL given for that one command only. Never seed it, and never run `db:seed` or `db:reset` against it.
+3. Set Vercel's Production variables for the new app (database, auth secret, GitHub OAuth app, email, `APP_URL`). `APP_URL` is the live domain: links in emails are built from it, never from the request's Host header.
+4. Merge `rebuild` into `master` with a merge commit. Vercel deploys.
+5. Test on production: register, email sign in, GitHub sign in, password reset email, create a project, open a board, drag a card, invite someone (to a real address you own).
 
 ## Rollback
-Vercel instant rollback **and** point Production's database variables back to the old London database. Code and database go back together.
+Vercel instant rollback to the last old deployment **and** point Production's `DATABASE_URL` and `DIRECT_URL` back to the London values from step 1, then redeploy that old deployment so it picks them up. Code and database go back together. Anything created in the new app after cutover stays in Frankfurt and doesn't appear in the old app.
+
+## After the rollback window
+After a few weeks with no rollback:
+
+1. Remove the old app's leftover Production variables from Vercel (anything the new app doesn't read, such as `NEXTAUTH_SECRET` or `NEXTAUTH_URL`).
+2. Delete the old London database (and its Neon account, if nothing else uses it).

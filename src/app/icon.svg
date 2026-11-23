@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
+  <!-- The Flowboard mark (src/components/ui/logo/logo.tsx). Light browser theme: the "onLight" logo.
+       Dark theme: the "onDark" logo, so the tile stands out from a dark tab bar. -->
+  <style>
+    .tile { fill: #1e1512; }
+    .bar1 { fill: #d23f27; }
+    .bar2 { fill: #d4f04a; }
+    .bar3 { fill: #fbf5ee; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #fbf5ee; }
+      .bar2 { fill: #1e1512; }
+      .bar3 { fill: #d4f04a; }
+    }
+  </style>
+  <rect class="tile" width="30" height="30" rx="9" />
+  <rect class="bar1" x="7" y="7" width="4" height="16" rx="2" />
+  <rect class="bar2" x="13" y="7" width="4" height="11" rx="2" />
+  <rect class="bar3" x="19" y="7" width="4" height="7" rx="2" />
+</svg>

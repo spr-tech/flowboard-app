@@ -59,6 +59,12 @@ describe("ColumnsSection", () => {
     expect(toast).toHaveBeenCalledWith({ type: "success", message: "Column settings saved" });
   });
 
+  it("shows the count alone when the limit was lowered below it", async () => {
+    await renderSection(owner({ membersCanAddColumns: true, memberColumnLimit: 2, memberColumnCount: 4 }), "demo");
+    expect(screen.getByText("· 4 used, over the limit")).toBeInTheDocument();
+    expect(screen.queryByText(/4 of 2/)).not.toBeInTheDocument();
+  });
+
   it("with the switch on, the limit field shows the usage and saves after a pause", async () => {
     const { writes } = await renderSection(owner({ membersCanAddColumns: true }), "demo");
     expect(screen.getByText("· 1 of 3 used")).toBeInTheDocument();

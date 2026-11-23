@@ -4,7 +4,7 @@ import DashboardContent from "@/components/content/dashboard/dashboardContent";
 import { toDashboardFilter } from "@/utilities/helpers/dashboardFilter";
 import { searchParam, type SearchParams } from "@/utilities/helpers/searchParam";
 
-export const metadata: Metadata = { title: "Dashboard · Flowboard" };
+export const metadata: Metadata = { title: "Dashboard" };
 
 export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;

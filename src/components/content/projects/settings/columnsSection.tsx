@@ -138,7 +138,10 @@ function ColumnPermissionsControl({ project }: { project: ProjectDetail }) {
           />
           <span>columns</span>
           <span id={`${ids.limit}-usage`} className="text-fg-muted">
-            · {memberColumnCount} of {memberColumnLimit} used
+            {/* A limit lowered below the count shows the count alone, never "5 of 3". */}
+            {memberColumnCount > memberColumnLimit
+              ? `· ${memberColumnCount} used, over the limit`
+              : `· ${memberColumnCount} of ${memberColumnLimit} used`}
           </span>
           {limitError && (
             <p role="alert" className="w-full text-danger">
