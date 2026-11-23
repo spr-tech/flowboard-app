@@ -22,8 +22,8 @@ const me = {
 const detail = (role: "OWNER" | "MEMBER"): ProjectDetail =>
   projectDetail({ colour: "blue", taskCount: 3, me: boardMembership({ role }) });
 const members: ProjectMemberResponse[] = [
-  { id: "demo", name: "Alex Morgan", email: "demo@example.com", image: null, role: "OWNER", taskCount: 2 },
-  { id: "ada", name: "Ada Obi", email: "ada@team.dev", image: null, role: "MEMBER", taskCount: 3 },
+  { id: "demo", name: "Alex Morgan", email: "demo@example.com", image: null, role: "OWNER", permissions: null, taskCount: 2 },
+  { id: "ada", name: "Ada Obi", email: "ada@team.dev", image: null, role: "MEMBER", permissions: null, taskCount: 3 },
 ];
 const DAY = 24 * 60 * 60 * 1000;
 const invites: InviteResponse[] = [

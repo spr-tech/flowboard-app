@@ -106,6 +106,7 @@ describe("listProjects", () => {
       members: [{ id: "u2", name: "Alex", image: null }],
       me: {
         role: "MEMBER",
+        permissions: null,
         pinnedAt: "2026-11-20T10:00:00.000Z",
         lastOpenedAt: null,
         joinedAt: joinedAt.toISOString(),
@@ -281,8 +282,44 @@ describe("updateProject", () => {
       description: null,
       membersCanAddColumns: false,
       memberColumnLimit: 3,
+      memberTakeLimit: 5,
     } as never);
     prismaMock.project.findUnique.mockResolvedValue(detailRow() as never);
+  });
+
+  it("changes the take limit with a project.take_limit_changed row (owner only)", async () => {
+    prismaMock.projectMember.findUnique.mockResolvedValue(owner as never);
+
+    await updateProject("u1", "p1", { memberTakeLimit: 8 });
+
+    expect(prismaMock.project.update).toHaveBeenCalledWith({ where: { id: "p1" }, data: { memberTakeLimit: 8 } });
+    expect(prismaMock.activity.create).toHaveBeenCalledWith({
+      data: { projectId: "p1", actorId: "u1", action: "project.take_limit_changed", meta: { from: 5, to: 8 } },
+    });
+  });
+
+  it("refuses settings to a manager with every switch on (403 OWNER_ONLY)", async () => {
+    prismaMock.projectMember.findUnique.mockResolvedValue({
+      ...owner,
+      role: "MANAGER",
+      permissions: {
+        createAndAssign: true,
+        editAnyTask: true,
+        moveAnyTask: true,
+        teamOrder: true,
+        manageColumns: true,
+        deleteAnyTask: true,
+        deleteColumns: true,
+        inviteMembers: true,
+        removeMembers: true,
+      },
+    } as never);
+
+    await expect(updateProject("u1", "p1", { memberTakeLimit: 8 })).rejects.toMatchObject({
+      status: 403,
+      code: "OWNER_ONLY",
+    });
+    expect(prismaMock.project.update).not.toHaveBeenCalled();
   });
 
   it("lets the owner rename and recolour, with the before and after in the Activity row", async () => {

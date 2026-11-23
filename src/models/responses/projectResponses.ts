@@ -1,4 +1,5 @@
 import type { BoardMember, BoardTask } from "@/models/responses/boardResponses";
+import type { ManagerPermissions } from "@/utilities/helpers/permissions";
 import type { ProjectColour } from "@/utilities/enums/projectColours";
 
 export type ProjectRole = "OWNER" | "MANAGER" | "MEMBER";
@@ -6,6 +7,8 @@ export type ProjectRole = "OWNER" | "MANAGER" | "MEMBER";
 /** My own membership of a project. Dates are ISO strings. */
 export type MyMembership = {
   role: ProjectRole;
+  /** A manager's switches, set by the owner; null for the owner and members. */
+  permissions: ManagerPermissions | null;
   /** Null when not pinned. Pinned projects sort by this, oldest first. */
   pinnedAt: string | null;
   /** When I last opened the project; null if never (then joinedAt stands in). */
@@ -76,8 +79,10 @@ export type ProjectDetail = {
   columns: ProjectColumnSummary[];
   /** Every task, by column then position. */
   tasks: BoardTask[];
-  /** Everyone on the project, owner first: assignee options and header avatars. */
+  /** Everyone on the project (owner, managers, members): assignee options and header avatars. */
   members: BoardMember[];
+  /** How many open tasks a member may take from the unassigned pool (1 to 20). */
+  memberTakeLimit: number;
   columnPermissions: ColumnPermissions;
   me: MyBoardMembership;
 };
@@ -95,6 +100,8 @@ export type ProjectMemberResponse = {
   email: string;
   image: string | null;
   role: ProjectRole;
+  /** A manager's switches; null for the owner and members. */
+  permissions: ManagerPermissions | null;
   /** Tasks assigned to this member in this project. */
   taskCount: number;
 };

@@ -1,3 +1,5 @@
+import type { ManagerPermissions } from "@/utilities/helpers/permissions";
+
 import type { ProjectRole } from "./projectResponses";
 
 // The board: tasks and the people they can be assigned to (GET /api/projects/:projectId).
@@ -22,7 +24,8 @@ export type BoardTask = {
 };
 
 /** A project member, for the assignee select and the header avatars. Owner first. */
-export type BoardMember = BoardPerson & { role: ProjectRole };
+/** Someone on the project, with a manager's switches (null for the owner and members). */
+export type BoardMember = BoardPerson & { role: ProjectRole; permissions: ManagerPermissions | null };
 
 /** A column as the column endpoints return it. */
 export type BoardColumn = {

@@ -13,10 +13,14 @@ import { transaction } from "@/server/lib/transaction";
 import { ActivityAction } from "@/utilities/enums/activityActions";
 import type { ProjectColour } from "@/utilities/enums/projectColours";
 import {
+  assertCan,
   membershipSelect,
+  permissionContext,
+  permissionsOf,
   projectNotFound,
   requireMember,
   requireOwner,
+  sortByRole,
   toMyMembership,
   type Db,
 } from "./projectAccess";
@@ -56,7 +60,8 @@ export async function listProjects(userId: string, today: string): Promise<Proje
           updatedAt: true,
           _count: { select: { members: true } },
           members: {
-            // OWNER sorts before MEMBER (enum order), then longest-standing first.
+            // OWNER sorts first in the enum (MANAGER was appended after MEMBER, which only changes
+            // who fills the later preview slots), then longest-standing first.
             orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
             take: MEMBER_PREVIEW_COUNT,
             select: { user: { select: { id: true, name: true, image: true } } },
@@ -135,6 +140,7 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
       colour: true,
       membersCanAddColumns: true,
       memberColumnLimit: true,
+      memberTakeLimit: true,
       createdAt: true,
       updatedAt: true,
       columns: {
@@ -149,15 +155,15 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
           _count: { select: { tasks: true } },
         },
       },
-      // Everyone, owner first then by joining; mine is picked out below.
+      // Everyone (sorted by role below); mine is picked out below.
       members: {
-        orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
         select: { ...membershipSelect, columnOrder: true, user: { select: { id: true, name: true, image: true } } },
       },
     },
   });
   const membership = project?.members.find((member) => member.user.id === userId);
   if (!project || !membership) throw projectNotFound();
+  const members = sortByRole(project.members);
   const tasks = await db.task.findMany({
     where: { projectId },
     orderBy: [{ columnId: "asc" }, { position: "asc" }],
@@ -180,7 +186,8 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
     taskCount: columns.reduce((sum, column) => sum + column.taskCount, 0),
     columns,
     tasks: tasks.map(toBoardTask),
-    members: project.members.map(({ role, user }) => ({ ...user, role })),
+    members: members.map((member) => ({ ...member.user, role: member.role, permissions: permissionsOf(member) })),
+    memberTakeLimit: project.memberTakeLimit,
     columnPermissions: {
       membersCanAddColumns: project.membersCanAddColumns,
       memberColumnLimit: project.memberColumnLimit,
@@ -233,6 +240,7 @@ export type ProjectChanges = {
   description?: string | null;
   membersCanAddColumns?: boolean;
   memberColumnLimit?: number;
+  memberTakeLimit?: number;
 };
 
 /**
@@ -247,10 +255,18 @@ export async function updateProject(
   changes: ProjectChanges
 ): Promise<ProjectDetail> {
   return transaction(async (tx) => {
-    await requireOwner(tx, userId, projectId);
+    const membership = await requireMember(tx, userId, projectId);
+    assertCan("project.editSettings", permissionContext(userId, membership));
     const before = await tx.project.findUniqueOrThrow({
       where: { id: projectId },
-      select: { name: true, colour: true, description: true, membersCanAddColumns: true, memberColumnLimit: true },
+      select: {
+        name: true,
+        colour: true,
+        description: true,
+        membersCanAddColumns: true,
+        memberColumnLimit: true,
+        memberTakeLimit: true,
+      },
     });
 
     const from: Record<string, string | null> = {};
@@ -270,8 +286,26 @@ export async function updateProject(
       permissions.memberColumnLimit = changes.memberColumnLimit;
     }
 
-    if (Object.keys(to).length > 0 || Object.keys(permissions).length > 0) {
-      await tx.project.update({ where: { id: projectId }, data: { ...to, ...permissions } });
+    const takeLimit =
+      changes.memberTakeLimit !== undefined && changes.memberTakeLimit !== before.memberTakeLimit
+        ? changes.memberTakeLimit
+        : undefined;
+
+    if (Object.keys(to).length > 0 || Object.keys(permissions).length > 0 || takeLimit !== undefined) {
+      await tx.project.update({
+        where: { id: projectId },
+        data: { ...to, ...permissions, ...(takeLimit !== undefined ? { memberTakeLimit: takeLimit } : {}) },
+      });
+    }
+    if (takeLimit !== undefined) {
+      await tx.activity.create({
+        data: {
+          projectId,
+          actorId: userId,
+          action: ActivityAction.ProjectTakeLimitChanged,
+          meta: { from: before.memberTakeLimit, to: takeLimit },
+        },
+      });
     }
     if (Object.keys(to).length > 0) {
       await tx.activity.create({

@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 import { PROJECT_COLOURS } from "@/utilities/enums/projectColours";
+import { TAKE_LIMIT_MAX, TAKE_LIMIT_MIN } from "@/utilities/helpers/permissions";
 
 export const PROJECT_NAME_MAX = 60;
 
@@ -31,6 +32,12 @@ export const memberColumnLimitField = z
   .min(MEMBER_COLUMN_LIMIT_MIN, `At least ${MEMBER_COLUMN_LIMIT_MIN}`)
   .max(MEMBER_COLUMN_LIMIT_MAX, `At most ${MEMBER_COLUMN_LIMIT_MAX}`);
 
+export const memberTakeLimitField = z
+  .number("Enter a number")
+  .int("Enter a whole number")
+  .min(TAKE_LIMIT_MIN, `At least ${TAKE_LIMIT_MIN}`)
+  .max(TAKE_LIMIT_MAX, `At most ${TAKE_LIMIT_MAX}`);
+
 /** New project dialog and POST /api/projects. */
 export const createProjectSchema = z.object({
   name: projectNameField,
@@ -52,6 +59,7 @@ export const updateProjectSchema = z
     description: projectDescriptionField.optional(),
     membersCanAddColumns: z.boolean().optional(),
     memberColumnLimit: memberColumnLimitField.optional(),
+    memberTakeLimit: memberTakeLimitField.optional(),
   })
   .refine((value) => Object.values(value).some((field) => field !== undefined), "Change at least one setting");
 

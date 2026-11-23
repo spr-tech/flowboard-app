@@ -11,6 +11,7 @@ import type {
 export function myMembership(overrides: Partial<MyMembership> = {}): MyMembership {
   return {
     role: "OWNER",
+    permissions: null,
     pinnedAt: null,
     lastOpenedAt: null,
     joinedAt: "2026-11-01T10:00:00.000Z",
@@ -98,9 +99,10 @@ export function projectDetail(overrides: Partial<ProjectDetail> = {}): ProjectDe
     columns,
     tasks: [],
     members: [
-      { id: "demo", name: "Alex Morgan", image: null, role: "OWNER" },
-      { id: "sam", name: "Sam Rivera", image: null, role: "MEMBER" },
+      { id: "demo", name: "Alex Morgan", image: null, role: "OWNER", permissions: null },
+      { id: "sam", name: "Sam Rivera", image: null, role: "MEMBER", permissions: null },
     ],
+    memberTakeLimit: 5,
     columnPermissions: { membersCanAddColumns: false, memberColumnLimit: 3, memberColumnCount: 0 },
     me: boardMembership(),
     ...overrides,
