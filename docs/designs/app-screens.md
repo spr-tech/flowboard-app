@@ -21,7 +21,7 @@ Reference files (open in a browser for layout only; they run inside the design t
 ## Dashboard (milestone 8)
 - Header: "Morning, <first name>." with the lime highlight on the name; summary line "You have N overdue and N due this week".
 - Four stat cards: Assigned to me, Due this week, Overdue (number in danger red when > 0), Completed this week (lime card). Clicking one filters My tasks; clicking again or the chip clears it. The filter lives in the URL (`?filter=overdue`).
-- My tasks grouped Overdue / Today / This week / Later / No due date. The checkbox moves the task to its project's done column (optimistic). Completed tasks stay visible struck through until the next refetch.
+- My tasks grouped Overdue / Today / This week / Later / No due date. The checkbox moves the task to its project's done column (optimistic). It shows only when `can("task.move")` allows (every task here is assigned to me, so in practice always). Completed tasks stay visible struck through until the next refetch.
 - Right column: project progress (bar in project colour), next 7 days (today highlighted, one dot per task), open work by priority (split bar + legend).
 - Bottom row: completed per day for 14 days (today's bar lime) and team activity.
 - New user (no projects): one empty state only, "Create your first project".
@@ -33,22 +33,29 @@ Reference files (open in a browser for layout only; they run inside the design t
 - Pin toggle: 44px, top-right of every card, outside the card's link (no button inside a link). `aria-pressed`, labelled "Pin <name>" / "Unpin <name>". Pinned: lime background, filled pin. Not pinned: white, outlined pin. Any member can pin; no cap.
 - Pinning is optimistic: the cached list changes straight away; if the request fails it is undone and an error toast shows.
 - Toasts: "<name> pinned to your sidebar" (pins 1–3), "<name> pinned (only your first 3 pins show in the sidebar)" (pin 4 and later), "<name> unpinned".
-- Card: colour tile with first letter, Owner (espresso + lime) or Member (outline) badge, the description under the name (clamped to 2 lines with an ellipsis; nothing when empty), "Updated ..." line, done/total + percentage + bar, member avatars, and either "N overdue" (red chip) or the next due date.
+- Card: colour tile with first letter, Owner (espresso + lime), Manager (teal) or Member (outline) badge, the description under the name (clamped to 2 lines with an ellipsis; nothing when empty), "Updated ..." line, done/total + percentage + bar, member avatars, and either "N overdue" (red chip) or the next due date.
 - Dashed "New project" card at the end of the grid, plus the Create button, both open the dialog.
 - New project dialog: live preview (the description shows under the name as you type, instead of "Preview"), name (required, max 60), an optional Description (3 rows, placeholder "e.g. Rebuilding the marketing site before the January launch", counter "N / 200"), 8 colours; Create is disabled until the name has text. On success: toast "<name> created" and open the new board.
 
 ## Board (milestone 6)
 - Header: colour tile, name, the description as a subtitle when set (the owner sees a quiet "+ Add a description" when it's empty, which opens an inline field: Enter or blur saves, Esc cancels; members see nothing), "N tasks · N done · N members", member avatars, settings button (Invite arrives in milestone 7).
-- Columns: each header has a grip handle ("Move column <name>"), for every member; columns are dragged only by it. The owner's drags change the team order; a member's change only their own view, shown as "Your order" with "Reset to team order" near the header. Keyboard: focus the handle, Space, left/right arrows, Space (Esc cancels). Both are optimistic.
-- Add column: the owner always; a member while "Members can add columns" is on, with "N of M member columns used", disabled with the limit message at the limit, and hidden when the switch is off.
-- Column menu: "Added by <name> · <date>" at the top; Rename for the owner and for the member who added that column; Set as done and Delete for the owner only.
+- Columns: each header has a grip handle ("Move column <name>"), for everyone; columns are dragged only by it. The owner's (and managers with manageColumns) drags change the team order; everyone else's change only their own view, shown as "Your order" with "Reset to team order" near the header (it resets cards too). Keyboard: focus the handle, Space, left/right arrows, Space (Esc cancels). Both are optimistic.
+- Cards: anyone drags any card within its column; for members (and managers without "Change team task order in columns") that changes only their own view. Cards I can't move to another column show a small lock (secondary text colour, labelled "You can only move tasks assigned to you.") and snap back with that message as an error toast, by mouse or keyboard; nothing is sent. The owner sees a lime "New" badge (espresso text) on members' tasks they haven't opened.
+- Members see "You've taken N of M open tasks." in secondary text next to the filters.
+- Add column: the owner and managers with manageColumns; nothing for anyone else.
+- Column menu: "Added by <name> · <date>" at the top; Rename for the owner and managers with manageColumns; Set as done for the owner only; Delete for the owner and managers with deleteColumns (never the done column for managers).
 - Filters: priority pills (All/High/Medium/Low) and "Only my tasks" (UI slice).
 - Columns are 300px; the done column shows a "Done column" badge and its cards are struck through with a green date.
 - Due chips: "Nd late" in danger red, "Today" espresso, "Tomorrow", otherwise "20 Nov".
 - Drop target: the column gets a dashed espresso outline and a warm background.
-- Quick add at the bottom of each column: Enter adds and keeps the field open, Esc closes.
+- Quick add at the bottom of each column: for the owner and managers who may assign, Enter adds and keeps the field open, Esc closes. Members (and managers without createAndAssign) get a small form: title, description (at least 20 characters; placeholder "What needs doing, and why? E.g. The checkout button does nothing on Safari, customers can't pay."), an optional due date with "You can't change this later" under it, and "Add task". The task is assigned to them.
 - Column menu: Rename (inline), Set as done column, Delete column; on the last column, "A board needs at least one column" instead of Delete.
-- Task drawer slides in from the right (460px), URL `?task=<id>`: title, column select (the keyboard alternative to dragging), assignee, priority, due date, description, recent activity, Delete task. Changes save automatically. Esc or the overlay closes it.
+- Task drawer slides in from the right (460px), URL `?task=<id>`: title, column select (the keyboard alternative to dragging), assignee, priority, due date, description, notes, recent activity, Delete task. Changes save automatically. Esc or the overlay closes it.
+  - Fields I can't change are read-only (sunken background) with a one-line reason and a lock: under the title for a task assigned to me ("Assigned to you: only the owner or a manager can change this. You can move it and add notes."), under the due date on my own task ("The due date is set when the task is created. …"), under Column when I can't move it.
+  - Assignee: a picker with everyone (and Unassigned) only for the owner and managers with createAndAssign; for everyone else, the name read-only, plus "Assign to me" on an unassigned task (disabled with "You've taken N open tasks. …" at the take limit).
+  - Delete task only when allowed.
+  - Notes under the description, oldest first: each in a sunken cream box with the author's initials avatar, name and time; a trash button on my own notes (on every note for the owner); "Add a note" field and button.
+  - The owner opening a member's new task clears its "New" badge.
 - Delete-column dialog: empty column → simple confirm. With tasks → "Move them, then delete the column" (default, with a target select) or "Delete the column and its N tasks" (danger, unlocked by typing the column name). Button label follows the choice.
 
 ## Account settings (milestone 9)
@@ -81,3 +88,4 @@ Reference files (open in a browser for layout only; they run inside the design t
 4. **Quick-added tasks** start as MEDIUM priority, unassigned, no due date.
 5. **Deleting a task** has no confirmation dialog; the toast offers Undo for about 5 seconds (soft delete in the cache, the request fires when the toast closes).
 6. **Danger colour** is #B3261E (delete actions, overdue numbers, late chips). Primary hover stays a darker vermilion.
+7. **Roles and badges.** Owner: espresso with lime text. Manager: teal (the project teal token, white text, 5.2:1). Member: sand (13.7:1) in settings, outline on project cards. "New": lime with espresso text (14:1). Role tokens live in `globals.css` (`--badge-manager`, `--badge-member`, `--badge-new`, each with `-fg`).

@@ -81,9 +81,7 @@ export function ProjectSettingsSkeleton({ projectId, showShapes }: ProjectSettin
         )}
       </SettingsSection>
 
-      <SettingsSection {...tasks}>
-        {showShapes && <Skeleton className="h-9 w-72 rounded-lg" />}
-      </SettingsSection>
+      <SettingsSection {...tasks}>{showShapes && <Skeleton className="h-9 w-72 rounded-lg" />}</SettingsSection>
 
       <SettingsSection {...members}>
         {showShapes && (
