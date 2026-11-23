@@ -61,15 +61,31 @@ const passwordsMatch = {
   error: { message: "Passwords don't match", path: ["confirmPassword"] },
 };
 
-export const registerSchema = z
-  .object({
-    name: nameField,
-    email: emailField,
-    password: newPasswordField,
-    confirmPassword: z.string(),
-  })
+const registerFields = z.object({
+  name: nameField,
+  email: emailField,
+  password: newPasswordField,
+  confirmPassword: z.string(),
+});
+
+const notAboutYou = {
+  check: (data: { password: string; email: string; name: string }) => !passwordMentionsYou(data.password, data),
+  error: { message: PERSONAL_INFO_MESSAGE, path: ["password"] },
+};
+
+/** The sign-up form. */
+export const registerSchema = registerFields
   .refine(passwordsMatch.check, passwordsMatch.error)
-  .refine((data) => !passwordMentionsYou(data.password, data), { message: PERSONAL_INFO_MESSAGE, path: ["password"] });
+  .refine(notAboutYou.check, notAboutYou.error);
+
+/**
+ * POST /api/auth/register: the form, plus the invite link it came from, if any. A live invite for
+ * this email means no code is sent (accepting the invite confirms the email).
+ */
+export const registerRequestSchema = registerFields
+  .extend({ inviteToken: z.string().trim().min(1).max(200).optional() })
+  .refine(passwordsMatch.check, passwordsMatch.error)
+  .refine(notAboutYou.check, notAboutYou.error);
 
 /** PATCH /api/me and the profile form. */
 export const updateMeSchema = z.object({ name: nameField });

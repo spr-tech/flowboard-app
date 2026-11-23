@@ -3,6 +3,11 @@ export type RegisterResponse = {
   id: string;
   name: string | null;
   email: string;
+  /**
+   * True: a code was sent (or should be), so the browser goes to /verify-email next. False when the
+   * sign-up came from a live invite for this email: accepting it confirms the email instead.
+   */
+  needsEmailCode: boolean;
 };
 
 /** POST /api/auth/forgot-password: always this, whether or not the email has an account. */

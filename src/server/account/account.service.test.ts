@@ -7,7 +7,14 @@ import { changePassword, getMe, updateMyName } from "./account.service";
 
 vi.mock("@/server/lib/prisma", async () => (await import("@/test/prismaMock")).prismaModule());
 
-const row = { id: "u1", name: "Ada Okafor", email: "ada@example.com", image: null, passwordHash: "hash" };
+const row = {
+  id: "u1",
+  name: "Ada Okafor",
+  email: "ada@example.com",
+  image: null,
+  passwordHash: "hash",
+  emailVerified: null,
+};
 
 beforeEach(() => resetPrismaMock());
 
@@ -17,7 +24,14 @@ describe("getMe", () => {
 
     const me = await getMe("u1");
 
-    expect(me).toEqual({ id: "u1", name: "Ada Okafor", email: "ada@example.com", image: null, hasPassword: true });
+    expect(me).toEqual({
+      id: "u1",
+      name: "Ada Okafor",
+      email: "ada@example.com",
+      image: null,
+      hasPassword: true,
+      emailVerified: false,
+    });
     expect(me).not.toHaveProperty("passwordHash");
     expect(prismaMock.user.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "u1" } }));
   });
@@ -26,6 +40,12 @@ describe("getMe", () => {
     prismaMock.user.findUnique.mockResolvedValue({ ...row, passwordHash: null } as never);
 
     expect((await getMe("u1")).hasPassword).toBe(false);
+  });
+
+  it("says whether the email is confirmed, without sending the date", async () => {
+    prismaMock.user.findUnique.mockResolvedValue({ ...row, emailVerified: new Date("2026-11-20T00:00:00Z") } as never);
+
+    expect((await getMe("u1")).emailVerified).toBe(true);
   });
 
   it("throws 401 when the user no longer exists", async () => {
@@ -45,6 +65,7 @@ describe("updateMyName", () => {
       email: "ada@example.com",
       image: null,
       hasPassword: true,
+      emailVerified: false,
     });
     expect(prismaMock.user.update).toHaveBeenCalledWith(expect.objectContaining({ data: { name: "Ada O." } }));
   });

@@ -7,4 +7,6 @@ export type MeResponse = {
   image: string | null;
   /** False for GitHub-only accounts, which have no password to change. */
   hasPassword: boolean;
+  /** True once the email is confirmed (a code, the email's link, an accepted invite, or GitHub). */
+  emailVerified: boolean;
 };

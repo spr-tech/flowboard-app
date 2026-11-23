@@ -14,7 +14,7 @@ import { AppShell } from "./appShell";
 
 vi.mock("@/components/ui/toast/toast", () => ({ toast: vi.fn(), dismissToast: vi.fn() }));
 
-const me: MeResponse = { id: "u1", name: "Ada Okafor", email: "ada@team.dev", image: null, hasPassword: true };
+const me: MeResponse = { id: "u1", name: "Ada Okafor", email: "ada@team.dev", image: null, hasPassword: true, emailVerified: true };
 const newUser: DashboardSummary = {
   firstName: "Ada",
   projectCount: 0,

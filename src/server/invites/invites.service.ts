@@ -1,5 +1,7 @@
 // Invites (docs/plan/04-api.md, "Members and invites"; 01-product-and-flows.md, "Accept invite").
-// - Owner only. One pending invite per email per project: inviting again resends it.
+// - Owner only, with a confirmed email (403 EMAIL_NOT_VERIFIED otherwise). One pending invite per
+//   email per project: inviting again resends it.
+// - Accepting an invite confirms the accepter's email (the link reached that address).
 // - Tokens: 32 random bytes, only the SHA-256 hash stored, 7 days.
 // - The row is written first, then the email is sent; a failed send is reported, and the invite
 //   stays listed so Resend works.
@@ -12,6 +14,7 @@ import type {
   InviteResponse,
   SentInviteResponse,
 } from "@/models/responses/memberResponses";
+import { requireVerifiedEmail, verifyThroughInvite } from "@/server/auth/emailVerification.service";
 import { inviteEmail } from "@/server/invites/inviteEmail";
 import { appUrl } from "@/server/lib/appUrl";
 import { sendEmail } from "@/server/lib/email";
@@ -79,6 +82,8 @@ export async function createInvite(userId: string, projectId: string, emailInput
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
 
   await requireOwner(prisma, userId, projectId);
+  // After the owner check, so a project you're not in still answers 404.
+  await requireVerifiedEmail(prisma, userId);
   const [member, pending, details] = await Promise.all([
     prisma.projectMember.findFirst({
       where: { projectId, user: { email } },
@@ -152,6 +157,7 @@ export async function resendInvite(userId: string, inviteId: string): Promise<Se
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
 
   const pending = await requirePendingInviteAsOwner(prisma, userId, inviteId);
+  await requireVerifiedEmail(prisma, userId);
   const details = await emailDetails(prisma, pending.projectId, userId);
 
   const invite = await transaction(async (tx) => {
@@ -251,6 +257,9 @@ export async function acceptInvite(userId: string, token: string): Promise<Accep
       data: { acceptedAt: new Date() },
     });
     if (count === 0) throw new ApiError(400, "INVITE_USED", "This invite has already been used.");
+
+    // The link reached this address, which confirms it (if it wasn't already).
+    await verifyThroughInvite(tx, userId);
 
     const result = { projectId: invite.projectId, projectName: invite.project.name };
     const already = await tx.projectMember.findUnique({

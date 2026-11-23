@@ -8,14 +8,21 @@ import { assertPasswordAllowed } from "@/server/auth/passwordRules";
 import { ApiError, unauthenticated } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
 
-const meSelect = { id: true, name: true, email: true, image: true, passwordHash: true } as const;
+const meSelect = { id: true, name: true, email: true, image: true, passwordHash: true, emailVerified: true } as const;
 
-type UserRow = { id: string; name: string | null; email: string; image: string | null; passwordHash: string | null };
+type UserRow = {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+  passwordHash: string | null;
+  emailVerified: Date | null;
+};
 
 /** The hash is read only to answer "has a password?"; it never leaves this file. */
 function toMe(user: UserRow): MeResponse {
-  const { passwordHash, ...rest } = user;
-  return { ...rest, hasPassword: passwordHash !== null };
+  const { passwordHash, emailVerified, ...rest } = user;
+  return { ...rest, hasPassword: passwordHash !== null, emailVerified: emailVerified !== null };
 }
 
 export async function getMe(userId: string): Promise<MeResponse> {

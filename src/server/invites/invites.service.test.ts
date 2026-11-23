@@ -29,6 +29,9 @@ beforeEach(() => {
   vi.setSystemTime(NOW);
   prismaMock.project.findUniqueOrThrow.mockResolvedValue({ name: "Website relaunch", description: null } as never);
   prismaMock.user.findUniqueOrThrow.mockResolvedValue({ name: "Alex Morgan", email: "demo@example.com" } as never);
+  // The inviter has a confirmed email (the unconfirmed case has its own tests below).
+  prismaMock.user.findUnique.mockResolvedValue({ emailVerified: NOW } as never);
+  prismaMock.user.updateMany.mockResolvedValue({ count: 0 });
 });
 afterEach(() => vi.useRealTimers());
 

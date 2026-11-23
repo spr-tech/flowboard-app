@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 
 import { escapeHtml } from "@/server/lib/escapeHtml";
-import { githubSignInEmail, resetPasswordEmail } from "./authEmails";
+import { githubSignInEmail, resetPasswordEmail, verificationEmail } from "./authEmails";
 
 describe("escapeHtml", () => {
   it("escapes the five characters that matter in HTML", () => {
@@ -64,5 +64,29 @@ describe("auth email templates", () => {
     expect(email.text).toContain("you sign in with GitHub");
     expect(email.text).toContain("https://flowboard.test/login");
     expect(email.text).not.toContain("reset-password");
+  });
+});
+
+describe("verificationEmail", () => {
+  const confirmUrl = "https://flowboard.test/verify-email/link/abc123";
+  const email = verificationEmail({ email: "ada@example.com", name: "Ada Okafor" }, "042917", confirmUrl);
+
+  it("puts the code in the subject", () => {
+    expect(email.subject).toBe("Your Flowboard code: 042917");
+    expect(email.to).toBe("ada@example.com");
+  });
+
+  it("shows the code large and spaced out with its expiry, then the backup button and the note", () => {
+    expect(email.html).toMatch(/font-size:36px[^>]*letter-spacing:10px[^>]*>042917</);
+    expect(email.html).toContain("It expires in 15 minutes.");
+    expect(email.html).toContain(`href="${confirmUrl}"`);
+    expect(email.html).toContain("Confirm my email");
+    expect(email.html).toContain("If you didn&#39;t create a Flowboard account, you can ignore this email.");
+    expect(email.html.indexOf("042917<")).toBeLessThan(email.html.indexOf("Confirm my email"));
+  });
+
+  it("has a plain-text version with the code and the link", () => {
+    expect(email.text).toContain("042917\nIt expires in 15 minutes.");
+    expect(email.text).toContain(`Confirm my email: ${confirmUrl}`);
   });
 });

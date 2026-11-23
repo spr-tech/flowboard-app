@@ -140,6 +140,7 @@ async function wipe() {
   await prisma.projectMember.deleteMany();
   await prisma.project.deleteMany();
   await prisma.passwordResetToken.deleteMany();
+  await prisma.emailVerificationToken.deleteMany();
   await prisma.account.deleteMany();
   await prisma.user.deleteMany();
 }
@@ -150,10 +151,23 @@ async function main() {
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
 
   const demo = await prisma.user.create({
-    data: { name: "Alex Morgan", email: normaliseEmail("demo@example.com"), passwordHash, createdAt: daysAgo(15) },
+    data: {
+      name: "Alex Morgan",
+      email: normaliseEmail("demo@example.com"),
+      passwordHash,
+      // Demo accounts start confirmed, so the demo can invite people straight away.
+      emailVerified: daysAgo(15),
+      createdAt: daysAgo(15),
+    },
   });
   const sam = await prisma.user.create({
-    data: { name: "Sam Rivera", email: normaliseEmail("sam@example.com"), passwordHash, createdAt: daysAgo(14) },
+    data: {
+      name: "Sam Rivera",
+      email: normaliseEmail("sam@example.com"),
+      passwordHash,
+      emailVerified: daysAgo(14),
+      createdAt: daysAgo(14),
+    },
   });
   const users: Record<UserKey, string> = { demo: demo.id, sam: sam.id };
 

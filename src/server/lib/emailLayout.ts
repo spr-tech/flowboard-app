@@ -10,6 +10,7 @@ const EMAIL_COLOURS = {
   page: "#fbf5ee", // --brand-cream
   card: "#ffffff", // --brand-white
   border: "#eadfd3", // --brand-sand
+  codeBox: "#fbf5ee", // --brand-cream
   text: "#1e1512", // --brand-espresso
   muted: "#7a675d", // --brand-mocha
   button: "#d23f27", // --brand-vermilion
@@ -24,18 +25,38 @@ type EmailLayout = {
   heading: string;
   /** Paragraphs of plain text; each is escaped here. */
   paragraphs: string[];
+  /** A one-time code, shown large and spaced out under the paragraphs, with a note under it. */
+  code?: { value: string; note: string };
+  /** A line just above the button (e.g. "Or confirm with the button instead."). Plain text; escaped here. */
+  buttonIntro?: string;
   button?: { label: string; url: string };
   /** Small print under the button. Plain text; escaped here. */
   footnote?: string;
 };
 
-export function renderEmailHtml({ preview, heading, paragraphs, button, footnote }: EmailLayout): string {
+const MONO_FONT = "'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace";
+
+export function renderEmailHtml({
+  preview,
+  heading,
+  paragraphs,
+  code,
+  buttonIntro,
+  button,
+  footnote,
+}: EmailLayout): string {
   const c = EMAIL_COLOURS;
-  const body = paragraphs
-    .map(
-      (text) => `<p style="margin:0 0 16px;font-size:16px;line-height:24px;color:${c.text};">${escapeHtml(text)}</p>`
-    )
-    .join("");
+  const paragraph = (text: string) =>
+    `<p style="margin:0 0 16px;font-size:16px;line-height:24px;color:${c.text};">${escapeHtml(text)}</p>`;
+  const body = paragraphs.map(paragraph).join("");
+  // letter-spacing spreads the digits for reading; the code is one text run, so copying it gives "123456".
+  const codeHtml = code
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px;"><tr><td style="background:${c.codeBox};border:1px solid ${c.border};border-radius:14px;padding:16px 24px;">
+<span style="font-family:${MONO_FONT};font-size:36px;line-height:44px;font-weight:700;letter-spacing:10px;color:${c.text};">${escapeHtml(code.value)}</span>
+</td></tr></table>
+<p style="margin:-12px 0 24px;font-size:14px;line-height:20px;color:${c.muted};">${escapeHtml(code.note)}</p>`
+    : "";
+  const buttonIntroHtml = buttonIntro ? paragraph(buttonIntro) : "";
   const buttonHtml = button
     ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px;"><tr><td style="border-radius:999px;background:${c.button};">
 <a href="${escapeHtml(button.url)}" style="display:inline-block;padding:14px 28px;font-size:16px;font-weight:600;color:${c.buttonText};text-decoration:none;border-radius:999px;">${escapeHtml(button.label)}</a>
@@ -55,7 +76,7 @@ export function renderEmailHtml({ preview, heading, paragraphs, button, footnote
 <tr><td style="padding:0 8px 20px;font-size:20px;font-weight:700;color:${c.text};">Flowboard</td></tr>
 <tr><td style="background:${c.card};border:1px solid ${c.border};border-radius:20px;padding:32px;">
 <h1 style="margin:0 0 16px;font-size:24px;line-height:30px;color:${c.text};">${escapeHtml(heading)}</h1>
-${body}${buttonHtml}${footnoteHtml}
+${body}${codeHtml}${buttonIntroHtml}${buttonHtml}${footnoteHtml}
 </td></tr>
 <tr><td style="padding:20px 8px 0;font-size:12px;line-height:18px;color:${c.muted};">You're getting this because someone used this address on Flowboard.</td></tr>
 </table></td></tr></table>
@@ -63,8 +84,15 @@ ${body}${buttonHtml}${footnoteHtml}
 }
 
 /** The same content as plain text. */
-export function renderEmailText({ heading, paragraphs, button, footnote }: EmailLayout): string {
-  return [heading, ...paragraphs, button ? `${button.label}: ${button.url}` : "", footnote ?? ""]
+export function renderEmailText({ heading, paragraphs, code, buttonIntro, button, footnote }: EmailLayout): string {
+  return [
+    heading,
+    ...paragraphs,
+    code ? `${code.value}\n${code.note}` : "",
+    buttonIntro ?? "",
+    button ? `${button.label}: ${button.url}` : "",
+    footnote ?? "",
+  ]
     .filter(Boolean)
     .join("\n\n");
 }
