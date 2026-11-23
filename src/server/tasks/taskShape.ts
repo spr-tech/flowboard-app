@@ -71,12 +71,12 @@ export async function requireTaskAccess(
 export const taskContext = (
   userId: string,
   membership: Membership,
-  task: Pick<TaskRow, "createdById" | "assignee">,
+  task: Pick<TaskRow, "createdById" | "assignee"> & { inDoneColumn?: boolean },
   extra: Omit<PermissionContext, "me" | "membership" | "task"> & { takenOpenCount?: number } = {}
 ) =>
   permissionContext(userId, membership, {
     ...extra,
-    task: { createdById: task.createdById, assigneeId: task.assignee?.id ?? null },
+    task: { createdById: task.createdById, assigneeId: task.assignee?.id ?? null, inDoneColumn: task.inDoneColumn },
   });
 
 /**

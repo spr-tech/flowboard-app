@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useId, useState, type RefObject } from "react";
-import { Lock, Trash2 } from "lucide-react";
+import { useEffect, useId, useState, type ReactNode, type RefObject } from "react";
+import { Info, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button/button";
 import { toast } from "@/components/ui/toast/toast";
@@ -41,19 +41,49 @@ const priorities: { value: TaskPriority; label: string }[] = [
   { value: "HIGH", label: "High" },
 ];
 
-/** A one-line reason under a field I can't change. */
-function LockedReason({ id, reason }: { id: string; reason: string }) {
+const PRIORITY_LABELS: Record<TaskPriority, string> = { LOW: "Low", MEDIUM: "Medium", HIGH: "High" };
+
+/** A field I can't change: its label and its value as plain text, not a disabled control. */
+function ReadOnlyField({ name, children }: { name: string; children: ReactNode }) {
   return (
-    <p id={id} className="flex items-center gap-1.5 text-xs text-fg-secondary">
-      <Lock aria-hidden className="size-3.5 shrink-0" />
-      {reason}
-    </p>
+    <div className="flex min-w-0 flex-col gap-1">
+      <span className={label}>{name}</span>
+      <div className="text-[15px] wrap-break-word text-fg-primary">{children}</div>
+    </div>
   );
 }
 
+const formatDay = (day: string) =>
+  new Date(`${day}T00:00:00Z`).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
+const joinWords = (words: string[]) =>
+  words.length < 2 ? (words[0] ?? "") : `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}`;
+
 /**
- * Every field of a task, saving as you edit. Each field asks can(): what I may not change is
- * read-only with a one-line reason. Remounted per task (key), so it starts fresh.
+ * The one note at the top of the drawer when I can't change everything: what I can do, and who
+ * can change the rest. Null when every field is mine to change.
+ */
+function lockNote(rights: { details: boolean; move: boolean; dueDate: boolean }): string | null {
+  const { details, move, dueDate } = rights;
+  if (details && move && dueDate) return null;
+  if (!details && !move && !dueDate) {
+    return "You can view this task and add notes. Only its creator, the owner or a manager can change it.";
+  }
+  const mine = [details && "edit the details", move && "move the task", dueDate && "change the due date"];
+  const locked = [!details && "the details", !move && "the column", !dueDate && "the due date"];
+  const who = details ? "the owner or a manager" : "its creator, the owner or a manager";
+  const words = (list: (string | false)[]) => joinWords(list.filter((word): word is string => !!word));
+  return `You can ${words([...mine, "add notes"])}. Only ${who} can change ${words(locked)}.`;
+}
+
+/**
+ * Every field of a task, saving as you edit. Each field asks can(): what I may not change shows
+ * as plain text, with one note at the top saying what I can do. Remounted per task (key).
  */
 export function TaskDrawerForm({ project, task, meId, flushRef, onDeleted }: TaskDrawerFormProps) {
   const id = useId();
@@ -72,7 +102,9 @@ export function TaskDrawerForm({ project, task, meId, flushRef, onDeleted }: Tas
   const [markSeen] = useMarkTaskSeenMutation();
   const deleteTask = useDeleteTask(project.id);
 
-  const can = (action: PermissionAction) => projectCan(project, meId, action, { task });
+  const column = project.columns.find((candidate) => candidate.id === task.columnId);
+  const inDoneColumn = column?.isDone === true;
+  const can = (action: PermissionAction) => projectCan(project, meId, action, { task: { ...task, inDoneColumn } });
   const rights = {
     title: can("task.editTitle"),
     description: can("task.editDescription"),
@@ -82,8 +114,8 @@ export function TaskDrawerForm({ project, task, meId, flushRef, onDeleted }: Tas
     delete: can("task.delete"),
   };
   const teamCards = can("task.reorderTeam").allowed;
-  // One reason for the main fields (they're locked together), shown once under the title.
-  const fieldsReason = !rights.title.allowed ? rights.title.reason : null;
+  // Title, description and priority share one rule, so they're "the details" together.
+  const note = lockNote({ details: rights.title.allowed, move: rights.move.allowed, dueDate: rights.dueDate.allowed });
 
   const isOwner = project.me.role === "OWNER";
   useEffect(() => {
@@ -140,124 +172,145 @@ export function TaskDrawerForm({ project, task, meId, flushRef, onDeleted }: Tas
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <label htmlFor={ids.title} className={label}>
-          Title
-        </label>
-        <input
-          id={ids.title}
-          value={text.title}
-          maxLength={TASK_TITLE_MAX}
-          readOnly={!rights.title.allowed}
-          onChange={(event) => onText("title", event.target.value)}
-          onBlur={autosave.blurred}
-          aria-invalid={errors.title ? true : undefined}
-          aria-describedby={fieldsReason ? `${id}r` : undefined}
-          className={`${field} h-12 font-heading text-lg font-bold`}
-        />
-        {errors.title && (
-          <p role="alert" className="text-sm text-danger">
-            {errors.title}
-          </p>
-        )}
-        {fieldsReason && <LockedReason id={`${id}r`} reason={fieldsReason} />}
-      </div>
+      {note && (
+        <p className="flex gap-2 rounded-input bg-surface-sunken px-3 py-2.5 text-sm text-fg-secondary">
+          <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {note}
+        </p>
+      )}
 
-      <div className="grid grid-cols-2 gap-4">
+      {rights.title.allowed ? (
         <div className="flex flex-col gap-2">
-          <label htmlFor={ids.column} className={label}>
-            Column
-          </label>
-          <select
-            id={ids.column}
-            value={task.columnId}
-            disabled={!rights.move.allowed}
-            aria-describedby={!rights.move.allowed ? `${id}m` : undefined}
-            onChange={(e) => void moveTo(e.target.value)}
-            className={`${field} h-11`}
-          >
-            {project.columns.map((column) => (
-              <option key={column.id} value={column.id}>
-                {column.name}
-              </option>
-            ))}
-          </select>
-          {!rights.move.allowed && <LockedReason id={`${id}m`} reason={rights.move.reason} />}
-        </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor={ids.assignee} className={label}>
-            Assignee
-          </label>
-          <AssigneeField
-            id={ids.assignee}
-            projectId={project.id}
-            task={task}
-            members={project.members}
-            meId={meId}
-            mayAssign={can("task.assignOthers").allowed}
-            take={can("task.take")}
-            onAssign={(assigneeId) => void save({ assigneeId })}
-            fieldClass={field}
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor={ids.priority} className={label}>
-            Priority
-          </label>
-          <select
-            id={ids.priority}
-            value={task.priority}
-            disabled={!rights.priority.allowed}
-            onChange={(e) => void save({ priority: e.target.value as TaskPriority })}
-            className={`${field} h-11`}
-          >
-            {priorities.map(({ value, label: text }) => (
-              <option key={value} value={value}>
-                {text}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor={ids.due} className={label}>
-            Due date
+          <label htmlFor={ids.title} className={label}>
+            Title
           </label>
           <input
-            id={ids.due}
-            type="date"
-            value={task.dueDate ?? ""}
-            readOnly={!rights.dueDate.allowed}
-            aria-describedby={!rights.dueDate.allowed && !fieldsReason ? `${id}u` : undefined}
-            onChange={(e) => rights.dueDate.allowed && void save({ dueDate: e.target.value || null })}
-            className={`${field} h-11`}
+            id={ids.title}
+            value={text.title}
+            maxLength={TASK_TITLE_MAX}
+            onChange={(event) => onText("title", event.target.value)}
+            onBlur={autosave.blurred}
+            aria-invalid={errors.title ? true : undefined}
+            className={`${field} h-12 font-heading text-lg font-bold`}
           />
-          {/* Shown on its own only when the other fields are editable (a member's own task). */}
-          {!rights.dueDate.allowed && !fieldsReason && <LockedReason id={`${id}u`} reason={rights.dueDate.reason} />}
+          {errors.title && (
+            <p role="alert" className="text-sm text-danger">
+              {errors.title}
+            </p>
+          )}
         </div>
-      </div>
+      ) : (
+        <ReadOnlyField name="Title">
+          <span className="font-heading text-lg font-bold">{task.title}</span>
+        </ReadOnlyField>
+      )}
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor={ids.desc} className={label}>
-          Description
-        </label>
-        <textarea
-          id={ids.desc}
-          value={text.description}
-          maxLength={TASK_DESCRIPTION_MAX}
-          rows={6}
-          readOnly={!rights.description.allowed}
-          onChange={(event) => onText("description", event.target.value)}
-          onBlur={autosave.blurred}
-          aria-invalid={errors.description ? true : undefined}
-          placeholder={rights.description.allowed ? "Add details, links or steps" : "No description"}
-          className={`${field} py-2.5 leading-relaxed`}
+      {/* One column on phones, so long names and dates never truncate. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {rights.move.allowed ? (
+          <div className="flex min-w-0 flex-col gap-2">
+            <label htmlFor={ids.column} className={label}>
+              Column
+            </label>
+            <select
+              id={ids.column}
+              value={task.columnId}
+              onChange={(e) => void moveTo(e.target.value)}
+              className={`${field} h-11`}
+            >
+              {project.columns.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <ReadOnlyField name="Column">{column?.name ?? ""}</ReadOnlyField>
+        )}
+        <AssigneeField
+          id={ids.assignee}
+          labelClass={label}
+          projectId={project.id}
+          task={task}
+          members={project.members}
+          meId={meId}
+          mayAssign={can("task.assignOthers").allowed}
+          take={can("task.take")}
+          inDoneColumn={inDoneColumn}
+          onAssign={(assigneeId) => void save({ assigneeId })}
+          fieldClass={field}
         />
-        {errors.description && (
-          <p role="alert" className="text-sm text-danger">
-            {errors.description}
-          </p>
+        {rights.priority.allowed ? (
+          <div className="flex min-w-0 flex-col gap-2">
+            <label htmlFor={ids.priority} className={label}>
+              Priority
+            </label>
+            <select
+              id={ids.priority}
+              value={task.priority}
+              onChange={(e) => void save({ priority: e.target.value as TaskPriority })}
+              className={`${field} h-11`}
+            >
+              {priorities.map(({ value, label: text }) => (
+                <option key={value} value={value}>
+                  {text}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <ReadOnlyField name="Priority">{PRIORITY_LABELS[task.priority]}</ReadOnlyField>
+        )}
+        {rights.dueDate.allowed ? (
+          <div className="flex min-w-0 flex-col gap-2">
+            <label htmlFor={ids.due} className={label}>
+              Due date
+            </label>
+            <input
+              id={ids.due}
+              type="date"
+              value={task.dueDate ?? ""}
+              onChange={(e) => void save({ dueDate: e.target.value || null })}
+              className={`${field} h-11`}
+            />
+          </div>
+        ) : (
+          <ReadOnlyField name="Due date">{task.dueDate ? formatDay(task.dueDate) : "No due date"}</ReadOnlyField>
         )}
       </div>
+
+      {rights.description.allowed ? (
+        <div className="flex flex-col gap-2">
+          <label htmlFor={ids.desc} className={label}>
+            Description
+          </label>
+          <textarea
+            id={ids.desc}
+            value={text.description}
+            maxLength={TASK_DESCRIPTION_MAX}
+            rows={6}
+            onChange={(event) => onText("description", event.target.value)}
+            onBlur={autosave.blurred}
+            aria-invalid={errors.description ? true : undefined}
+            placeholder="Add details, links or steps"
+            className={`${field} py-2.5 leading-relaxed`}
+          />
+          {errors.description && (
+            <p role="alert" className="text-sm text-danger">
+              {errors.description}
+            </p>
+          )}
+        </div>
+      ) : (
+        <ReadOnlyField name="Description">
+          {task.description ? (
+            <p className="leading-relaxed whitespace-pre-wrap">{task.description}</p>
+          ) : (
+            <span className="text-fg-muted">No description</span>
+          )}
+        </ReadOnlyField>
+      )}
 
       <TaskNotes project={project} taskId={task.id} meId={meId} />
 

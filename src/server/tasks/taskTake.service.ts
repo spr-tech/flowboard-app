@@ -5,13 +5,13 @@ import { ApiError } from "@/server/lib/errors";
 import { transaction } from "@/server/lib/transaction";
 import { ownerOnly } from "@/server/projects/projectAccess";
 import { ActivityAction } from "@/utilities/enums/activityActions";
-import { can } from "@/utilities/helpers/permissions";
+import { can, PermissionReason } from "@/utilities/helpers/permissions";
 import { countTakenOpen, requireTaskAccess, taskContext, taskSelect, toBoardTask } from "./taskShape";
 
 const alreadyAssigned = () => new ApiError(409, "TASK_ALREADY_ASSIGNED", "Someone is already on this task.");
 
 /**
- * I take an unassigned task. Members may hold up to the project's take limit of open taken tasks
+ * I take an unassigned task that isn't in the done column (409 TASK_DONE). Members may hold up to the project's take limit of open taken tasks
  * (409 TAKE_LIMIT_REACHED); the owner and managers have no limit. My membership row is locked
  * for the transaction, so two quick takes can't both slip under the limit, and the assignment is
  * conditional, so two people can't both take the same task.
@@ -21,12 +21,20 @@ export async function takeTask(userId: string, taskId: string, now = new Date())
     const { task, membership } = await requireTaskAccess(tx, userId, taskId);
     if (task.assignee) throw alreadyAssigned();
     await tx.$executeRaw`SELECT 1 FROM "ProjectMember" WHERE "userId" = ${userId} AND "projectId" = ${task.projectId} FOR UPDATE`;
-    const [project, takenOpenCount] = await Promise.all([
+    const [project, takenOpenCount, column] = await Promise.all([
       tx.project.findUniqueOrThrow({ where: { id: task.projectId }, select: { memberTakeLimit: true } }),
       countTakenOpen(tx, userId, task.projectId),
+      tx.column.findUnique({ where: { id: task.columnId }, select: { isDone: true } }),
     ]);
-    const result = can("task.take", taskContext(userId, membership, task, { project, takenOpenCount }));
-    if (!result.allowed) throw new ApiError(409, "TAKE_LIMIT_REACHED", result.reason);
+    const inDoneColumn = column?.isDone === true;
+    const result = can(
+      "task.take",
+      taskContext(userId, membership, { ...task, inDoneColumn }, { project, takenOpenCount })
+    );
+    if (!result.allowed) {
+      const code = result.reason === PermissionReason.takeDone ? "TASK_DONE" : "TAKE_LIMIT_REACHED";
+      throw new ApiError(409, code, result.reason);
+    }
 
     const { count } = await tx.task.updateMany({
       where: { id: taskId, assigneeId: null },

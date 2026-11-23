@@ -11,7 +11,7 @@ export type ProjectForPermissions = {
 };
 
 type Extra = {
-  task?: Pick<BoardTask, "createdById" | "assignee">;
+  task?: Pick<BoardTask, "createdById" | "assignee"> & { inDoneColumn?: boolean };
   note?: PermissionContext["note"];
   target?: PermissionContext["target"];
 };
@@ -27,7 +27,13 @@ export function myContext(project: ProjectForPermissions, meId: string | null, e
     },
     project: { memberTakeLimit: project.memberTakeLimit ?? 0 },
     ...(extra.task
-      ? { task: { createdById: extra.task.createdById, assigneeId: extra.task.assignee?.id ?? null } }
+      ? {
+          task: {
+            createdById: extra.task.createdById,
+            assigneeId: extra.task.assignee?.id ?? null,
+            inDoneColumn: extra.task.inDoneColumn,
+          },
+        }
       : {}),
     ...(extra.note ? { note: extra.note } : {}),
     ...(extra.target ? { target: extra.target } : {}),

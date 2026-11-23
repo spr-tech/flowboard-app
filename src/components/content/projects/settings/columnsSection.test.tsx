@@ -42,8 +42,8 @@ describe("ColumnsSection", () => {
 
     const rows = screen.getAllByRole("listitem");
     expect(rows).toHaveLength(3);
-    expect(within(rows[0]).getByText("2 tasks · Added by Alex Morgan · 1 Nov 2026")).toBeInTheDocument();
-    expect(within(rows[1]).getByText(/Added by Sam Rivera/)).toBeInTheDocument();
+    expect(within(rows[0]).getByText("2 tasks · Alex M. · 1 Nov")).toBeInTheDocument();
+    expect(within(rows[1]).getByText(/Sam R\./)).toBeInTheDocument();
     expect(within(rows[2]).getByText("Done column")).toBeInTheDocument();
   });
 

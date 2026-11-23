@@ -45,13 +45,13 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
   const boardHref = `/projects/${project.id}`;
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-5xl min-w-0 flex-col gap-8">
       <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-fg-secondary">
         <Link href="/projects" className="hover:text-fg-primary">
           Projects
         </Link>
         <span aria-hidden>/</span>
-        <Link href={boardHref} className="hover:text-fg-primary">
+        <Link href={boardHref} className="min-w-0 wrap-break-word hover:text-fg-primary">
           {project.name}
         </Link>
         <span aria-hidden>/</span>
@@ -61,11 +61,11 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
       </nav>
 
       <header className="flex flex-wrap items-center justify-between gap-5">
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           <ProjectTile name={project.name} colour={project.colour} />
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">Project settings</h1>
-            <p className="text-fg-secondary">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Project settings</h1>
+            <p className="wrap-break-word text-fg-secondary">
               {project.name} · {roleLine[project.me.role]}
             </p>
           </div>
@@ -106,7 +106,7 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
         description={isOwner ? "Permanent actions. They affect everyone on this board." : "Leaving only affects you."}
       >
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <span>
+          <span className="min-w-0">
             <span className="block font-semibold">{isOwner ? "Delete this project" : "Leave this project"}</span>
             <span className="block text-sm text-fg-secondary">
               {isOwner

@@ -56,7 +56,7 @@ export function PendingInvites({ projectId, invites }: PendingInvitesProps) {
                 <Mail className="size-4" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-semibold">{invite.email}</span>
+                <span className="block font-semibold break-all sm:truncate">{invite.email}</span>
                 <span className={cn("block text-sm", note.isExpired ? "text-danger" : "text-fg-muted")}>
                   {note.text}
                 </span>
