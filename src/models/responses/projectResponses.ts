@@ -1,7 +1,7 @@
 import type { BoardMember, BoardTask } from "@/models/responses/boardResponses";
 import type { ProjectColour } from "@/utilities/enums/projectColours";
 
-export type ProjectRole = "OWNER" | "MEMBER";
+export type ProjectRole = "OWNER" | "MANAGER" | "MEMBER";
 
 /** My own membership of a project. Dates are ISO strings. */
 export type MyMembership = {

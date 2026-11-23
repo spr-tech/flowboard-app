@@ -1,3 +1,5 @@
+import type { ProjectRole } from "./projectResponses";
+
 // The board: tasks and the people they can be assigned to (GET /api/projects/:projectId).
 export type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
 
@@ -20,7 +22,7 @@ export type BoardTask = {
 };
 
 /** A project member, for the assignee select and the header avatars. Owner first. */
-export type BoardMember = BoardPerson & { role: "OWNER" | "MEMBER" };
+export type BoardMember = BoardPerson & { role: ProjectRole };
 
 /** A column as the column endpoints return it. */
 export type BoardColumn = {
