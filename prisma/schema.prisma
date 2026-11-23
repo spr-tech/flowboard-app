@@ -55,11 +55,12 @@ model User {
 
   accounts            Account[]
   memberships         ProjectMember[]
-  assignedTasks       Task[]               @relation("TaskAssignee")
-  createdTasks        Task[]               @relation("TaskCreator")
-  createdColumns      Column[]             @relation("ColumnCreator")
+  assignedTasks       Task[]                   @relation("TaskAssignee")
+  createdTasks        Task[]                   @relation("TaskCreator")
+  createdColumns      Column[]                 @relation("ColumnCreator")
   sentInvites         Invite[]
   passwordResetTokens PasswordResetToken[]
+  verificationTokens  EmailVerificationToken[]
   activities          Activity[]
 }
 
@@ -99,6 +100,29 @@ model PasswordResetToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+/// One "confirm your email" send: a 6-digit code (15 minutes, 5 tries) and a backup link
+/// (24 hours), both single use. Only SHA-256 hashes are stored. A newer send marks older unused
+/// rows used, and rows are never deleted, so the last hour's rows count the sends (3 per hour).
+model EmailVerificationToken {
+  id            String    @id @default(cuid())
+  userId        String
+  // SHA-256 of "<userId>:<code>". Never the code itself.
+  codeHash      String
+  // SHA-256 of the link's token. Never the token itself.
+  linkTokenHash String    @unique
+  codeExpiresAt DateTime
+  linkExpiresAt DateTime
+  // Wrong codes entered. At 5 the code stops working; the link doesn't count these.
+  attempts      Int       @default(0)
+  // Set when the code or the link is used, or when a newer send replaces this one.
+  usedAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 // ─── Projects ────────────────────────────────────────────────────────────────
