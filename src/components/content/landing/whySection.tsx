@@ -4,62 +4,8 @@ import { Highlight } from "@/components/ui/typography/highlight";
 import { cn } from "@/utilities/helpers/cn";
 import { cssVars } from "@/utilities/helpers/cssVars";
 import { buttonLift } from "./landingMotion";
-
-/**
- * Each card's place in the tight pile (x0, y0, r0) and when fanned out (x1, y1, r1).
- * The x offsets are 0.9× the design's, matching the cards' 0.9× width.
- * The movement itself is the `deck-card` utility in globals.css.
- */
-const cards = [
-  {
-    label: "Board",
-    name: "Drag and drop",
-    pile: ["-99px", "18px", "-18deg"],
-    fan: ["-270px", "40px", "-14deg"],
-    colours: "bg-surface-page text-fg-primary",
-    labelColour: "text-fg-muted",
-  },
-  {
-    label: "Focus",
-    name: "Priority labels",
-    pile: ["-59px", "6px", "-11deg"],
-    fan: ["-162px", "8px", "-8deg"],
-    colours: "bg-surface-sunken text-fg-primary",
-    labelColour: "text-fg-muted",
-  },
-  {
-    label: "Deadlines",
-    name: "Due dates",
-    pile: ["-20px", "0px", "-4deg"],
-    fan: ["-54px", "-6px", "-3deg"],
-    colours: "border border-fg-on-inverse/15 bg-surface-inverse-raised text-fg-on-inverse",
-    labelColour: "text-fg-muted-on-inverse",
-  },
-  {
-    label: "Team",
-    name: "Owners and members",
-    pile: ["20px", "0px", "4deg"],
-    fan: ["54px", "-6px", "3deg"],
-    colours: "bg-surface-card text-fg-primary",
-    labelColour: "text-fg-muted",
-  },
-  {
-    label: "Invites",
-    name: "Email invites",
-    pile: ["59px", "6px", "11deg"],
-    fan: ["162px", "8px", "8deg"],
-    colours: "bg-highlight text-fg-on-highlight",
-    labelColour: "text-fg-on-highlight-secondary",
-  },
-  {
-    label: "Progress",
-    name: "A real done column",
-    pile: ["99px", "18px", "18deg"],
-    fan: ["270px", "40px", "14deg"],
-    colours: "bg-primary text-fg-on-primary",
-    labelColour: "text-fg-on-primary",
-  },
-];
+import { WHY_CARDS } from "./whyCards";
+import { WhyPhoneDeck } from "./whyPhoneDeck";
 
 export function WhySection() {
   return (
@@ -93,10 +39,15 @@ export function WhySection() {
           />
         </div>
 
-        <div className="min-w-0 flex-[1_1_420px]">
-          {/* Each card is focusable, so Tab (or a tap on a phone) brings it to the front and fans the
-              deck (it fans on :focus-within). Scaled down on phones, where the pile is wider than
-              the screen. Starts stacked and spreads to its resting pile when it scrolls into view. */}
+        {/* Phones (under md): the cards dealt one at a time as the page scrolls. */}
+        <WhyPhoneDeck />
+
+        {/* The card positions live in whyCards.ts; the movement is the `deck-card` utility in
+            globals.css. */}
+        <div className="min-w-0 flex-[1_1_420px] max-md:hidden">
+          {/* Tablet and desktop (md up). Each card is focusable, so Tab (or a tap) brings it to the
+              front and fans the deck (it fans on :focus-within). Starts stacked and spreads to its
+              resting pile when it scrolls into view. */}
           <Reveal
             effect="fan"
             role="list"
@@ -104,7 +55,7 @@ export function WhySection() {
             className="deck relative h-[380px] rounded-card-lg max-sm:scale-75"
           >
             <div className="h-full animate-sway">
-              {cards.map((card) => (
+              {WHY_CARDS.map((card) => (
                 <div
                   key={card.name}
                   role="listitem"
