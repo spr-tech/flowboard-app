@@ -10,10 +10,7 @@ import type {
   ResetPasswordRequest,
   VerifyResetTokenRequest,
 } from "@/models/requests/authRequests";
-import type {
-  VerificationStatusResponse,
-  VerifyLinkResponse,
-} from "@/models/responses/emailVerificationResponses";
+import type { VerificationStatusResponse, VerifyLinkResponse } from "@/models/responses/emailVerificationResponses";
 import type { MeResponse } from "@/models/responses/meResponses";
 import type { VerifyCodeValues, VerifyLinkValues } from "@/models/validations/emailVerificationValidation";
 import type {

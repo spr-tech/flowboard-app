@@ -52,9 +52,7 @@ describe("POST /api/auth/register", () => {
   });
 
   it("answers 409 in our error shape when the email is taken", async () => {
-    vi.mocked(signUp).mockRejectedValue(
-      new ApiError(409, "EMAIL_TAKEN", "An account with this email already exists.")
-    );
+    vi.mocked(signUp).mockRejectedValue(new ApiError(409, "EMAIL_TAKEN", "An account with this email already exists."));
 
     const response = await post(JSON.stringify(valid));
 

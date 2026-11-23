@@ -11,7 +11,14 @@ import { UserMenu } from "./userMenu";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), replace: vi.fn() }) }));
 
-const ada: MeResponse = { id: "u1", name: "Ada Okafor", email: "ada@team.dev", image: null, hasPassword: true, emailVerified: true };
+const ada: MeResponse = {
+  id: "u1",
+  name: "Ada Okafor",
+  email: "ada@team.dev",
+  image: null,
+  hasPassword: true,
+  emailVerified: true,
+};
 
 beforeEach(() => {
   vi.clearAllMocks();

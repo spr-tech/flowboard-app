@@ -56,7 +56,9 @@ export function CodeInput({
 
   /** Puts `text`'s digits into the boxes from `start` on, and focuses the box after the last one. */
   const fill = (start: number, text: string) => {
-    const incoming = onlyDigits(text).slice(0, length - start).split("");
+    const incoming = onlyDigits(text)
+      .slice(0, length - start)
+      .split("");
     if (incoming.length === 0) return;
     const next = [...digits];
     incoming.forEach((digit, offset) => (next[start + offset] = digit));

@@ -16,10 +16,10 @@ async function isLiveInviteFor(token: string, email: string): Promise<boolean> {
   });
   return Boolean(
     invite &&
-      invite.email === normaliseEmail(email) &&
-      !invite.acceptedAt &&
-      !invite.cancelledAt &&
-      invite.expiresAt.getTime() > Date.now()
+    invite.email === normaliseEmail(email) &&
+    !invite.acceptedAt &&
+    !invite.cancelledAt &&
+    invite.expiresAt.getTime() > Date.now()
   );
 }
 

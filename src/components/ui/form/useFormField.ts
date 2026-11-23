@@ -28,8 +28,7 @@ export function useFormField<TValues extends FieldValues>({ control, name }: For
     fieldState,
     formState,
   } = useController({ control, name });
-  const shouldShowError =
-    fieldState.isTouched || formState.isSubmitted || fieldState.error?.type === LIVE_ERROR_TYPE;
+  const shouldShowError = fieldState.isTouched || formState.isSubmitted || fieldState.error?.type === LIVE_ERROR_TYPE;
 
   return {
     name,

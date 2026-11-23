@@ -33,7 +33,14 @@ const sha256 = (value: string) => createHash("sha256").update(value).digest("hex
 const ago = (ms: number) => new Date(NOW.getTime() - ms);
 
 const unverified = { id: "u1", email: "ada@example.com", name: "Ada Okafor", emailVerified: null };
-const me = { id: "u1", name: "Ada Okafor", email: "ada@example.com", image: null, hasPassword: true, emailVerified: true };
+const me = {
+  id: "u1",
+  name: "Ada Okafor",
+  email: "ada@example.com",
+  image: null,
+  hasPassword: true,
+  emailVerified: true,
+};
 
 /** A live row for code "123456". */
 const liveRow = (overrides: Record<string, unknown> = {}) => ({
@@ -316,7 +323,9 @@ describe("verifyLink", () => {
       where: { id: "row1", usedAt: null, linkExpiresAt: { gt: NOW } },
       data: { usedAt: NOW },
     });
-    expect(prismaMock.user.updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "u1", emailVerified: null } }));
+    expect(prismaMock.user.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "u1", emailVerified: null } })
+    );
   });
 
   it("works once: a used link answers TOKEN_USED", async () => {

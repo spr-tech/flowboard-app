@@ -10,10 +10,7 @@
 import { createHash, randomInt, timingSafeEqual } from "node:crypto";
 
 import type { MeResponse } from "@/models/responses/meResponses";
-import type {
-  VerificationStatusResponse,
-  VerifyLinkResponse,
-} from "@/models/responses/emailVerificationResponses";
+import type { VerificationStatusResponse, VerifyLinkResponse } from "@/models/responses/emailVerificationResponses";
 import { getMe } from "@/server/account/account.service";
 import { verificationEmail } from "@/server/auth/authEmails";
 import { appUrl } from "@/server/lib/appUrl";
@@ -66,8 +63,7 @@ const alreadyVerified = () => new ApiError(400, "ALREADY_VERIFIED", "Your email 
 
 const LINK_ERRORS = {
   invalid: () => new ApiError(400, "TOKEN_INVALID", "This link isn't valid. Use the button in your latest email."),
-  used: () =>
-    new ApiError(400, "TOKEN_USED", "This link has already been used, or a newer email replaced it."),
+  used: () => new ApiError(400, "TOKEN_USED", "This link has already been used, or a newer email replaced it."),
   expired: () => new ApiError(400, "TOKEN_EXPIRED", "This link has expired. Send a new code from Flowboard."),
 };
 

@@ -11,7 +11,14 @@ import BoardContent from "./boardContent";
 
 vi.mock("@/components/ui/toast/toast", () => ({ toast: vi.fn(), dismissToast: vi.fn() }));
 
-const me = { id: "demo", name: "Alex Morgan", email: "demo@example.com", image: null, hasPassword: true, emailVerified: true };
+const me = {
+  id: "demo",
+  name: "Alex Morgan",
+  email: "demo@example.com",
+  image: null,
+  hasPassword: true,
+  emailVerified: true,
+};
 
 function boardWith(overrides: Partial<ProjectDetail> = {}) {
   return projectDetail({
