@@ -47,7 +47,8 @@ export const invitesService = baseApi.injectEndpoints({
     acceptInvite: builder.mutation<AcceptInviteResponse, string>({
       query: (token) => ({ url: `/invites/token/${encodeURIComponent(token)}/accept`, method: "POST" }),
       extraOptions: { toast: false },
-      invalidatesTags: [projectList, ApiTag.Dashboard, ApiTag.Activity],
+      // Me too: accepting an invite confirms the email, which hides the banner and opens up inviting.
+      invalidatesTags: [projectList, ApiTag.Dashboard, ApiTag.Activity, ApiTag.Me, ApiTag.Verification],
     }),
   }),
 });

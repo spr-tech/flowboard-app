@@ -48,3 +48,25 @@ export function githubSignInEmail(to: Recipient, loginUrl: string): EmailMessage
     text: renderEmailText(content),
   };
 }
+
+/**
+ * The confirm-your-email message: the 6-digit code (15 minutes) with a "Confirm my email" button as
+ * a backup (24 hours). The code is in the subject so it shows in the inbox list and phone notifications.
+ */
+export function verificationEmail(to: Recipient, code: string, confirmUrl: string): EmailMessage {
+  const content = {
+    preview: "Enter this code in Flowboard to confirm your email. It expires in 15 minutes.",
+    heading: "Confirm your email",
+    paragraphs: [greeting(to.name), "Enter this code in Flowboard to confirm your email address:"],
+    code: { value: code, note: "It expires in 15 minutes." },
+    buttonIntro: "Or confirm with the button instead. It works for 24 hours.",
+    button: { label: "Confirm my email", url: confirmUrl },
+    footnote: "If you didn't create a Flowboard account, you can ignore this email.",
+  };
+  return {
+    to: to.email,
+    subject: `Your Flowboard code: ${code}`,
+    html: renderEmailHtml(content),
+    text: renderEmailText(content),
+  };
+}

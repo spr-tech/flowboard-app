@@ -7,6 +7,7 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 
 import { loginSchema } from "@/models/validations/authValidation";
+import { onSignIn } from "@/server/auth/emailVerification.service";
 import { signInWithPassword } from "@/server/auth/signInLimit.service";
 import { updateSessionToken } from "@/server/auth/sessionToken";
 import { prisma } from "@/server/lib/prisma";
@@ -47,6 +48,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  events: {
+    // GitHub sign-ins count as a confirmed email (GitHub verifies primary emails).
+    signIn: onSignIn,
+  },
   callbacks: {
     ...authConfig.callbacks,
     // `user` is only set at sign-in. The passwordChangedAt check happens in updateSessionToken.

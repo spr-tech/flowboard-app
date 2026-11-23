@@ -10,7 +10,14 @@ vi.mock("@/auth", () => ({ auth: vi.fn() }));
 vi.mock("@/server/account/account.service", () => ({ getMe: vi.fn() }));
 const mockAuth = auth as unknown as Mock<() => Promise<Session | null>>;
 
-const me = { id: "u1", name: "Ada Okafor", email: "ada@example.com", image: null, hasPassword: true };
+const me = {
+  id: "u1",
+  name: "Ada Okafor",
+  email: "ada@example.com",
+  image: null,
+  hasPassword: true,
+  emailVerified: true,
+};
 
 function get() {
   return GET(new Request("http://localhost/api/me"), { params: Promise.resolve({}) });

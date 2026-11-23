@@ -1,6 +1,6 @@
 # Flowboard — instructions for Claude Code
 
-Flowboard is a Kanban workspace where a small team (2–10 people) plans a project and moves tasks from idea to done. This repo is being rebuilt on the `rebuild` branch. The full plan lives in `docs/plan/`. Read the plan file for the milestone you are working on before writing code.
+Flowboard is a Kanban workspace where a small team (2–10 people) plans a project and moves tasks from idea to done. The rebuild is live on `master`; new work is one branch per change from the latest `master`, with a PR into `master` (`rebuild` is retired). The plan lives in `docs/plan/`. Read the plan files the change touches before writing code.
 
 ## How to work with me
 - I am learning. Before writing code for any task, explain your plan and the decisions in it, then wait for me to approve.
@@ -33,7 +33,7 @@ Server code (the backend lives in this same Next.js app for now):
 
 ## Database safety
 - The old live database (London, separate Neon account) is commented out in `.env`. Never touch it.
-- `.env` points at the new Neon project's **dev** branch: `DATABASE_URL` is pooled (the app), `DIRECT_URL` is direct (Prisma CLI: migrations, seed). Never run anything against the new project's production branch; it stays empty until cutover.
+- `.env` points at the new Neon project's **dev** branch: `DATABASE_URL` is pooled (the app), `DIRECT_URL` is direct (Prisma CLI: migrations, seed). Never run anything against the new project's production branch: it's the live database. I apply migrations to it myself, before merging (see `docs/plan/07-git-workflow.md`).
 - `pnpm db:seed` and `pnpm db:reset` wipe the database. They refuse to run unless `ALLOW_DB_RESET=true` is set, and print the host first. Set it in your local `.env` only, never on Vercel. Always ask before running either.
 
 ## Rules
@@ -65,15 +65,15 @@ Server code (the backend lives in this same Next.js app for now):
 - **Time zone is fixed to America/New_York** (not Lagos), so date code that depends on the machine's zone fails instead of passing by luck. Use fake timers (`vi.useFakeTimers()`, `vi.setSystemTime()`) for anything time-based.
 - **Every new service or helper gets a test in the same branch.**
 - **Never send real email to addresses that can't receive it** (example.com, example.org, `.test`, `.invalid` and similar) in proofs or end-to-end checks: the bounces hurt the sending Gmail account's reputation. Use `adetoroshina434+<something>@gmail.com`, or mock `sendEmail`.
-- CI (`.github/workflows/ci.yml`) runs one job, `check`: install with the frozen lockfile, Prisma generate, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, with dummy env values that point at a host that can't exist. It must pass before merging into `rebuild` or `master`.
+- CI (`.github/workflows/ci.yml`) runs one job, `check`: install with the frozen lockfile, Prisma generate, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, with dummy env values that point at a host that can't exist. It must pass before merging into `master`.
 
 ## Stack
 Next.js (App Router) · React · TypeScript · Redux Toolkit + RTK Query · Prisma + PostgreSQL (Neon) · Auth.js v5 with the Prisma adapter (email + password, GitHub) · Nodemailer over Gmail SMTP for email (`smtp.gmail.com` port 587, STARTTLS with `requireTLS`, certificate checks on; behind `sendEmail` in `src/server/lib/email.ts`, so a later move to Resend changes one file) · dnd-kit · Tailwind CSS v4 · shadcn on Radix UI · React Hook Form + Zod · Vitest + Cypress.
 
 ## Git
-See `docs/plan/07-git-workflow.md`. Merge with merge commits, never squash, never force-push `master`.
+See `docs/plan/07-git-workflow.md`. Branch from the latest `master` (`feature-<name>`, `fix-<name>`, `chore-<name>`) and open PRs into `master`; `rebuild` is retired. Merge with merge commits, never squash, never force-push `master`. A PR with a migration needs it applied to the production database before merging (see "Database migrations" in that file).
 
 Every push gets a description, without exception (milestones, small fixes, chores, follow-up commits):
 - Commit messages: a short summary line, then a blank line, then a body explaining what changed and why. No commit with only a summary line.
-- After pushing a branch, always give me in the chat: the compare link (base `rebuild`), a title, and a full PR description with What, Why (when it isn't obvious), Tests, and Checked in a browser (when there's UI). For stacked branches, say which branch must be merged first.
+- After pushing a branch, always give me in the chat: the compare link (base `master`), a title, and a full PR description with What, Why (when it isn't obvious), Tests, and Checked in a browser (when there's UI). For stacked branches, say which branch must be merged first.
 - When pushing follow-up commits to a branch whose PR already exists, give me the updated PR description (or the lines to add), so the PR on GitHub matches what's in the branch.

@@ -18,8 +18,11 @@ const validRegistration = {
 };
 
 /** The messages Zod reported, keyed by field, for readable assertions. */
+/** The first message for each field, as the API (zodFieldErrors) and the forms show them. */
 function fieldErrors(result: { success: boolean; error?: { issues: { path: PropertyKey[]; message: string }[] } }) {
-  return Object.fromEntries((result.error?.issues ?? []).map((issue) => [issue.path.join("."), issue.message]));
+  const fields: Record<string, string> = {};
+  for (const issue of result.error?.issues ?? []) fields[issue.path.join(".")] ??= issue.message;
+  return fields;
 }
 
 describe("registerSchema", () => {
@@ -36,7 +39,7 @@ describe("registerSchema", () => {
   });
 
   it(`accepts a password of exactly ${PASSWORD_MIN_LENGTH} characters`, () => {
-    const exact = "a".repeat(PASSWORD_MIN_LENGTH);
+    const exact = `${"a".repeat(PASSWORD_MIN_LENGTH - 1)}!`;
     expect(registerSchema.safeParse({ ...validRegistration, password: exact, confirmPassword: exact }).success).toBe(
       true
     );
@@ -89,16 +92,34 @@ describe("new password rules", () => {
     expect(register("ten-chars!").success).toBe(true);
   });
 
-  it("allows any characters, symbols and spaces included", () => {
-    expect(register("plum harbour ☕ & <ok>").success).toBe(true);
+  it("allows any characters except < and >, symbols and spaces included", () => {
+    expect(register("plum harbour ☕ & ok").success).toBe(true);
+    expect(register("Ünïcödé-plüm-日本").success).toBe(true);
+  });
+
+  it("asks for one special character: anything that isn't a letter or a digit, spaces included", () => {
+    expect(fieldErrors(register("plumharbour71")).password).toBe("Add at least one special character, like ! or #");
+    for (const password of ["plumharbour!", "plum harbour", "plumharbour#7", "plumharbour_", "plumharbour☕"]) {
+      expect(register(password).success).toBe(true);
+    }
+    // Letters and digits in any alphabet are still letters and digits.
+    expect(register("日本語のパスワード東京").success).toBe(false);
+  });
+
+  it("refuses < and >, and says so first, whatever else is wrong", () => {
+    expect(fieldErrors(register("plum<harbour>!")).password).toBe("Passwords can't contain < or >");
+    expect(fieldErrors(register("a<b")).password).toBe("Passwords can't contain < or >");
+    // They don't count as the special character either.
+    expect(register("plumharbour<").success).toBe(false);
+    expect(register("plumharbour>!").success).toBe(false);
   });
 
   it("caps a password at 72 bytes, counting accented letters and emoji as more than one", () => {
-    expect(register("x".repeat(72)).success).toBe(true);
-    expect(fieldErrors(register("x".repeat(73))).password).toMatch(/^Password is too long: 72 bytes at most/);
-    // 36 two-byte letters are 72 bytes; one more is 74.
-    expect(register("é".repeat(36)).success).toBe(true);
-    expect(register("é".repeat(37)).success).toBe(false);
+    expect(register(`${"x".repeat(71)}!`).success).toBe(true);
+    expect(fieldErrors(register(`${"x".repeat(72)}!`)).password).toMatch(/^Password is too long: 72 bytes at most/);
+    // 35 two-byte letters and two "!" are 72 bytes; one more letter is 74.
+    expect(register(`${"é".repeat(35)}!!`).success).toBe(true);
+    expect(register(`${"é".repeat(36)}!!`).success).toBe(false);
   });
 
   it("refuses the email's name part or a word of the name, when 4+ characters", () => {

@@ -11,7 +11,7 @@ vi.mock("@/server/account/account.service", () => ({ changePassword: vi.fn() }))
 const { changePassword } = await import("@/server/account/account.service");
 
 const body = { currentPassword: "old-password-1", password: "plum-harbour-71", confirmPassword: "plum-harbour-71" };
-const me = { id: "u1", name: "Ada", email: "ada@team.dev", image: null, hasPassword: true };
+const me = { id: "u1", name: "Ada", email: "ada@team.dev", image: null, hasPassword: true, emailVerified: true };
 
 beforeEach(() => {
   vi.clearAllMocks();

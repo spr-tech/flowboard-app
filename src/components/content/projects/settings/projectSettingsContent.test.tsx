@@ -11,7 +11,14 @@ import ProjectSettingsContent from "./projectSettingsContent";
 
 vi.mock("@/components/ui/toast/toast", () => ({ toast: vi.fn() }));
 
-const me = { id: "demo", name: "Alex Morgan", email: "demo@example.com", image: null, hasPassword: true };
+const me = {
+  id: "demo",
+  name: "Alex Morgan",
+  email: "demo@example.com",
+  image: null,
+  hasPassword: true,
+  emailVerified: true,
+};
 const detail = (role: "OWNER" | "MEMBER"): ProjectDetail =>
   projectDetail({ colour: "blue", taskCount: 3, me: boardMembership({ role }) });
 const members: ProjectMemberResponse[] = [

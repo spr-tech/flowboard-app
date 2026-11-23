@@ -5,6 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { getPasswordChecks, PasswordChecks } from "@/components/content/auth/passwordChecks";
+import { PasswordStrengthMeter } from "@/components/content/auth/passwordStrengthMeter";
 import { Button } from "@/components/ui/button/button";
 import { FormInput } from "@/components/ui/form/formInput";
 import { FormPasswordInput } from "@/components/ui/form/formPasswordInput";
@@ -13,6 +14,7 @@ import type { MeResponse } from "@/models/responses/meResponses";
 import { changePasswordFormSchema, type ChangePasswordValues } from "@/models/validations/authValidation";
 import { useChangePasswordMutation } from "@/services/accountService";
 import { applyApiError } from "@/utilities/helpers/applyApiError";
+import { useNoAngleBrackets } from "@/utilities/hooks/useNoAngleBrackets";
 
 const FIELDS = ["currentPassword", "password", "confirmPassword"] as const;
 const EMPTY = { currentPassword: "", password: "", confirmPassword: "" };
@@ -24,13 +26,18 @@ const EMPTY = { currentPassword: "", password: "", confirmPassword: "" };
 export function ChangePasswordForm({ me }: { me: MeResponse }) {
   const [changePassword] = useChangePasswordMutation();
   const [isRevealed, setIsRevealed] = useState(false);
+  const form = useForm<ChangePasswordValues>({
+    resolver: zodResolver(changePasswordFormSchema(me)),
+    defaultValues: EMPTY,
+  });
   const {
     control,
     handleSubmit,
     reset,
     setError,
     formState: { isSubmitting },
-  } = useForm<ChangePasswordValues>({ resolver: zodResolver(changePasswordFormSchema(me)), defaultValues: EMPTY });
+  } = form;
+  useNoAngleBrackets(form, "password");
   const [password, confirmPassword] = useWatch({ control, name: ["password", "confirmPassword"] });
 
   const onSubmit = async (values: ChangePasswordValues) => {
@@ -57,7 +64,10 @@ export function ChangePasswordForm({ me }: { me: MeResponse }) {
         onRevealedChange={setIsRevealed}
         toggleLabel={{ show: "Show passwords", hide: "Hide passwords" }}
       />
-      <FormInput control={control} name="password" label="New password" type={type} autoComplete="new-password" />
+      <div>
+        <FormInput control={control} name="password" label="New password" type={type} autoComplete="new-password" />
+        <PasswordStrengthMeter password={password} who={me} />
+      </div>
       <FormInput
         control={control}
         name="confirmPassword"

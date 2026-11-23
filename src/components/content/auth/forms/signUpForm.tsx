@@ -14,7 +14,9 @@ import { registerSchema, type RegisterFormValues } from "@/models/validations/au
 import { useRegisterMutation } from "@/services/authService";
 import { useInvitePreview } from "@/services/invitesService";
 import { safeCallbackUrl } from "@/utilities/helpers/safeCallbackUrl";
+import { useNoAngleBrackets } from "@/utilities/hooks/useNoAngleBrackets";
 import { getPasswordChecks, PasswordChecks } from "../passwordChecks";
+import { PasswordStrengthMeter } from "../passwordStrengthMeter";
 import { applyApiError, isAppError } from "@/utilities/helpers/applyApiError";
 
 const FIELDS = ["name", "email", "password", "confirmPassword"] as const;
@@ -35,16 +37,18 @@ export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
   const [formError, setFormError] = useState<string | null>(null);
   // One toggle reveals both password fields, as in the design.
   const [isPasswordRevealed, setIsPasswordRevealed] = useState(false);
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
+  });
   const {
     control,
     handleSubmit,
     setError,
     setValue,
     formState: { isSubmitting },
-  } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
-  });
+  } = form;
+  useNoAngleBrackets(form, "password");
 
   // The invite's email arrives after the first render; put it in the (locked) field.
   useEffect(() => {
@@ -52,13 +56,20 @@ export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
   }, [lockedEmail, setValue]);
 
   // Worked out from the typed values on each render, so there's no state to keep in sync.
-  const [password, confirmPassword] = useWatch({ control, name: ["password", "confirmPassword"] });
+  const [name, email, password, confirmPassword] = useWatch({
+    control,
+    name: ["name", "email", "password", "confirmPassword"],
+  });
 
   const onSubmit = async (values: RegisterFormValues) => {
     setFormError(null);
+    let needsEmailCode = true;
     try {
       // unwrap() turns RTK Query's { data } / { error } result into a value or a thrown AppError.
-      await registerAccount(values).unwrap();
+      // The invite's token goes along only when its email is the one locked in the field: then the
+      // server skips the code, because accepting the invite confirms the email.
+      const created = await registerAccount({ ...values, inviteToken: lockedEmail ? inviteToken : undefined }).unwrap();
+      needsEmailCode = created.needsEmailCode;
     } catch (error) {
       if (isAppError(error) && error.code === "EMAIL_TAKEN") {
         setError("email", { message: error.message }, { shouldFocus: true });
@@ -75,7 +86,9 @@ export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
       router.push("/login");
       return;
     }
-    router.push(safeCallbackUrl(callbackUrl, window.location.origin));
+    const destination = safeCallbackUrl(callbackUrl, window.location.origin);
+    // Next: the code that was just emailed, then where they were going.
+    router.push(needsEmailCode ? `/verify-email?callbackUrl=${encodeURIComponent(destination)}` : destination);
     router.refresh();
   };
 
@@ -94,15 +107,18 @@ export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
           helperText={lockedEmail ? "This is the address your invite was sent to." : undefined}
           className={lockedEmail ? "bg-surface-sunken text-fg-secondary" : undefined}
         />
-        <FormPasswordInput
-          control={control}
-          name="password"
-          label="Password"
-          autoComplete="new-password"
-          isRevealed={isPasswordRevealed}
-          onRevealedChange={setIsPasswordRevealed}
-          toggleLabel={{ show: "Show passwords", hide: "Hide passwords" }}
-        />
+        <div>
+          <FormPasswordInput
+            control={control}
+            name="password"
+            label="Password"
+            autoComplete="new-password"
+            isRevealed={isPasswordRevealed}
+            onRevealedChange={setIsPasswordRevealed}
+            toggleLabel={{ show: "Show passwords", hide: "Hide passwords" }}
+          />
+          <PasswordStrengthMeter password={password} who={{ name, email }} />
+        </div>
         <FormInput
           control={control}
           name="confirmPassword"

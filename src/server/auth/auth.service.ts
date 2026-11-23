@@ -1,7 +1,6 @@
 // Accounts and sessions: register, check a password, and decide whether a session is still valid.
 import bcrypt from "bcryptjs";
 
-import type { RegisterResponse } from "@/models/responses/authResponses";
 import { assertPasswordAllowed } from "@/server/auth/passwordRules";
 import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
@@ -23,7 +22,9 @@ const TIMING_DUMMY_HASH = "$2b$10$EemiSnI3QTF8J26iiRO2cuLiuJHoEkIKawhdz/4EuRu4r.
 const emailTaken = () =>
   new ApiError(409, "EMAIL_TAKEN", "An account with this email already exists. Sign in instead.");
 
-export async function register(input: { name: string; email: string; password: string }): Promise<RegisterResponse> {
+export type CreatedUser = { id: string; name: string | null; email: string };
+
+export async function register(input: { name: string; email: string; password: string }): Promise<CreatedUser> {
   const email = normaliseEmail(input.email);
   const name = input.name.trim();
 

@@ -15,12 +15,12 @@ export const PATCH = route({ auth: true, body: updateMeSchema }, ({ user, body }
 - The handler returns a plain value (sent as JSON, status 200 or `status`) or a `Response`. Anything thrown goes through `errorResponse`: an `ApiError` keeps its status and code; anything else is a logged 500 with no details sent.
 - Membership checks (404 for non-members) stay in the services; the wrapper never knows about projects.
 - The wrapper's second argument must stay required: `next build` checks it is assignable to `{ params: Promise<…> }`.
-- `auth: false` (public routes: register, forgot-password, reset-password, verify) never reads the session: no database work, the same timing for everyone, and `user` is `null`.
+- `auth: false` (public routes: register, forgot-password, reset-password, verify, verify-email/link) never reads the session: no database work, the same timing for everyone, and `user` is `null`.
 
 ## Auth
 | Method | Path | Who | What |
 |---|---|---|---|
-| POST | /api/auth/register | Anyone | Create an email account. 201 with `{ id, name, email }`; 409 `EMAIL_TAKEN`. The form then signs in and goes to /dashboard |
+| POST | /api/auth/register | Anyone | Create an email account and send the confirm-your-email code. Body: the sign-up form, plus an optional `inviteToken`. 201 with `{ id, name, email, needsEmailCode }`; 409 `EMAIL_TAKEN`. The form then signs in and goes to `/verify-email` (or, when `needsEmailCode` is false, straight to the invite) |
 | GET/POST | /api/auth/[...nextauth] | Anyone | Auth.js: sign in/out, GitHub callback, session |
 | POST | /api/auth/forgot-password | Anyone | Send the reset email; same response always (the work runs after the response, so timing is the same too); rate limited |
 | POST | /api/auth/reset-password/verify | Anyone | `{ token }` → `{ state: valid \| expired \| used \| invalid }`. Checks a link without using it, so the page can show the state before anyone types |
@@ -32,19 +32,34 @@ Auth notes:
 - The forgot-password rate limit (3 per address per hour) is silent: the answer is the same 200, because a 429 would reveal that the address has an account. Over the limit, nothing is sent.
 - Reset emails go through `sendEmail` (`src/server/lib/email.ts`): Nodemailer, `smtp.gmail.com` port 587, STARTTLS with `requireTLS`. It logs `[email] sent` with the messageId, or `[email] NOT sent` with the full error, because the work runs after the response and nobody else would see a failure.
 - GitHub sign-in with an email that already has a password account is refused (no automatic linking): Auth.js redirects to `/login?error=OAuthAccountNotLinked`, which shows "This email already has a Flowboard account. Sign in with your email and password."
-- Middleware protects `/dashboard`, `/projects` and `/settings` (with `callbackUrl`), and sends signed-in users from `/login`, `/register` and `/forgot-password` to `/dashboard`. `callbackUrl` only ever leads to a path on our own site.
+- Middleware protects `/dashboard`, `/projects`, `/settings` and exactly `/verify-email` (with `callbackUrl`; `/verify-email/link/...` stays public), and sends signed-in users from `/login`, `/register` and `/forgot-password` to `/dashboard`. `callbackUrl` only ever leads to a path on our own site.
+
+## Email verification
+| Method | Path | Who | What |
+|---|---|---|---|
+| GET | /api/auth/verify-email/status | Signed in | `{ email, isVerified, resendAvailableAt, sendsLeftThisHour }`, so `/verify-email` can show the resend countdown and the hourly limit after a reload |
+| POST | /api/auth/verify-email/send | Signed in | Send a new code and link (older ones stop working). 200 with the status after sending; 429 `SEND_TOO_SOON` within a minute of the last send, 429 `SEND_LIMIT` after 3 in an hour; 400 `ALREADY_VERIFIED`; 502 `EMAIL_NOT_SENT` |
+| POST | /api/auth/verify-email/code | Signed in | `{ code }` (6 digits). 200 with the user (`GET /api/me`'s shape), now verified. 400 `CODE_WRONG` ("Wrong code. N attempts left."), `CODE_EXPIRED` ("This code has expired. Send a new one."), `TOO_MANY_ATTEMPTS` ("Too many attempts. Send a new code.") |
+| POST | /api/auth/verify-email/link | Anyone | `{ token }` from the email's link. 200 with `{ email }`. 400 `TOKEN_EXPIRED`, `TOKEN_USED` (also when a newer email replaced it), `TOKEN_INVALID` |
+
+Email verification notes:
+- All through `route()` and `src/server/auth/emailVerification.service.ts`, with the shared Zod schemas in `src/models/validations/emailVerificationValidation.ts`.
+- The email: subject "Your Flowboard code: 123456"; the code large and spaced out, "It expires in 15 minutes."; a "Confirm my email" button as a backup (24 hours); "If you didn't create a Flowboard account, you can ignore this email." Its link uses `APP_URL`, like the reset and invite emails. It's sent after the database write, never inside a transaction.
+- Sending locks the user's row inside the transaction, so two sends at the same moment take turns and can't pass the hourly limit together.
+- The link is only used by a POST from the page's button, never by opening the page, so email scanners that open links can't use it up.
+- GitHub sign-ins set `emailVerified` if it's empty (Auth.js `signIn` event). Accepting an invite sets it too, in the accept transaction.
 
 ## Account
 | Method | Path | Who | What |
 |---|---|---|---|
-| GET | /api/me | Signed in | Current user: `{ id, name, email, image, hasPassword }` (`hasPassword` false for GitHub-only accounts). Built in milestone 4 |
+| GET | /api/me | Signed in | Current user: `{ id, name, email, image, hasPassword, emailVerified }` (`hasPassword` false for GitHub-only accounts; `emailVerified` a boolean, never the date). Built in milestone 4 |
 | PATCH | /api/me | Signed in | Update name |
 | PATCH | /api/me/password | Email users | Current + new password |
 
 Account notes (milestone 9):
 - PATCH /api/me takes `{ name }` (3 to 80 characters, trimmed) and returns me.
 - PATCH /api/me/password takes `{ currentPassword, password, confirmPassword }`. A wrong current password, the same password again, a common one, or one containing the name or email is a 400 with the message on that field. Saving sets `passwordChangedAt`, which ends every session that signed in earlier; the route then signs this device in again with the new password (a fresh session cookie on the response), so only other devices are signed out. GitHub-only accounts: 400 `NO_PASSWORD`.
-- **New-password rules** (sign-up, reset, change; existing shorter passwords still sign in): at least 10 characters; at most 72 UTF-8 bytes (bcrypt's limit); any characters; not containing the email's name part (before any "+") or a word of the name, when 4+ characters; not one of the 10,000 most common passwords (SecLists; only its 10+ character entries are kept, in `src/server/auth/commonPasswords.ts`, server only, regenerated by `scripts/build-common-passwords.mjs`). The length rules and the name/email rule are in the shared schema; the server also checks the list and the name/email rule against the account itself.
+- **New-password rules** (sign-up, reset, change; existing shorter passwords still sign in): no `<` or `>` (checked first, so it's the message shown: "Passwords can't contain < or >"); at least 10 characters; at most 72 UTF-8 bytes (bcrypt's limit); at least one special character, meaning anything but a letter or a digit in any alphabet, spaces included, and not `<` or `>` ("Add at least one special character, like ! or #"); every other character allowed; not containing the email's name part (before any "+") or a word of the name, when 4+ characters; not one of the 10,000 most common passwords (SecLists; only its 10+ character entries are kept, in `src/server/auth/commonPasswords.ts`, server only, regenerated by `scripts/build-common-passwords.mjs`). The length rules and the name/email rule are in the shared schema; the server also checks the list and the name/email rule against the account itself.
 - **Sign-in rate limit:** at most 5 failed email-and-password sign-ins per email in 15 minutes, counted in `SignInAttempt`. The 6th is refused before the password is checked ("Too many attempts. Try again in a few minutes."), for real and unknown emails alike. A successful sign-in clears the email's failures. GitHub sign-in isn't counted.
 
 ## Dashboard
@@ -116,6 +131,7 @@ Task notes: a task in a project I'm not in is 404 `TASK_NOT_FOUND`, like the pro
 | POST | /api/invites/token/:token/accept | Signed in | Join the project |
 
 Members and invites notes (milestone 7):
+- Invites and resends need a confirmed email: otherwise 403 `EMAIL_NOT_VERIFIED` ("Confirm your email before inviting people."), checked after the membership check, so a project you're not in still answers 404. Cancelling stays allowed (it sends no email). Accepting an invite confirms the accepter's email.
 - Invites: owner only; the email is lowercased. Already a member → 409 `ALREADY_MEMBER` ("<name> is already a member.", as a field error on `email`). A pending invite (not accepted, not cancelled; expired ones too) for the same email is sent again on the same row with a new token and expiry, and the answer says `resent: true`. Tokens are 32 random bytes; only the SHA-256 hash is stored; they last 7 days.
 - The invite row is written first, then the email is sent. If sending fails, 502 `EMAIL_NOT_SENT`; the invite stays listed so Resend works.
 - POST /invites and resend return the invite `{ id, email, createdAt, expiresAt, resent }`; GET /invites lists pending ones, newest first, expired ones included (the page marks them). Cancel stamps `cancelledAt` and returns `{ id }`.

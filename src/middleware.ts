@@ -8,5 +8,14 @@ export const { auth: middleware } = NextAuth(authConfig);
 export const config = {
   // Only the pages the rules cover, so the landing page and the API skip middleware entirely.
   // "/dashboard/:path*" matches /dashboard itself as well as everything under it.
-  matcher: ["/dashboard/:path*", "/projects/:path*", "/settings/:path*", "/login", "/register", "/forgot-password"],
+  // "/verify-email" matches only that page, not the public /verify-email/link/... pages.
+  matcher: [
+    "/dashboard/:path*",
+    "/projects/:path*",
+    "/settings/:path*",
+    "/verify-email",
+    "/login",
+    "/register",
+    "/forgot-password",
+  ],
 };

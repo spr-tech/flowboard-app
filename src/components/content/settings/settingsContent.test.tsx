@@ -12,7 +12,14 @@ vi.mock("@/components/ui/toast/toast", () => ({ toast: vi.fn() }));
 const refresh = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh, push: vi.fn(), replace: vi.fn() }) }));
 
-const ada: MeResponse = { id: "u1", name: "Ada Okafor", email: "ada@team.dev", image: null, hasPassword: true };
+const ada: MeResponse = {
+  id: "u1",
+  name: "Ada Okafor",
+  email: "ada@team.dev",
+  image: null,
+  hasPassword: true,
+  emailVerified: true,
+};
 
 function renderSettings(me: MeResponse, onWrite: (request: Request) => Response = () => jsonResponse(200, me)) {
   const fetchMock = mockFetch((request) => (request.method === "GET" ? jsonResponse(200, me) : onWrite(request)));
