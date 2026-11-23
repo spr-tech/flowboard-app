@@ -1,21 +1,33 @@
 # 7. Git workflow and cutover
 
 ## Branches
-- `master`: the live app, frozen except urgent fixes. If you fix something on `master`, merge `master` into `rebuild` straight away.
-- `rebuild`: the new app comes together here.
-- `rebuild-mN-<name>`: one per milestone (`rebuild-m1-foundation`, `rebuild-m2-database`, ...), PR into `rebuild`. Hyphens, not slashes: a `rebuild/...` branch can't coexist with the `rebuild` branch, because Git stores `rebuild` as a file and `rebuild/...` would need it to be a folder.
+- `master`: the live app. Every change reaches it through a pull request.
+- One short-lived branch per change, made from the latest `master` and opened as a PR into `master`: `feature-<name>` for new features (`feature-email-verification`), `fix-<name>` for bug fixes, `chore-<name>` for tooling and docs. Hyphens, not slashes.
+- `rebuild` is retired. The rebuild went live through it (PR #23); don't branch from it or open PRs into it. The old `rebuild-mN-<name>` branches are history.
 
 ## Merging
 - Always "Create a merge commit". Never squash (squashed commits lose their own dates and contribution-graph credit). Never force-push `master`.
+- CI's `check` job must pass before merging into `master`.
 - Check that `git config user.email` matches an email on your GitHub account.
 
+## Database migrations
+Migrations are add-only where possible (new tables, new nullable columns), so the code running before and after a deploy both work with the new schema.
+
+1. Apply the migration to the Neon **dev** branch while building the change (`pnpm prisma migrate dev`, which uses `DIRECT_URL` from `.env`).
+2. **Before merging the PR into `master`**, apply it to the **production** branch from a laptop, giving the production direct URL to that one command only, so `.env` keeps pointing at dev: `DIRECT_URL="<production direct URL>" pnpm prisma migrate deploy`. If the code deploys first, anything touching the new table fails on the live site.
+3. Merge. Vercel deploys.
+
+Never seed or reset the production branch.
+
 ## Environments
-- Neon: the rebuild uses a new Neon project (Frankfurt). Its **dev** branch is used locally and by the Vercel *preview* environment (`DATABASE_URL` pooled for the app, `DIRECT_URL` direct for migrations). Its **production** branch stays empty until cutover. Vercel *production* keeps using the old London database until then. Never run rebuild migrations against either production database.
-- GitHub sign-in on previews: a second GitHub OAuth app whose callback uses the fixed Vercel branch domain for `rebuild`; set `AUTH_TRUST_HOST=true`. Preview sets `AUTH_GITHUB_ID`/`AUTH_GITHUB_SECRET` (the preview app), `AUTH_TRUST_HOST`, `EMAIL_USER` and `EMAIL_PASS` for all Preview deployments, so email and password work on every milestone preview; GitHub sign-in only works on the `rebuild` preview. Email links on previews use `VERCEL_BRANCH_URL` unless `APP_URL` is set.
+- Neon: the app uses the Neon project in Frankfurt. Its **dev** branch is used locally and by the Vercel *preview* environment (`DATABASE_URL` pooled for the app, `DIRECT_URL` direct for migrations). Its **production** branch is the live database, used by Vercel *production*.
+- GitHub sign-in on previews: a second GitHub OAuth app, whose callback uses one fixed Vercel branch domain (it was set up for `rebuild`), so GitHub sign-in only works on previews served from that domain; set `AUTH_TRUST_HOST=true`. Preview sets `AUTH_GITHUB_ID`/`AUTH_GITHUB_SECRET` (the preview app), `AUTH_TRUST_HOST`, `EMAIL_USER` and `EMAIL_PASS` for all Preview deployments, so email and password work on every branch preview. Email links on previews use `VERCEL_BRANCH_URL` unless `APP_URL` is set.
 - Email: `EMAIL_USER` is the Gmail address and `EMAIL_PASS` a Google App Password (needs 2-Step Verification), sent over port 587 with STARTTLS. Antivirus "mail shields" that intercept SMTP on a laptop break local sending; fix that in the antivirus, never by turning off certificate checks.
 - Locally, `next start` (production mode) needs `APP_URL=http://localhost:3000` in `.env`; `pnpm dev` falls back to localhost by itself.
 
-## Cutover day
+## Cutover day (done)
+Kept as a record: the rebuild is live, merged into `master` through PR #23.
+
 A fresh start: the rebuild begins with an empty database on the new Neon project (Frankfurt). **No data is copied** from the old live database (London, separate Neon account); it only holds test data. Anyone using the old app makes a new account after cutover.
 
 The old London database is never migrated, written to or deleted on cutover day. It stays untouched as the rollback for a few weeks, then gets deleted (see "After the rollback window" below).
