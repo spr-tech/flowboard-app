@@ -20,6 +20,10 @@ type BoardColumnProps = {
   tasks: BoardTask[];
   /** What I may do to this column (from can()). */
   rights: ColumnRights;
+  /** Per card: the lock (I can't move it to another column) and the owner's "New" badge. */
+  cardFlags: (task: BoardTask) => { isLocked: boolean; isNew: boolean };
+  /** Quick add follows the member rule (a description first). */
+  needsDescription: boolean;
   isLastColumn: boolean;
   today: string;
   onOpenTask: (taskId: string) => void;
@@ -36,7 +40,7 @@ type BoardColumnProps = {
  * The column is dragged only by its handle, so column drags never clash with card drags or the menu.
  */
 export function BoardColumn(props: BoardColumnProps) {
-  const { projectId, column, tasks, rights, isLastColumn, today, onOpenTask } = props;
+  const { projectId, column, tasks, rights, cardFlags, needsDescription, isLastColumn, today, onOpenTask } = props;
   const { isCollapsed, isPhone, onToggle } = props;
   const bodyId = `column-body-${column.id}`;
   // Destructured: the hooks lint rule treats an object holding refs as a ref itself.
@@ -120,12 +124,18 @@ export function BoardColumn(props: BoardColumnProps) {
                   today={today}
                   onOpen={onOpenTask}
                   isDisabled={isFoldedHere}
+                  {...cardFlags(task)}
                 />
               ))}
             </SortableContext>
           </div>
 
-          <QuickAddForm projectId={projectId} columnId={column.id} columnName={column.name} />
+          <QuickAddForm
+            projectId={projectId}
+            columnId={column.id}
+            columnName={column.name}
+            needsDescription={needsDescription}
+          />
         </div>
       </div>
     </section>

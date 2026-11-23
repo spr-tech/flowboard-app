@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ProjectDetail } from "@/models/responses/projectResponses";
@@ -8,7 +8,9 @@ import { boardMembership, boardTask, projectDetail } from "@/test/projectFixture
 import { jsonResponse, mockFetch, renderWithStore } from "@/test/renderWithStore";
 import type { BoardFilters } from "@/utilities/helpers/boardView";
 import { collapsedColumnsKey } from "@/utilities/helpers/collapsedColumns";
+import { toast } from "@/components/ui/toast/toast";
 import { BoardColumns } from "./boardColumns";
+import { LOCKED_CARD_LABEL } from "./taskCard";
 
 vi.mock("@/components/ui/toast/toast", () => ({ toast: vi.fn(), dismissToast: vi.fn() }));
 
@@ -278,5 +280,85 @@ describe("BoardColumns from md up", () => {
       expect(bodyOf(toggle)).not.toHaveAttribute("inert");
     }
     window.localStorage.clear();
+  });
+});
+
+describe("BoardColumns: who may move which card", () => {
+  let layout: ReturnType<typeof layOutColumnsInAStack>;
+  beforeEach(() => {
+    stubScreenWidth(PHONE_WIDTH);
+    layout = layOutColumnsInAStack();
+    vi.mocked(toast).mockClear();
+  });
+  afterEach(() => {
+    layout.mockRestore();
+    vi.unstubAllGlobals();
+    window.localStorage.clear();
+  });
+
+  const me = { id: "demo", name: "Alex Morgan", image: null };
+  const sam = { id: "sam", name: "Sam Rivera", image: null };
+  const memberBoard = () =>
+    projectDetail({
+      me: boardMembership({ role: "MEMBER" }),
+      tasks: [
+        boardTask("mine", { title: "My card", assignee: me }),
+        boardTask("theirs", { title: "Their card", assignee: sam, position: 2000 }),
+        boardTask("d1", { columnId: "done", title: "Old work" }),
+      ],
+    });
+
+  it("a member sees a lock on cards they can't move between columns, and none on their own", async () => {
+    await renderColumns(memberBoard(), () => jsonResponse(200, {}));
+
+    const theirs = screen.getByRole("button", { name: /^Their card\./ });
+    const mine = screen.getByRole("button", { name: /^My card\./ });
+    expect(within(theirs).getByRole("img", { name: LOCKED_CARD_LABEL })).toBeInTheDocument();
+    expect(mine.querySelector("svg[aria-label]")).toBeNull();
+    expect(theirs).toHaveAccessibleName(/Space to reorder/);
+  });
+
+  it("a card a member can't move snaps back with the reason; nothing is sent", async () => {
+    const { writes } = await renderColumns(memberBoard(), () => jsonResponse(200, {}));
+    const card = screen.getByRole("button", { name: /^Their card\./ });
+
+    await pressDragKeys(card, ["Space", "ArrowDown", "ArrowDown", "Space"]);
+
+    expect(toast).toHaveBeenCalledWith({ type: "error", message: "You can only move tasks assigned to you." });
+    expect(writes()).toHaveLength(0);
+    expect(screen.getAllByRole("region")[0]).toContainElement(card);
+  });
+
+  it("a member's own card moves to another column", async () => {
+    const { writes } = await renderColumns(memberBoard(), () =>
+      jsonResponse(200, { ...boardTask("mine", { assignee: me }), columnId: "done", position: 0 })
+    );
+    const card = screen.getByRole("button", { name: /^My card\./ });
+
+    await pressDragKeys(card, ["Space", "ArrowDown", "ArrowDown", "Space"]);
+
+    await vi.waitFor(() => expect(writes()).toHaveLength(1));
+    expect(new URL(writes()[0].url).pathname).toBe("/api/tasks/mine/move");
+    expect(await writes()[0].json()).toEqual({ columnId: "done", afterTaskId: "d1" });
+  });
+
+  it("the owner sees the New badge on a member's new task; members don't", async () => {
+    const tasks = [boardTask("n", { title: "From Sam", newForOwner: true })];
+    const view = await renderColumns(projectDetail({ tasks }), () => jsonResponse(200, {}));
+    expect(screen.getByText("New")).toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: LOCKED_CARD_LABEL })).not.toBeInTheDocument();
+    view.unmount();
+
+    await renderColumns(projectDetail({ tasks, me: boardMembership({ role: "MEMBER" }) }), () => jsonResponse(200, {}));
+    expect(screen.queryByText("New")).not.toBeInTheDocument();
+  });
+
+  it("a member's quick add asks for the description and an optional due date that can't change later", async () => {
+    await renderColumns(memberBoard(), () => jsonResponse(201, {}));
+
+    fireEvent.click(screen.getByRole("button", { name: "Add a task to To do" }));
+
+    expect(screen.getByPlaceholderText(/What needs doing, and why\?/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Due date (optional)")).toHaveAccessibleDescription("You can't change this later");
   });
 });

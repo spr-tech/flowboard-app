@@ -10,17 +10,25 @@ import { Button } from "@/components/ui/button/button";
 import { taskTitleField, TASK_TITLE_MAX } from "@/models/validations/boardValidation";
 import { useCreateTaskMutation } from "@/services/tasksService";
 import { applyApiError } from "@/utilities/helpers/applyApiError";
+import { MemberTaskForm } from "./memberTaskForm";
 
 const quickAddSchema = z.object({ title: taskTitleField });
 type QuickAddValues = z.infer<typeof quickAddSchema>;
 
-type QuickAddFormProps = { projectId: string; columnId: string; columnName: string };
+type QuickAddFormProps = {
+  projectId: string;
+  columnId: string;
+  columnName: string;
+  /** The member rule applies (my task, 20+ character description): open the small form instead. */
+  needsDescription?: boolean;
+};
 
 /**
- * "+ Add task" at the bottom of a column. Enter adds and keeps the field open for the next one;
- * Esc closes. A failed add keeps the text so it can be tried again.
+ * "+ Add task" at the bottom of a column. The owner's and managers' quick add is instant: Enter adds
+ * and keeps the field open for the next one; Esc closes. Members get a small form for the
+ * description (and an optional due date) first. A failed add keeps the text so it can be tried again.
  */
-export function QuickAddForm({ projectId, columnId, columnName }: QuickAddFormProps) {
+export function QuickAddForm({ projectId, columnId, columnName, needsDescription = false }: QuickAddFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [createTask] = useCreateTaskMutation();
   const {
@@ -50,6 +58,10 @@ export function QuickAddForm({ projectId, columnId, columnName }: QuickAddFormPr
     reset();
     setIsOpen(false);
   };
+
+  if (needsDescription) {
+    return <MemberTaskForm projectId={projectId} columnId={columnId} columnName={columnName} onClose={close} />;
+  }
 
   const onSubmit = async ({ title }: QuickAddValues) => {
     try {

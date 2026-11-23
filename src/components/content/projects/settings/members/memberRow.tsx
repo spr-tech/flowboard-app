@@ -1,32 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
+import { SlidersHorizontal } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar/avatar";
 import { Button } from "@/components/ui/button/button";
 import { toast } from "@/components/ui/toast/toast";
 import type { ProjectMemberResponse } from "@/models/responses/projectResponses";
-import { useRemoveMemberMutation } from "@/services/membersService";
+import { useRemoveMemberMutation, useSetMemberRoleMutation } from "@/services/membersService";
+import { MANAGER_LIMIT } from "@/utilities/helpers/permissions";
+import { PermissionsDialog } from "./permissionsDialog";
+import { RoleBadge } from "./roleBadge";
 
 type MemberRowProps = {
   projectId: string;
   member: ProjectMemberResponse;
   isMe: boolean;
-  /** The viewer owns the project and this row isn't the owner. */
+  /** can("member.remove") for this person. */
   canRemove: boolean;
+  /** The viewer is the owner and this row isn't: the role dropdown and Permissions. */
+  canManageRole: boolean;
+  /** The project already has 3 managers: a member can't be promoted. */
+  managersFull: boolean;
 };
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 
+export const MANAGER_LIMIT_REASON = `A project can have at most ${MANAGER_LIMIT} managers.`;
+
 /**
- * Avatar, name ("(you)" for the viewer), "email · N tasks", role badge. The owner can remove a
- * member after an inline confirmation: "Remove Ada? Their 3 tasks will be unassigned."
+ * Avatar, name ("(you)" for the viewer), "email · N tasks", role badge. The owner changes the role
+ * (Member / Manager) and, for a manager, opens Permissions. Whoever may remove this person can,
+ * after an inline confirmation: "Remove Ada? Their 3 tasks will be unassigned."
  */
-export function MemberRow({ projectId, member, isMe, canRemove }: MemberRowProps) {
+export function MemberRow({ projectId, member, isMe, canRemove, canManageRole, managersFull }: MemberRowProps) {
+  const roleId = useId();
   const [isConfirming, setIsConfirming] = useState(false);
+  const [showPermissions, setShowPermissions] = useState(false);
   const [removeMember, { isLoading }] = useRemoveMemberMutation();
+  const [setRole, { isLoading: isSavingRole }] = useSetMemberRoleMutation();
   const name = member.name?.trim() || member.email;
   const firstName = name.split(/\s+/)[0];
+  const promoteBlocked = member.role === "MEMBER" && managersFull;
 
   const remove = async () => {
     try {
@@ -35,6 +50,18 @@ export function MemberRow({ projectId, member, isMe, canRemove }: MemberRowProps
     } catch {
       // The base query showed why; the row stays.
       setIsConfirming(false);
+    }
+  };
+
+  const changeRole = async (role: "MANAGER" | "MEMBER") => {
+    try {
+      await setRole({ projectId, userId: member.id, role }).unwrap();
+      toast({
+        type: "success",
+        message: role === "MANAGER" ? `${firstName} is now a manager` : `${firstName} is now a member`,
+      });
+    } catch {
+      // The base query showed why; the role stays.
     }
   };
 
@@ -50,12 +77,52 @@ export function MemberRow({ projectId, member, isMe, canRemove }: MemberRowProps
           {member.email} · {plural(member.taskCount, "task")}
         </span>
       </span>
-      {member.role === "OWNER" ? (
-        <span className="rounded-full bg-surface-inverse px-2.5 py-1 text-xs font-semibold text-highlight">Owner</span>
-      ) : (
-        <span className="rounded-full border border-line-strong px-2.5 py-[3px] text-xs font-semibold text-fg-secondary">
-          Member
+      {canManageRole && member.role !== "OWNER" ? (
+        <span className="flex flex-col items-end gap-1">
+          <label htmlFor={roleId} className="sr-only">
+            Role for {name}
+          </label>
+          <select
+            id={roleId}
+            value={member.role}
+            disabled={isSavingRole}
+            aria-describedby={promoteBlocked ? `${roleId}-why` : undefined}
+            onChange={(event) => void changeRole(event.target.value as "MANAGER" | "MEMBER")}
+            className="h-9 rounded-lg border-[1.5px] border-line-strong bg-surface-card px-2 text-sm font-semibold"
+          >
+            <option value="MEMBER">Member</option>
+            <option value="MANAGER" disabled={promoteBlocked}>
+              Manager
+            </option>
+          </select>
+          {promoteBlocked && (
+            <span id={`${roleId}-why`} className="text-xs text-fg-secondary">
+              {MANAGER_LIMIT_REASON}
+            </span>
+          )}
         </span>
+      ) : (
+        <RoleBadge role={member.role} />
+      )}
+      {canManageRole && member.role === "MANAGER" && member.permissions && (
+        <>
+          <Button
+            text="Permissions"
+            variant="secondary"
+            size="sm"
+            startIcon={<SlidersHorizontal aria-hidden />}
+            aria-label={`Permissions for ${name}`}
+            onClick={() => setShowPermissions(true)}
+          />
+          <PermissionsDialog
+            projectId={projectId}
+            userId={member.id}
+            name={firstName}
+            permissions={member.permissions}
+            isOpen={showPermissions}
+            onClose={() => setShowPermissions(false)}
+          />
+        </>
       )}
       {canRemove && !isConfirming && (
         <Button

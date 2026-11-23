@@ -17,12 +17,16 @@ import { ProjectTile } from "../projectTile";
 import { useDelayedFlag } from "@/utilities/hooks/useDelayedFlag";
 import { ColumnsSection } from "./columnsSection";
 import { MembersSection } from "./members/membersSection";
+import { TasksSection } from "./tasksSection";
 import { ProjectSettingsSkeleton } from "./projectSettingsSkeleton";
 import { SETTINGS_SECTIONS, SettingsSection } from "./settingsSection";
 
+const roleLine = { OWNER: "you're the owner", MANAGER: "you're a manager", MEMBER: "you're a member" } as const;
+
 /**
  * /projects/[projectId]/settings (docs/designs/project-settings.md).
- * General, Columns, Members (with invites) and the Danger zone.
+ * General, Columns, Tasks, Members (with roles and invites) and the Danger zone. What I may change
+ * follows can(); everything else shows as read-only.
  */
 export default function ProjectSettingsContent({ projectId }: { projectId: string }) {
   const dispatch = useAppDispatch();
@@ -62,7 +66,7 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">Project settings</h1>
             <p className="text-fg-secondary">
-              {project.name} · {isOwner ? "you're the owner" : "you're a member"}
+              {project.name} · {roleLine[project.me.role]}
             </p>
           </div>
         </div>
@@ -71,8 +75,9 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
 
       {!isOwner && (
         <p role="note" className="rounded-card bg-surface-sunken px-5 py-4 text-sm text-fg-secondary">
-          Only the owner can change the name, colour, columns and members. You can see them here, and leave the project
-          at the bottom.
+          {project.me.role === "MANAGER"
+            ? "The owner chooses what you can do as a manager. Settings you can't change are shown as they are, and you can leave the project at the bottom."
+            : "Only the owner (and managers, where allowed) can change the name, columns and members. You can see them here, and leave the project at the bottom."}
         </p>
       )}
 
@@ -88,8 +93,12 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
         <ColumnsSection project={project} meId={me?.id ?? null} />
       </SettingsSection>
 
+      <SettingsSection {...SETTINGS_SECTIONS.tasks}>
+        <TasksSection key={project.memberTakeLimit} project={project} />
+      </SettingsSection>
+
       <SettingsSection {...SETTINGS_SECTIONS.members}>
-        <MembersSection projectId={project.id} isOwner={isOwner} meId={me?.id ?? null} />
+        <MembersSection project={project} meId={me?.id ?? null} />
       </SettingsSection>
 
       <SettingsSection

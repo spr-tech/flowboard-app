@@ -116,7 +116,9 @@ describe("ProjectSettingsContent", () => {
     renderWithStore(<ProjectSettingsContent projectId="p1" />);
 
     expect(await screen.findByText("Website relaunch · you're a member")).toBeInTheDocument();
-    expect(screen.getByRole("note")).toHaveTextContent("Only the owner can change the name");
+    expect(screen.getByRole("note")).toHaveTextContent(
+      "Only the owner (and managers, where allowed) can change the name"
+    );
     expect(screen.getByLabelText("Project name")).toBeDisabled();
     expect(screen.getByRole("button", { name: "Leave project" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Delete project" })).not.toBeInTheDocument();

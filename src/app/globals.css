@@ -107,6 +107,16 @@
   --status-done: var(--brand-chip-done);
   --status-done-fg: var(--brand-chip-done-text);
 
+  /* Badges (background, then text). Roles on members: the owner is espresso (surface-inverse
+     with highlight text), managers teal, members sand. "New" marks a member's task the owner
+     hasn't opened yet. Contrast: manager 5.2:1, member 13.7:1, new 14:1 (all pass AA). */
+  --badge-manager: var(--brand-teal);
+  --badge-manager-fg: var(--brand-white);
+  --badge-member: var(--brand-sand);
+  --badge-member-fg: var(--brand-espresso);
+  --badge-new: var(--brand-lime);
+  --badge-new-fg: var(--brand-espresso);
+
   /* Project colours (the 8 ProjectColour keys), then the readable text on each */
   --project-vermilion: var(--brand-vermilion);
   --project-vermilion-fg: var(--brand-white);
@@ -198,6 +208,13 @@
   --color-status-low-fg: var(--status-low-fg);
   --color-status-done: var(--status-done);
   --color-status-done-fg: var(--status-done-fg);
+
+  --color-badge-manager: var(--badge-manager);
+  --color-badge-manager-fg: var(--badge-manager-fg);
+  --color-badge-member: var(--badge-member);
+  --color-badge-member-fg: var(--badge-member-fg);
+  --color-badge-new: var(--badge-new);
+  --color-badge-new-fg: var(--badge-new-fg);
 
   --color-project-vermilion: var(--project-vermilion);
   --color-project-vermilion-fg: var(--project-vermilion-fg);

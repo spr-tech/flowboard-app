@@ -13,10 +13,16 @@ export const SETTINGS_SECTIONS = {
     description:
       "The board's columns, left to right (the team order). Tasks in the done column count as finished on the dashboard.",
   },
+  tasks: {
+    id: "settings-tasks",
+    title: "Tasks",
+    description: "How members pick up work from the unassigned pool.",
+  },
   members: {
     id: "settings-members",
     title: "Members",
-    description: "Everyone on this board. Invites are sent by email and the link works for 7 days.",
+    description:
+      "Everyone on this board, and their roles. Managers get the permissions you choose. Invites are sent by email and the link works for 7 days.",
   },
   danger: { id: "settings-danger", title: "Danger zone" },
 } as const;

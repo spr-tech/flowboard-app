@@ -4,24 +4,33 @@ import { InviteForm } from "@/components/content/projects/forms/inviteForm";
 import { Skeleton } from "@/components/ui/skeleton/skeleton";
 import { useInvites } from "@/services/invitesService";
 import { useMembers } from "@/services/membersService";
+import type { ProjectDetail } from "@/models/responses/projectResponses";
+import { MANAGER_LIMIT } from "@/utilities/helpers/permissions";
+import { projectCan } from "@/utilities/helpers/projectPermissions";
 import { useDelayedFlag } from "@/utilities/hooks/useDelayedFlag";
 import { MemberRow } from "./memberRow";
 import { PendingInvites } from "./pendingInvites";
 
-type MembersSectionProps = { projectId: string; isOwner: boolean; meId: string | null };
+type MembersSectionProps = { project: Pick<ProjectDetail, "id" | "me" | "memberTakeLimit">; meId: string | null };
 
 /**
- * Project settings, Members (docs/designs/project-settings.md). The owner gets the invite card,
- * Remove on each member, and the pending invites; members see the list only.
+ * Project settings, Members (docs/designs/project-settings.md). Whoever may invite (the owner,
+ * managers with inviteMembers) gets the invite card and the pending invites. The owner changes
+ * roles and managers' permissions; Remove shows where can() allows it (a manager with
+ * removeMembers: members only). Everyone else sees the list.
  */
-export function MembersSection({ projectId, isOwner, meId }: MembersSectionProps) {
+export function MembersSection({ project, meId }: MembersSectionProps) {
+  const projectId = project.id;
+  const mayInvite = projectCan(project, meId, "member.invite").allowed;
+  const canManageRole = projectCan(project, meId, "member.changeRole").allowed;
   const { data: members, isLoading } = useMembers(projectId);
-  const { data: invites } = useInvites(projectId, { skip: !isOwner });
+  const { data: invites } = useInvites(projectId, { skip: !mayInvite });
+  const managersFull = (members?.filter((member) => member.role === "MANAGER").length ?? 0) >= MANAGER_LIMIT;
   const showSkeleton = useDelayedFlag(isLoading);
 
   return (
     <div className="flex flex-col gap-4">
-      {isOwner && (
+      {mayInvite && (
         <div className="rounded-card-lg bg-surface-inverse p-5">
           <InviteForm projectId={projectId} tone="dark" />
         </div>
@@ -52,14 +61,19 @@ export function MembersSection({ projectId, isOwner, meId }: MembersSectionProps
                 projectId={projectId}
                 member={member}
                 isMe={member.id === meId}
-                canRemove={isOwner && member.role !== "OWNER"}
+                canRemove={
+                  member.id !== meId &&
+                  projectCan(project, meId, "member.remove", { target: { role: member.role } }).allowed
+                }
+                canManageRole={canManageRole}
+                managersFull={managersFull}
               />
             ))}
           </ul>
         )}
       </div>
 
-      {isOwner && invites && <PendingInvites projectId={projectId} invites={invites} />}
+      {mayInvite && invites && <PendingInvites projectId={projectId} invites={invites} />}
     </div>
   );
 }
