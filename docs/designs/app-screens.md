@@ -54,8 +54,25 @@ Reference files (open in a browser for layout only; they run inside the design t
 ## Account settings (milestone 9)
 - Two-column sections: title + description on the left, card on the right.
 - Profile: initials avatar, name (Save enabled only when changed), read-only email with a note.
-- Password: current/new/confirm with live checks and one show/hide toggle; GitHub-only users see "You sign in with GitHub" instead.
+- Password: current/new/confirm with live checks, the strength meter under the new password, and one show/hide toggle; GitHub-only users see "You sign in with GitHub" instead.
 - Session: "Signed in with ..." and Sign out (danger outline).
+
+## Email verification
+- **`/verify-email`** (auth shell, deep plum panel: "One code and you're in." with a wiggling envelope; the form on the left):
+  - "Confirm your email" and "We sent a 6-digit code to <email>."
+  - Six boxes under "Your 6-digit code": numeric keyboard (`inputMode="numeric"`), the first with `autocomplete="one-time-code"` so phones offer the code from the email. Typing moves to the next box, Backspace on an empty box moves back, the arrow keys move between boxes, and pasting a whole code fills all six from any box. It submits by itself on the sixth digit; a "Confirm email" button does the same.
+  - Under the boxes, one message line: "Wrong code. N attempts left." (the boxes clear for another try), "This code has expired. Send a new one.", "Too many attempts. Send a new code.", or "Checking your code…". Then "Can't find it? Check your spam folder." (Gmail often files our emails as spam for now.)
+  - "Resend code": "Resend code in 42s" and disabled for 60 seconds after each send; after 3 codes in an hour, "You've asked for 3 codes in the last hour. You can ask again in N minutes." A new code clears the boxes. "Do this later" goes to the dashboard.
+  - Success: toast "Email confirmed", then back to `callbackUrl` (same-site only) or the dashboard. Already verified: "Your email is confirmed" and Continue.
+- **`/verify-email/link/[token]`** (same shell): "Confirm your email", "One click and your email is confirmed." and a "Confirm my email" button. Opening the page does nothing; only the click does (scanners open links). Then "Email confirmed" with "Go to Flowboard", or "This link has expired" / "This link was already used" / "This link doesn't work", each with "Send a new code".
+- **Banner** (app shell, under the top bar, status-medium yellow): "Confirm your email to invite people." with "Enter code" (to `/verify-email`, coming back to this page), "Resend code" (toast "We sent a new code to <email>.") and a dismiss button. Dismissed for the browser tab's session; back on the next visit until verified.
+- **Invite form, unverified** (the board's Invite dialog and the settings Members card share it): "Invite by email", "Confirm your email before inviting people." and an "Enter code" button instead of the email field.
+
+## New-password fields
+- Live checks: "At least 10 characters", "One special character", "Passwords match".
+- "Passwords can't contain < or >" appears under the field as soon as one is typed (other errors wait until the field is left or the form submitted).
+- **Strength meter** under the new-password field (sign-up, reset, change): a 3-part bar plus "Password strength: Weak / Fair / Strong", announced politely (`aria-live`). Weak fills one part in danger red, Fair two in warning amber, Strong three in success green (`--feedback-warning`, `--feedback-success`); the word is always shown, so colour is never the only signal. It guides but never blocks submitting.
+- Scoring (`src/utilities/helpers/passwordStrength.ts`): length points (10–11: 1, 12–13: 2, 14–15: 3, 16–19: 4, 20+: 5), plus one per kind of character beyond the first (lowercase, uppercase, digits, symbols), minus 2 for repeats (aaa, or 4 or fewer different characters) and 1 for a simple sequence (abc, 123, qwerty, forwards or backwards). Strong from 6, Fair from 4. Always Weak while a rule fails, including containing your name or email.
 
 ## Decisions that change the plan docs
 1. **Project colour is stored as a key, not hex**: `vermilion | espresso | lime | blue | teal | plum | amber | rose`. The frontend maps keys to tokens and to a readable text colour. (Amends `docs/plan/03-data-model.md`: Project.colour is an enum.)
