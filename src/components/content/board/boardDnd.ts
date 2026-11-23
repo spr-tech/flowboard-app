@@ -84,14 +84,15 @@ export function resolveDrop(
 }
 
 /**
- * Screen reader announcements in plain English, for cards and for columns. Columns sit side by
+ * Screen reader announcements in plain English, for cards and for columns. `teamColumns`: my column
+ * drags change the team order (the owner, managers with manageColumns). Columns sit side by
  * side from md up and in a stack on phones (`isPhone`), which changes the arrow keys and wording.
  */
-export function boardAnnouncements(project: ProjectDetail, isOwner: boolean, isPhone = false): Announcements {
+export function boardAnnouncements(project: ProjectDetail, teamColumns: boolean, isPhone = false): Announcements {
   const columnName = (columnId: unknown) => project.columns.find((column) => column.id === columnId)?.name ?? "";
   const label = (data: Record<string, unknown> | undefined) =>
     data?.kind === "column" ? `column ${columnName(data.columnId)}` : String(data?.title ?? "the card");
-  const whoSees = isOwner ? "This changes the team order for everyone." : "This changes only your view.";
+  const whoSees = teamColumns ? "This changes the team order for everyone." : "This changes only your view.";
   const arrows = isPhone ? "up and down" : "left and right";
 
   return {

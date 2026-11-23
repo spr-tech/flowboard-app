@@ -13,14 +13,20 @@ import { transaction } from "@/server/lib/transaction";
 import { ActivityAction } from "@/utilities/enums/activityActions";
 import type { ProjectColour } from "@/utilities/enums/projectColours";
 import {
+  assertCan,
   membershipSelect,
+  permissionContext,
+  permissionsOf,
   projectNotFound,
   requireMember,
   requireOwner,
+  sortByRole,
   toMyMembership,
   type Db,
 } from "./projectAccess";
-import { taskSelect, toBoardTask } from "@/server/tasks/taskShape";
+import { countTakenOpen, taskSelect, toBoardTask } from "@/server/tasks/taskShape";
+import { toCardOrder } from "@/utilities/helpers/cardOrder";
+import { usesTeamCardOrder, usesTeamColumnOrder } from "@/utilities/helpers/permissions";
 import { recordVisit } from "./projectPins.service";
 
 /** Every new board starts with these, Done last and marked as the done column. */
@@ -56,7 +62,8 @@ export async function listProjects(userId: string, today: string): Promise<Proje
           updatedAt: true,
           _count: { select: { members: true } },
           members: {
-            // OWNER sorts before MEMBER (enum order), then longest-standing first.
+            // OWNER sorts first in the enum (MANAGER was appended after MEMBER, which only changes
+            // who fills the later preview slots), then longest-standing first.
             orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
             take: MEMBER_PREVIEW_COUNT,
             select: { user: { select: { id: true, name: true, image: true } } },
@@ -133,8 +140,7 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
       name: true,
       description: true,
       colour: true,
-      membersCanAddColumns: true,
-      memberColumnLimit: true,
+      memberTakeLimit: true,
       createdAt: true,
       updatedAt: true,
       columns: {
@@ -149,22 +155,30 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
           _count: { select: { tasks: true } },
         },
       },
-      // Everyone, owner first then by joining; mine is picked out below.
+      // Everyone (sorted by role below); mine is picked out below.
       members: {
-        orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
-        select: { ...membershipSelect, columnOrder: true, user: { select: { id: true, name: true, image: true } } },
+        select: {
+          ...membershipSelect,
+          columnOrder: true,
+          cardOrder: true,
+          user: { select: { id: true, name: true, image: true } },
+        },
       },
     },
   });
   const membership = project?.members.find((member) => member.user.id === userId);
   if (!project || !membership) throw projectNotFound();
-  const tasks = await db.task.findMany({
-    where: { projectId },
-    orderBy: [{ columnId: "asc" }, { position: "asc" }],
-    select: taskSelect,
-  });
+  const members = sortByRole(project.members);
+  const [tasks, takenOpenCount] = await Promise.all([
+    db.task.findMany({
+      where: { projectId },
+      orderBy: [{ columnId: "asc" }, { position: "asc" }],
+      select: taskSelect,
+    }),
+    countTakenOpen(db, userId, projectId),
+  ]);
+  const myContext = permissionContext(userId, membership);
 
-  const ownerId = project.members.find((member) => member.role === "OWNER")?.user.id;
   const columns = project.columns.map(({ _count, createdAt, ...column }) => ({
     ...column,
     createdAt: createdAt.toISOString(),
@@ -180,16 +194,14 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
     taskCount: columns.reduce((sum, column) => sum + column.taskCount, 0),
     columns,
     tasks: tasks.map(toBoardTask),
-    members: project.members.map(({ role, user }) => ({ ...user, role })),
-    columnPermissions: {
-      membersCanAddColumns: project.membersCanAddColumns,
-      memberColumnLimit: project.memberColumnLimit,
-      memberColumnCount: columns.filter((column) => column.createdBy.id !== ownerId).length,
-    },
+    members: members.map((member) => ({ ...member.user, role: member.role, permissions: permissionsOf(member) })),
+    memberTakeLimit: project.memberTakeLimit,
     me: {
       ...toMyMembership(membership),
-      // The owner has no personal order: the owner's drags change the team order.
-      columnOrder: membership.role === "OWNER" ? null : toColumnOrder(membership.columnOrder),
+      // Whoever changes the team order has no personal one (owner; managers with the switch).
+      columnOrder: usesTeamColumnOrder(myContext) ? null : toColumnOrder(membership.columnOrder),
+      cardOrder: usesTeamCardOrder(myContext) ? null : toCardOrder(membership.cardOrder),
+      takenOpenCount,
     },
   };
 }
@@ -231,15 +243,14 @@ export type ProjectChanges = {
   name?: string;
   colour?: ProjectColour;
   description?: string | null;
-  membersCanAddColumns?: boolean;
-  memberColumnLimit?: number;
+  memberTakeLimit?: number;
 };
 
 /**
  * Owner only. Writes only what really changed. General settings (name, colour, description) get a
- * project.updated row with the before and after; column permissions get their own
- * project.column_permissions_changed row with the new switch and limit. Turning the switch off or
- * lowering the limit never deletes columns; it only blocks new ones.
+ * project.updated row with the before and after; the take limit gets its own
+ * project.take_limit_changed row. Lowering the limit never takes tasks away; it only blocks new
+ * takes until members are under it.
  */
 export async function updateProject(
   userId: string,
@@ -247,10 +258,16 @@ export async function updateProject(
   changes: ProjectChanges
 ): Promise<ProjectDetail> {
   return transaction(async (tx) => {
-    await requireOwner(tx, userId, projectId);
+    const membership = await requireMember(tx, userId, projectId);
+    assertCan("project.editSettings", permissionContext(userId, membership));
     const before = await tx.project.findUniqueOrThrow({
       where: { id: projectId },
-      select: { name: true, colour: true, description: true, membersCanAddColumns: true, memberColumnLimit: true },
+      select: {
+        name: true,
+        colour: true,
+        description: true,
+        memberTakeLimit: true,
+      },
     });
 
     const from: Record<string, string | null> = {};
@@ -262,33 +279,30 @@ export async function updateProject(
         to[key] = next;
       }
     }
-    const permissions: { membersCanAddColumns?: boolean; memberColumnLimit?: number } = {};
-    if (changes.membersCanAddColumns !== undefined && changes.membersCanAddColumns !== before.membersCanAddColumns) {
-      permissions.membersCanAddColumns = changes.membersCanAddColumns;
-    }
-    if (changes.memberColumnLimit !== undefined && changes.memberColumnLimit !== before.memberColumnLimit) {
-      permissions.memberColumnLimit = changes.memberColumnLimit;
-    }
+    const takeLimit =
+      changes.memberTakeLimit !== undefined && changes.memberTakeLimit !== before.memberTakeLimit
+        ? changes.memberTakeLimit
+        : undefined;
 
-    if (Object.keys(to).length > 0 || Object.keys(permissions).length > 0) {
-      await tx.project.update({ where: { id: projectId }, data: { ...to, ...permissions } });
-    }
-    if (Object.keys(to).length > 0) {
-      await tx.activity.create({
-        data: { projectId, actorId: userId, action: ActivityAction.ProjectUpdated, meta: { from, to } },
+    if (Object.keys(to).length > 0 || takeLimit !== undefined) {
+      await tx.project.update({
+        where: { id: projectId },
+        data: { ...to, ...(takeLimit !== undefined ? { memberTakeLimit: takeLimit } : {}) },
       });
     }
-    if (Object.keys(permissions).length > 0) {
+    if (takeLimit !== undefined) {
       await tx.activity.create({
         data: {
           projectId,
           actorId: userId,
-          action: ActivityAction.ProjectColumnPermissionsChanged,
-          meta: {
-            membersCanAddColumns: permissions.membersCanAddColumns ?? before.membersCanAddColumns,
-            memberColumnLimit: permissions.memberColumnLimit ?? before.memberColumnLimit,
-          },
+          action: ActivityAction.ProjectTakeLimitChanged,
+          meta: { from: before.memberTakeLimit, to: takeLimit },
         },
+      });
+    }
+    if (Object.keys(to).length > 0) {
+      await tx.activity.create({
+        data: { projectId, actorId: userId, action: ActivityAction.ProjectUpdated, meta: { from, to } },
       });
     }
     return loadDetail(tx, userId, projectId);

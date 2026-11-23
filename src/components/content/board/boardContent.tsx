@@ -15,6 +15,7 @@ import {
 } from "@/stores/uiSlice";
 import type { BoardFilters as Filters } from "@/utilities/helpers/boardView";
 import { localToday } from "@/utilities/helpers/localToday";
+import { projectCan } from "@/utilities/helpers/projectPermissions";
 import { useDelayedFlag } from "@/utilities/hooks/useDelayedFlag";
 import { flushPendingDeletes } from "@/utilities/hooks/useDeleteTask";
 import { useTaskParam } from "@/utilities/hooks/useTaskParam";
@@ -38,6 +39,7 @@ export default function BoardContent({ projectId }: { projectId: string }) {
     onlyMine: useAppSelector(selectOnlyMyTasks),
     meId: me?.id ?? null,
     hiddenIds: useAppSelector(selectPendingDeleteTaskIds),
+    cardOrder: project?.me.cardOrder ?? null,
   };
 
   // Leaving the board: filters reset, an open dialog closes, and deletes still in their Undo
@@ -61,7 +63,14 @@ export default function BoardContent({ projectId }: { projectId: string }) {
       <BoardHeader project={project} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <BoardFilters />
-        {project.me.columnOrder && <YourOrder projectId={project.id} />}
+        <div className="flex flex-wrap items-center gap-3">
+          {project.me.role === "MEMBER" && (
+            <p className="text-sm text-fg-secondary">
+              You&apos;ve taken {project.me.takenOpenCount} of {project.memberTakeLimit} open tasks.
+            </p>
+          )}
+          {(project.me.columnOrder || project.me.cardOrder) && <YourOrder projectId={project.id} />}
+        </div>
       </div>
       <BoardColumns
         project={project}
@@ -72,7 +81,9 @@ export default function BoardContent({ projectId }: { projectId: string }) {
       />
       <TaskDrawer project={project} meId={me?.id ?? null} />
       <DeleteColumnDialog project={project} />
-      {project.me.role === "OWNER" && <InviteDialog projectId={project.id} projectName={project.name} />}
+      {projectCan(project, me?.id ?? null, "member.invite").allowed && (
+        <InviteDialog projectId={project.id} projectName={project.name} />
+      )}
     </div>
   );
 }

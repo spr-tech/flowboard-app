@@ -1,11 +1,14 @@
-import type { BoardMember, BoardTask } from "@/models/responses/boardResponses";
+import type { BoardMember, BoardTask, CardOrder } from "@/models/responses/boardResponses";
+import type { ManagerPermissions } from "@/utilities/helpers/permissions";
 import type { ProjectColour } from "@/utilities/enums/projectColours";
 
-export type ProjectRole = "OWNER" | "MEMBER";
+export type ProjectRole = "OWNER" | "MANAGER" | "MEMBER";
 
 /** My own membership of a project. Dates are ISO strings. */
 export type MyMembership = {
   role: ProjectRole;
+  /** A manager's switches, set by the owner; null for the owner and members. */
+  permissions: ManagerPermissions | null;
   /** Null when not pinned. Pinned projects sort by this, oldest first. */
   pinnedAt: string | null;
   /** When I last opened the project; null if never (then joinedAt stands in). */
@@ -51,17 +54,15 @@ export type ProjectColumnSummary = {
   createdAt: string;
 };
 
-/** Who may add columns (Settings › Columns). */
-export type ColumnPermissions = {
-  membersCanAddColumns: boolean;
-  /** 1 to 10, for all members together. */
-  memberColumnLimit: number;
-  /** Columns created by someone other than the owner. */
-  memberColumnCount: number;
+/**
+ * My membership, plus my own column and card orders (null = the team order; always null for
+ * whoever changes the team order) and how many open tasks I took from the pool.
+ */
+export type MyBoardMembership = MyMembership & {
+  columnOrder: string[] | null;
+  cardOrder: CardOrder | null;
+  takenOpenCount: number;
 };
-
-/** My membership, plus my own column order (null = the team order; the owner never has one). */
-export type MyBoardMembership = MyMembership & { columnOrder: string[] | null };
 
 /** GET /api/projects/:projectId: the whole board. Also what project writes return. */
 export type ProjectDetail = {
@@ -76,9 +77,10 @@ export type ProjectDetail = {
   columns: ProjectColumnSummary[];
   /** Every task, by column then position. */
   tasks: BoardTask[];
-  /** Everyone on the project, owner first: assignee options and header avatars. */
+  /** Everyone on the project (owner, managers, members): assignee options and header avatars. */
   members: BoardMember[];
-  columnPermissions: ColumnPermissions;
+  /** How many open tasks a member may take from the unassigned pool (1 to 20). */
+  memberTakeLimit: number;
   me: MyBoardMembership;
 };
 
@@ -95,6 +97,8 @@ export type ProjectMemberResponse = {
   email: string;
   image: string | null;
   role: ProjectRole;
+  /** A manager's switches; null for the owner and members. */
+  permissions: ManagerPermissions | null;
   /** Tasks assigned to this member in this project. */
   taskCount: number;
 };

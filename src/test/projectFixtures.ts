@@ -11,6 +11,7 @@ import type {
 export function myMembership(overrides: Partial<MyMembership> = {}): MyMembership {
   return {
     role: "OWNER",
+    permissions: null,
     pinnedAt: null,
     lastOpenedAt: null,
     joinedAt: "2026-11-01T10:00:00.000Z",
@@ -42,7 +43,7 @@ export function projectSummary(
 
 /** My membership on a board: role, pin, last opened, and my own column order (null = team order). */
 export function boardMembership(overrides: Partial<MyBoardMembership> = {}): MyBoardMembership {
-  return { ...myMembership(), columnOrder: null, ...overrides };
+  return { ...myMembership(), columnOrder: null, cardOrder: null, takenOpenCount: 0, ...overrides };
 }
 
 /** A column as GET /api/projects/:projectId returns it. Demo added it unless said otherwise. */
@@ -76,6 +77,9 @@ export function boardTask(id: string, overrides: Partial<BoardTask> = {}): Board
     assignee: null,
     completedAt: null,
     createdAt: "2026-11-01T10:00:00.000Z",
+    createdById: "demo",
+    takenFromPool: false,
+    newForOwner: false,
     ...overrides,
   };
 }
@@ -98,10 +102,10 @@ export function projectDetail(overrides: Partial<ProjectDetail> = {}): ProjectDe
     columns,
     tasks: [],
     members: [
-      { id: "demo", name: "Alex Morgan", image: null, role: "OWNER" },
-      { id: "sam", name: "Sam Rivera", image: null, role: "MEMBER" },
+      { id: "demo", name: "Alex Morgan", image: null, role: "OWNER", permissions: null },
+      { id: "sam", name: "Sam Rivera", image: null, role: "MEMBER", permissions: null },
     ],
-    columnPermissions: { membersCanAddColumns: false, memberColumnLimit: 3, memberColumnCount: 0 },
+    memberTakeLimit: 5,
     me: boardMembership(),
     ...overrides,
   };

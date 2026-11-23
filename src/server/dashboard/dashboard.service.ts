@@ -14,6 +14,9 @@ import { prisma } from "@/server/lib/prisma";
 import { listProjects } from "@/server/projects/projects.service";
 import { selectSidebarProjects } from "@/utilities/helpers/projectOrder";
 import { addDays, completedSince, dayRange, daysBetween, dueDay, dueGroup, localDay } from "./dashboardDates";
+import type { Prisma } from "@/lib/generated/prisma";
+import type { ProjectRole } from "@/models/responses/projectResponses";
+import { permissionsOf } from "@/server/projects/projectAccess";
 
 const GROUP_ORDER: DueGroupKey[] = ["overdue", "today", "week", "later", "none"];
 const PRIORITY_RANK = { HIGH: 0, MEDIUM: 1, LOW: 2 } as const;
@@ -52,6 +55,12 @@ export async function getSummary(userId: string, { today, tz }: DashboardQuery):
   };
 }
 
+/** My role and a manager's switches; a missing membership (it can't happen here) counts as a member. */
+const toMyRole = (membership: { role: ProjectRole; permissions: Prisma.JsonValue } | undefined) =>
+  membership
+    ? { role: membership.role, permissions: permissionsOf(membership) }
+    : { role: "MEMBER" as const, permissions: null };
+
 /** Each project's done column, and the column a reopened task goes back to (the first other one). */
 async function columnTargets(projectIds: string[]) {
   const columns = await prisma.column.findMany({
@@ -88,7 +97,16 @@ export async function getMyTasks(userId: string, { today, tz }: DashboardQuery):
       dueDate: true,
       completedAt: true,
       columnId: true,
-      project: { select: { id: true, name: true, colour: true } },
+      createdById: true,
+      project: {
+        select: {
+          id: true,
+          name: true,
+          colour: true,
+          // My role there, so the checkbox shows only when can() lets me move the task.
+          members: { where: { userId }, select: { role: true, permissions: true } },
+        },
+      },
     },
   });
   const targets = await columnTargets([...new Set(tasks.map((task) => task.project.id))]);
@@ -103,7 +121,14 @@ export async function getMyTasks(userId: string, { today, tz }: DashboardQuery):
       dueDate: task.dueDate ? dueDay(task.dueDate) : null,
       completedAt: task.completedAt?.toISOString() ?? null,
       columnId: task.columnId,
-      project: { ...task.project, ...targets.get(task.project.id)! },
+      createdById: task.createdById,
+      project: {
+        id: task.project.id,
+        name: task.project.name,
+        colour: task.project.colour,
+        me: toMyRole(task.project.members[0]),
+        ...targets.get(task.project.id)!,
+      },
     };
     return { myTask, completedDay };
   });

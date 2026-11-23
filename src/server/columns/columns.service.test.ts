@@ -2,13 +2,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prismaMock, resetPrismaMock } from "@/test/prismaMock";
+import { ALL_ON } from "@/test/taskFixtures";
+import { DEFAULT_MANAGER_PERMISSIONS, type ManagerPermissions } from "@/utilities/helpers/permissions";
 import { createColumn, deleteColumn, moveColumn, updateColumn } from "./columns.service";
 
 vi.mock("@/server/lib/prisma", async () => (await import("@/test/prismaMock")).prismaModule());
 
 const NOW = new Date("2026-11-22T10:00:00Z");
-const owner = { role: "OWNER", pinnedAt: null, lastOpenedAt: null, joinedAt: NOW } as const;
+const owner = { role: "OWNER", permissions: null, pinnedAt: null, lastOpenedAt: null, joinedAt: NOW } as const;
 const member = { ...owner, role: "MEMBER" } as const;
+type Role = { role: "OWNER" | "MANAGER" | "MEMBER"; permissions: unknown };
+const manager = (switches: Partial<ManagerPermissions> = {}): Role => ({
+  ...owner,
+  role: "MANAGER",
+  permissions: { ...DEFAULT_MANAGER_PERMISSIONS, ...switches },
+});
 
 const col = (id: string, name: string, position: number, isDone = false, createdById = "demo") => ({
   id,
@@ -29,7 +37,7 @@ const board = [todo, doing, done];
 /** Column and task writes in the order they happened, to check the done flag is cleared before it's set. */
 let writeLog: unknown[] = [];
 
-function asRole(role: typeof owner | typeof member, column = doing, columns = board) {
+function asRole(role: Role, column = doing, columns = board) {
   prismaMock.column.findUnique.mockResolvedValue(column as never);
   prismaMock.projectMember.findUnique.mockResolvedValue(role as never);
   prismaMock.column.findMany.mockResolvedValue(columns as never);
@@ -47,16 +55,6 @@ function asRole(role: typeof owner | typeof member, column = doing, columns = bo
     Promise.resolve({ ...col("new", "", 0, false, args.data.createdById), ...args.data })) as never);
 }
 
-/** The project's column settings, and how many member-created columns it already has. */
-function settings(membersCanAddColumns: boolean, memberColumnLimit: number, used: number) {
-  prismaMock.project.findUniqueOrThrow.mockResolvedValue({
-    membersCanAddColumns,
-    memberColumnLimit,
-    members: [{ userId: "demo" }],
-  } as never);
-  prismaMock.column.count.mockResolvedValue(used);
-}
-
 beforeEach(() => {
   resetPrismaMock();
   writeLog = [];
@@ -65,7 +63,6 @@ beforeEach(() => {
 describe("createColumn", () => {
   it("lets the owner add a column whatever the switch says, just before the done column", async () => {
     asRole(owner);
-    settings(false, 3, 3);
 
     const created = await createColumn("demo", "p1", { name: "Review" });
 
@@ -76,54 +73,30 @@ describe("createColumn", () => {
       createdById: "demo",
     });
     expect(created).toMatchObject({ name: "Review", taskCount: 0, createdBy: { id: "demo" } });
-    expect(prismaMock.project.findUniqueOrThrow).not.toHaveBeenCalled();
     expect(prismaMock.activity.create.mock.calls[0][0].data).toMatchObject({
       actorId: "demo",
       action: "column.created",
     });
   });
 
-  it("blocks members with 403 COLUMNS_LOCKED while the switch is off", async () => {
+  it("refuses members (403), whatever they added before", async () => {
     asRole(member);
-    settings(false, 3, 0);
 
     await expect(createColumn("sam", "p1", { name: "Mine" })).rejects.toMatchObject({
       status: 403,
-      code: "COLUMNS_LOCKED",
+      code: "FORBIDDEN",
+      message: "Only the owner or a manager can change the team columns.",
     });
     expect(prismaMock.column.create).not.toHaveBeenCalled();
   });
 
-  it("lets a member add while the switch is on and under the shared limit, as the creator", async () => {
-    asRole(member);
-    settings(true, 3, 2);
+  it("lets a manager with manageColumns add, as the creator; refuses one without it", async () => {
+    asRole(manager());
+    await createColumn("kim", "p1", { name: "QA" });
+    expect(prismaMock.column.create.mock.calls[0][0].data).toMatchObject({ createdById: "kim" });
 
-    await createColumn("sam", "p1", { name: "Mine" });
-
-    expect(prismaMock.column.count).toHaveBeenCalledWith({ where: { projectId: "p1", createdById: { not: "demo" } } });
-    expect(prismaMock.column.create.mock.calls[0][0].data).toMatchObject({ createdById: "sam" });
-    expect(prismaMock.activity.create.mock.calls[0][0].data).toMatchObject({
-      actorId: "sam",
-      action: "column.created",
-    });
-  });
-
-  it("answers 409 COLUMN_LIMIT_REACHED at the limit, counting every member's columns together", async () => {
-    asRole(member);
-    settings(true, 3, 3);
-
-    await expect(createColumn("sam", "p1", { name: "One more" })).rejects.toMatchObject({
-      status: 409,
-      code: "COLUMN_LIMIT_REACHED",
-      message: "Column limit reached (3 of 3). The owner can raise it.",
-    });
-  });
-
-  it("allows a member to add again once a member column is deleted (back under the limit)", async () => {
-    asRole(member);
-    settings(true, 3, 2);
-
-    await expect(createColumn("sam", "p1", { name: "Again" })).resolves.toMatchObject({ name: "Again" });
+    asRole(manager({ manageColumns: false }));
+    await expect(createColumn("kim", "p1", { name: "QA" })).rejects.toMatchObject({ status: 403 });
   });
 });
 
@@ -140,20 +113,19 @@ describe("updateColumn", () => {
     });
   });
 
-  it("lets a member rename only a column they added", async () => {
+  it("refuses a member's rename, even of a column they added before this change", async () => {
     asRole(member, samsColumn);
-    await expect(updateColumn("sam", "review", { name: "Sam QA" })).resolves.toMatchObject({ name: "Sam QA" });
-
-    asRole(member, doing);
-    await expect(updateColumn("sam", "doing", { name: "Nope" })).rejects.toMatchObject({
-      status: 403,
-      code: "NOT_YOUR_COLUMN",
-    });
+    await expect(updateColumn("sam", "review", { name: "Sam QA" })).rejects.toMatchObject({ status: 403 });
   });
 
-  it("keeps Set as done owner-only, even on a member's own column", async () => {
-    asRole(member, samsColumn);
-    await expect(updateColumn("sam", "review", { isDone: true })).rejects.toMatchObject({
+  it("lets a manager with manageColumns rename any column", async () => {
+    asRole(manager(), doing);
+    await expect(updateColumn("kim", "doing", { name: "Doing" })).resolves.toMatchObject({ name: "Doing" });
+  });
+
+  it("keeps Set as done owner-only, even for a manager with every switch", async () => {
+    asRole(manager(ALL_ON), samsColumn);
+    await expect(updateColumn("kim", "review", { isDone: true })).rejects.toMatchObject({
       status: 403,
       code: "OWNER_ONLY",
     });
@@ -189,12 +161,26 @@ describe("updateColumn", () => {
 });
 
 describe("moveColumn (team order)", () => {
-  it("is owner-only: 403 for members", async () => {
+  it("is for the owner and managers with manageColumns: 403 for members and other managers", async () => {
     asRole(member);
     await expect(moveColumn("sam", "doing", { beforeColumnId: "todo" })).rejects.toMatchObject({
       status: 403,
+      code: "FORBIDDEN",
+    });
+    asRole(manager({ manageColumns: false }));
+    await expect(moveColumn("kim", "doing", { beforeColumnId: "todo" })).rejects.toMatchObject({ status: 403 });
+    asRole(manager());
+    await expect(moveColumn("kim", "doing", { beforeColumnId: "todo" })).resolves.toBeDefined();
+  });
+
+  it("a manager with deleteColumns deletes a column but never the done column (owner's call)", async () => {
+    asRole(manager({ deleteColumns: true }), done);
+    await expect(deleteColumn("kim", "done", { moveTasksTo: "todo" })).rejects.toMatchObject({
+      status: 403,
       code: "OWNER_ONLY",
     });
+    asRole(manager({ deleteColumns: false }), doing);
+    await expect(deleteColumn("kim", "doing", { moveTasksTo: "todo" })).rejects.toMatchObject({ status: 403 });
   });
 
   it("goes first, between two, or last, from the neighbours' current positions", async () => {

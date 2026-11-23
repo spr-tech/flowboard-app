@@ -34,6 +34,10 @@ export function ProjectCard({ project, today, pinnedCount }: ProjectCardProps) {
             <span className="rounded-full bg-surface-inverse px-2.5 py-1 text-xs font-semibold text-highlight">
               Owner
             </span>
+          ) : me.role === "MANAGER" ? (
+            <span className="rounded-full bg-badge-manager px-2.5 py-1 text-xs font-semibold text-badge-manager-fg">
+              Manager
+            </span>
           ) : (
             <span className="rounded-full border border-line-strong px-2.5 py-[3px] text-xs font-semibold text-fg-secondary">
               Member

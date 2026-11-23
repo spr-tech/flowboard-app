@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/button/buttonLink";
 import type { ProjectDetail } from "@/models/responses/projectResponses";
 import { BoardDescription } from "./boardDescription";
 import { InviteButton } from "./inviteButton";
+import { projectCan } from "@/utilities/helpers/projectPermissions";
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 
@@ -55,7 +56,7 @@ export function BoardHeader({ project }: { project: ProjectDetail }) {
               />
             ))}
           </span>
-          {project.me.role === "OWNER" && <InviteButton />}
+          {projectCan(project, null, "member.invite").allowed && <InviteButton />}
           <ButtonLink
             href={`/projects/${project.id}/settings`}
             text="Settings"

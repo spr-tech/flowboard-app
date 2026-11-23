@@ -84,8 +84,8 @@ Dashboard notes (milestone 8):
 |---|---|---|---|
 | GET | /api/projects?today=YYYY-MM-DD | Signed in | My projects as cards (with `description`): done/total, overdue count and next due date (against `today`), up to 4 member avatars (owner first), "updated", and `me: { role, pinnedAt, lastOpenedAt, joinedAt }`. Newest "updated" first; the browser applies pin order |
 | POST | /api/projects | Signed in | `{ name, colour, description? }`. Project + OWNER membership + 3 default columns (To do / In progress / Done, created by the owner) + `project.created`, one transaction |
-| GET | /api/projects/:projectId | Member | The whole board: the project (with `description`), its columns in the team order (each with `createdBy { id, name }` and `createdAt`), every task (by column, then position), the members (owner first), `columnPermissions { membersCanAddColumns, memberColumnLimit, memberColumnCount }` and `me` (with my `columnOrder`). Also records my visit: `lastOpenedAt`, at most once a minute |
-| PATCH | /api/projects/:projectId | Owner | Any of `name`, `colour`, `description` (trimmed; empty → null; max 200), `membersCanAddColumns`, `memberColumnLimit` (1–10). Only what changed is written. General changes write `project.updated` (before/after); the column settings write `project.column_permissions_changed` |
+| GET | /api/projects/:projectId | Member | The whole board: the project (with `description`), its columns in the team order (each with `createdBy { id, name }` and `createdAt`), every task (by column, then position), the members (owner, managers, members; each with `role` and a manager's `permissions`), `memberTakeLimit`, and `me` (`role`, `permissions`, my `columnOrder` and `cardOrder` (null when I change the team order), and `takenOpenCount`). Also records my visit: `lastOpenedAt`, at most once a minute |
+| PATCH | /api/projects/:projectId | Owner | Any of `name`, `colour`, `description` (trimmed; empty → null; max 200), `memberTakeLimit` (1–20). Only what changed is written. General changes write `project.updated` (before/after); the take limit writes `project.take_limit_changed` |
 | DELETE | /api/projects/:projectId | Owner | Body has the typed project name; 400 `NAME_MISMATCH` if it differs. Returns `{ id }` |
 | POST | /api/projects/:projectId/leave | Member, not owner | Leave, unassign my tasks, `member.left`, one transaction |
 | POST | /api/projects/:projectId/pin | Member (any role) | Pin for me. Already pinned → unchanged (keeps the first pin's time). Returns my updated membership `{ projectId, role, pinnedAt, lastOpenedAt, joinedAt }` |
@@ -99,40 +99,48 @@ Projects notes:
 ## Columns
 | Method | Path | Who | What |
 |---|---|---|---|
-| POST | /api/projects/:projectId/columns | Owner; members when allowed | `{ name }` (max 40). Inserted just before the done column; `createdById` is the caller. Members: 403 `COLUMNS_LOCKED` while the switch is off; 409 `COLUMN_LIMIT_REACHED` ("Column limit reached (3 of 3). The owner can raise it.") at the limit. 201 with the column |
-| PATCH | /api/columns/:columnId | Owner; creator to rename | `{ name?, isDone?: true }`. A member may rename only a column they added (else 403 `NOT_YOUR_COLUMN`); `isDone: true` (owner) makes this the done column (see 03-data-model). Returns the column |
-| PATCH | /api/columns/:columnId/move | Owner | The team order: `{ afterColumnId?, beforeColumnId? }`; the server computes the position (re-spacing all the project's columns if needed) and writes `column.moved`. Members get 403. Returns the column |
-| PUT | /api/projects/:projectId/column-order | Member, not owner | `{ columnIds }`: my own order (each id once, all this project's; else 400 `UNKNOWN_COLUMN`). The owner gets 400 `OWNER_USES_TEAM_ORDER`. No Activity row. Returns `{ projectId, columnOrder }` |
-| DELETE | /api/projects/:projectId/column-order | Member | Back to the team order (`columnOrder: null`) |
-| DELETE | /api/columns/:columnId | Owner | `{ moveTasksTo }` (tasks go to the bottom of that column, in order) or `{ confirmName }` (exact name, else 400 `NAME_MISMATCH`; deletes the tasks too). Never the last column (400 `LAST_COLUMN`). Returns `{ id }` |
+| POST | /api/projects/:projectId/columns | Owner; managers with manageColumns | `{ name }` (max 40). Inserted just before the done column; `createdById` is the caller. Others: 403 `FORBIDDEN`. 201 with the column |
+| PATCH | /api/columns/:columnId | Owner; managers with manageColumns to rename | `{ name?, isDone?: true }`. `isDone: true` is owner-only (403 `OWNER_ONLY`) and makes this the done column (see 03-data-model). Returns the column |
+| PATCH | /api/columns/:columnId/move | Owner; managers with manageColumns | The team order: `{ afterColumnId?, beforeColumnId? }`; the server computes the position (re-spacing all the project's columns if needed) and writes `column.moved`. Others get 403. Returns the column |
+| PUT | /api/projects/:projectId/column-order | Whoever doesn't change the team order | `{ columnIds }`: my own order (each id once, all this project's; else 400 `UNKNOWN_COLUMN`). The owner and managers with manageColumns get 400 `USES_TEAM_ORDER`. No Activity row. Returns `{ projectId, columnOrder }` |
+| PUT | /api/projects/:projectId/card-order | Whoever doesn't change the team task order | `{ columnId, taskIds }`: my own top-to-bottom order of one column (each id once, all tasks of that column; else 400 `UNKNOWN_TASK`). The owner and managers with teamOrder get 400 `USES_TEAM_ORDER`. No Activity row. Returns `{ projectId, cardOrder }` |
+| DELETE | /api/projects/:projectId/column-order | Member | Back to the team order for both columns and cards (`columnOrder` and `cardOrder` null) |
+| DELETE | /api/columns/:columnId | Owner; managers with deleteColumns (never the done column: 403 `OWNER_ONLY`) | `{ moveTasksTo }` (tasks go to the bottom of that column, in order) or `{ confirmName }` (exact name, else 400 `NAME_MISMATCH`; deletes the tasks too). Never the last column (400 `LAST_COLUMN`). Returns `{ id }` |
 
-Column notes: members get 403 `OWNER_ONLY`; a column in a project I'm not in is 404 `COLUMN_NOT_FOUND`. The column writes return the column; the board refetches the project, because a done-column switch also changes tasks.
+Column notes: refusals come from `can()` (403 `FORBIDDEN` with its reason; `OWNER_ONLY` for the done column); a column in a project I'm not in is 404 `COLUMN_NOT_FOUND`. The column writes return the column; the board refetches the project, because a done-column switch also changes tasks.
 
 ## Tasks
 | Method | Path | Who | What |
 |---|---|---|---|
-| POST | /api/projects/:projectId/tasks | Member | `{ title, columnId }`. Added at the bottom, MEDIUM, unassigned, no due date. 201 with the task |
-| PATCH | /api/tasks/:taskId | Member | Any of `title`, `description`, `priority`, `assigneeId` (a project member, else 400 `ASSIGNEE_NOT_MEMBER`), `dueDate` (YYYY-MM-DD); `null` clears. Writes only what changed. Returns the task |
-| PATCH | /api/tasks/:taskId/move | Member | `{ columnId, afterTaskId?, beforeTaskId? }`; the server computes the position. Returns the task |
-| DELETE | /api/tasks/:taskId | Member | Delete; its activity stays. Returns `{ id }` |
+| POST | /api/projects/:projectId/tasks | Member | `{ title, columnId, description?, dueDate?, assigneeId? }`. Added at the bottom, MEDIUM. The owner and managers with createAndAssign: as sent (title only from quick add: unassigned, no due date). Everyone else: assigned to themselves, description of 20+ characters (else 403 `TASK_FORBIDDEN` with a `description` field message), another assignee 403. Members' tasks start unseen by the owner. 201 with the task |
+| PATCH | /api/tasks/:taskId | Member | Any of `title`, `description`, `priority`, `assigneeId` (a project member, else 400 `ASSIGNEE_NOT_MEMBER`), `dueDate` (YYYY-MM-DD); `null` clears. Writes only what changed, and checks each changed field with `can()` (403 `TASK_FORBIDDEN`). Reassigning clears `takenFromPoolAt`. Returns the task |
+| PATCH | /api/tasks/:taskId/move | Member | `{ columnId, afterTaskId?, beforeTaskId? }`; the server computes the position. Another column needs `can("task.move")`. Within a column, only whoever changes the team task order (others use card-order). See "Moving a task". Returns the task |
+| DELETE | /api/tasks/:taskId | Member | Delete (members: tasks they created; managers need deleteAnyTask). Its activity stays. Returns `{ id }` |
+| POST | /api/tasks/:taskId/take | Member | "Assign to me": unassigned tasks only (else 409 `TASK_ALREADY_ASSIGNED`); members up to the take limit (409 `TAKE_LIMIT_REACHED` with the message). Writes `task.taken`. Returns the task |
+| POST | /api/tasks/:taskId/seen | Owner | Clears the "New" badge (`seenByOwnerAt`). No Activity row. Returns the task |
+| GET | /api/tasks/:taskId/notes | Member | The task's notes, oldest first: `{ id, taskId, body, createdAt, author { id, name, image } }` |
+| POST | /api/tasks/:taskId/notes | Member | `{ body }` (1–1000, trimmed). Writes `task.note_added`. 201 with the note |
+| DELETE | /api/notes/:noteId | The author, or the owner | Writes `task.note_deleted` (who and which task, never the text). A note in a project I'm not in is 404 `NOTE_NOT_FOUND`. Returns `{ id }` |
 
-Task notes: a task in a project I'm not in is 404 `TASK_NOT_FOUND`, like the project. A task is `{ id, columnId, title, description, priority, position, dueDate, assignee, completedAt, createdAt }`, the same shape as in GET /api/projects/:projectId.
+Task notes: a task in a project I'm not in is 404 `TASK_NOT_FOUND`, like the project. Every refusal comes from `can()` and is 403 `TASK_FORBIDDEN` with the message the browser shows. A task is `{ id, columnId, title, description, priority, position, dueDate, assignee, completedAt, createdAt, createdById, takenFromPool, newForOwner }`, the same shape as in GET /api/projects/:projectId.
 
 ## Members and invites
 | Method | Path | Who | What |
 |---|---|---|---|
 | GET | /api/projects/:projectId/members | Member | Members with roles and their task counts in this project (built in milestone 5) |
-| DELETE | /api/projects/:projectId/members/:userId | Owner | Remove + unassign, one transaction |
-| GET | /api/projects/:projectId/invites | Owner | Pending invites |
-| POST | /api/projects/:projectId/invites | Owner | Invite by email |
-| POST | /api/invites/:inviteId/resend | Owner | New token, expiry and email |
-| DELETE | /api/invites/:inviteId | Owner | Cancel |
+| PATCH | /api/projects/:projectId/members/:userId | Owner | `{ role: "MANAGER" \| "MEMBER" }`. Promote (default switches; at most 3 managers, else 409 `MANAGER_LIMIT`) or demote (switches cleared). Never the owner (400 `CANNOT_CHANGE_OWNER_ROLE`). Writes `member.promoted` / `member.demoted`. Returns `{ projectId, userId, role, permissions }` |
+| PATCH | /api/projects/:projectId/members/:userId/permissions | Owner | Only the switches that changed, e.g. `{ deleteAnyTask: true }`. Managers only (400 `NOT_A_MANAGER`). Writes `manager.permissions_changed`. Returns `{ projectId, userId, role, permissions }` |
+| DELETE | /api/projects/:projectId/members/:userId | Owner; managers with removeMembers (members only) | Remove + unassign, one transaction |
+| GET | /api/projects/:projectId/invites | Owner; managers with inviteMembers | Pending invites |
+| POST | /api/projects/:projectId/invites | Owner; managers with inviteMembers | Invite by email |
+| POST | /api/invites/:inviteId/resend | Owner; managers with inviteMembers | New token, expiry and email |
+| DELETE | /api/invites/:inviteId | Owner; managers with inviteMembers | Cancel |
 | GET | /api/invites/token/:token | Anyone | Preview: project, inviter, state |
 | POST | /api/invites/token/:token/accept | Signed in | Join the project |
 
 Members and invites notes (milestone 7):
 - Invites and resends need a confirmed email: otherwise 403 `EMAIL_NOT_VERIFIED` ("Confirm your email before inviting people."), checked after the membership check, so a project you're not in still answers 404. Cancelling stays allowed (it sends no email). Accepting an invite confirms the accepter's email.
-- Invites: owner only; the email is lowercased. Already a member → 409 `ALREADY_MEMBER` ("<name> is already a member.", as a field error on `email`). A pending invite (not accepted, not cancelled; expired ones too) for the same email is sent again on the same row with a new token and expiry, and the answer says `resent: true`. Tokens are 32 random bytes; only the SHA-256 hash is stored; they last 7 days.
+- Invites: the owner and managers with inviteMembers (others 403 `FORBIDDEN`); the email is lowercased. Already a member → 409 `ALREADY_MEMBER` ("<name> is already a member.", as a field error on `email`). A pending invite (not accepted, not cancelled; expired ones too) for the same email is sent again on the same row with a new token and expiry, and the answer says `resent: true`. Tokens are 32 random bytes; only the SHA-256 hash is stored; they last 7 days.
 - The invite row is written first, then the email is sent. If sending fails, 502 `EMAIL_NOT_SENT`; the invite stays listed so Resend works.
 - POST /invites and resend return the invite `{ id, email, createdAt, expiresAt, resent }`; GET /invites lists pending ones, newest first, expired ones included (the page marks them). Cancel stamps `cancelledAt` and returns `{ id }`.
 - Remove: never the owner (400 `CANNOT_REMOVE_OWNER`); someone not in the project → 404 `MEMBER_NOT_FOUND`. Returns `{ projectId, userId, unassignedTaskCount }`.
@@ -147,7 +155,8 @@ Members and invites notes (milestone 7):
 - Every write returns the updated object.
 
 ## Moving a task (server side, one transaction)
-1. Check membership (404 otherwise); the target column is in the same project (400 `COLUMN_NOT_FOUND`).
+1. Check membership (404 otherwise); the target column is in the same project (400 `COLUMN_NOT_FOUND`). Check `can()`: another column needs `task.move` (members: tasks assigned to them); a reorder within the column needs `task.reorderTeam` (403 `TASK_FORBIDDEN`).
+   - Whoever doesn't change the team task order sends neighbours from their own card order. The server places the card there in their `cardOrder` (and drops it from the source column's list), and puts it at the TOP of the target column's team order. Steps 2–3 below are for the owner and managers with teamOrder.
 2. Find the neighbours in the target column's current order, without the moved card. `afterTaskId` is the card it lands below, `beforeTaskId` the one it lands above; given one, the other side is whatever is next to it now; given none, the card goes to the bottom. A neighbour that isn't in that column, or two that aren't next to each other, is 400 `INVALID_POSITION` (the board changed under the user).
 3. Position: between → midpoint; top → first − 1000; bottom → last + 1000; empty → 1000. If the gap is too small, re-space the column first (03-data-model).
 4. Into the isDone column → set completedAt (reordering inside it keeps the original time); out of it → clear it.

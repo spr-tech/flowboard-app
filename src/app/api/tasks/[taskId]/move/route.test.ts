@@ -1,12 +1,12 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { moveTask } from "@/server/tasks/tasks.service";
+import { moveTask } from "@/server/tasks/taskMove.service";
 import { jsonRequest, segment, signInAs } from "@/test/routeTestHelpers";
 import { PATCH } from "./route";
 
 vi.mock("@/auth", () => ({ auth: vi.fn() }));
-vi.mock("@/server/tasks/tasks.service", () => ({ moveTask: vi.fn() }));
+vi.mock("@/server/tasks/taskMove.service", () => ({ moveTask: vi.fn() }));
 
 const path = "/api/tasks/t1/move";
 const params = segment({ taskId: "t1" });

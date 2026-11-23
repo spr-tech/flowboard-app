@@ -1,5 +1,5 @@
 // Invites (docs/plan/04-api.md, "Members and invites"; 01-product-and-flows.md, "Accept invite").
-// - Owner only, with a confirmed email (403 EMAIL_NOT_VERIFIED otherwise). One pending invite per
+// - The owner, or a manager with inviteMembers, with a confirmed email (403 EMAIL_NOT_VERIFIED otherwise). One pending invite per
 //   email per project: inviting again resends it.
 // - Accepting an invite confirms the accepter's email (the link reached that address).
 // - Tokens: 32 random bytes, only the SHA-256 hash stored, 7 days.
@@ -22,11 +22,17 @@ import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
 import { transaction } from "@/server/lib/transaction";
 import { createToken, hashToken } from "@/server/lib/secureToken";
-import { requireOwner, type Db } from "@/server/projects/projectAccess";
+import { assertCan, permissionContext, requireMember, type Db } from "@/server/projects/projectAccess";
 import { ActivityAction } from "@/utilities/enums/activityActions";
 import { normaliseEmail } from "@/utilities/helpers/normaliseEmail";
 
 export const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** The owner, or a manager with inviteMembers: 404 for non-members, 403 for anyone else. */
+async function requireInviter(db: Db, userId: string, projectId: string) {
+  const membership = await requireMember(db, userId, projectId);
+  assertCan("member.invite", permissionContext(userId, membership));
+}
 
 const inviteNotFound = () => new ApiError(404, "INVITE_NOT_FOUND", "We couldn't find that invite.");
 const notPending = () => new ApiError(400, "INVITE_NOT_PENDING", "That invite has already been used or cancelled.");
@@ -81,8 +87,8 @@ export async function createInvite(userId: string, projectId: string, emailInput
   const { token, tokenHash } = createToken();
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
 
-  await requireOwner(prisma, userId, projectId);
-  // After the owner check, so a project you're not in still answers 404.
+  await requireInviter(prisma, userId, projectId);
+  // After the membership check, so a project you're not in still answers 404.
   await requireVerifiedEmail(prisma, userId);
   const [member, pending, details] = await Promise.all([
     prisma.projectMember.findFirst({
@@ -130,7 +136,7 @@ export async function createInvite(userId: string, projectId: string, emailInput
 
 /** The project's pending invites, newest first. Expired ones are included; the page marks them. */
 export async function listInvites(userId: string, projectId: string): Promise<InviteResponse[]> {
-  await requireOwner(prisma, userId, projectId);
+  await requireInviter(prisma, userId, projectId);
   const invites = await prisma.invite.findMany({
     where: { projectId, acceptedAt: null, cancelledAt: null },
     orderBy: { expiresAt: "desc" },
@@ -139,14 +145,14 @@ export async function listInvites(userId: string, projectId: string): Promise<In
   return invites.map(toInviteResponse);
 }
 
-/** The invite and its project, if the user owns that project (404 otherwise, like the project). */
-async function requirePendingInviteAsOwner(db: Db, userId: string, inviteId: string) {
+/** The invite, if the user may invite to its project (404 for non-members, like the project). */
+async function requirePendingInviteAsInviter(db: Db, userId: string, inviteId: string) {
   const invite = await db.invite.findUnique({
     where: { id: inviteId },
     select: { ...inviteSelect, projectId: true, acceptedAt: true, cancelledAt: true },
   });
   if (!invite) throw inviteNotFound();
-  await requireOwner(db, userId, invite.projectId);
+  await requireInviter(db, userId, invite.projectId);
   if (invite.acceptedAt || invite.cancelledAt) throw notPending();
   return invite;
 }
@@ -156,7 +162,7 @@ export async function resendInvite(userId: string, inviteId: string): Promise<Se
   const { token, tokenHash } = createToken();
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
 
-  const pending = await requirePendingInviteAsOwner(prisma, userId, inviteId);
+  const pending = await requirePendingInviteAsInviter(prisma, userId, inviteId);
   await requireVerifiedEmail(prisma, userId);
   const details = await emailDetails(prisma, pending.projectId, userId);
 
@@ -185,7 +191,7 @@ export async function resendInvite(userId: string, inviteId: string): Promise<Se
 /** Cancel a pending invite. The row stays (stamped), so its link can say it was cancelled. */
 export async function cancelInvite(userId: string, inviteId: string): Promise<CancelInviteResponse> {
   return transaction(async (tx) => {
-    const pending = await requirePendingInviteAsOwner(tx, userId, inviteId);
+    const pending = await requirePendingInviteAsInviter(tx, userId, inviteId);
     await tx.invite.update({ where: { id: pending.id }, data: { cancelledAt: new Date() } });
     await tx.activity.create({
       data: {
