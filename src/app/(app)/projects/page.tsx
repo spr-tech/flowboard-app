@@ -4,7 +4,7 @@ import ProjectsContent from "@/components/content/projects/projectsContent";
 import { toProjectFilter } from "@/utilities/helpers/projectOrder";
 import { searchParam, type SearchParams } from "@/utilities/helpers/searchParam";
 
-export const metadata: Metadata = { title: "Projects · Flowboard" };
+export const metadata: Metadata = { title: "Projects" };
 
 export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;

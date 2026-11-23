@@ -6,6 +6,7 @@ import { HowItWorksSection } from "./howItWorksSection";
 import { LandingFooter } from "./landingFooter";
 import { LandingNav } from "./landingNav";
 import { SloganSection } from "./sloganSection";
+import { StructuredData } from "./structuredData";
 import { WhySection } from "./whySection";
 
 export default function LandingContent() {
@@ -25,6 +26,7 @@ export default function LandingContent() {
         <CtaSection />
       </main>
       <LandingFooter />
+      <StructuredData />
     </div>
   );
 }
