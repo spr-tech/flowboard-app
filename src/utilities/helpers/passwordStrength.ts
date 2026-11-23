@@ -38,11 +38,15 @@ function characterKinds(password: string): number {
   return [/\p{Ll}/u, /\p{Lu}/u, /\p{N}/u, /[^\p{L}\p{N}]/u].filter((kind) => kind.test(password)).length;
 }
 
-/** Longer is stronger: 0 points under 12 characters, up to 4 from 20. */
-function lengthPoints(length: number): number {
-  if (length >= 20) return 4;
-  if (length >= 16) return 2;
-  if (length >= 12) return 1;
+/**
+ * Longer is stronger: 0 points under 10 characters, 1 for 10–11, 2 for 12–13, 3 for 14–15,
+ * and 4 from 16.
+ */
+export function lengthPoints(length: number): number {
+  if (length >= 16) return 4;
+  if (length >= 14) return 3;
+  if (length >= 12) return 2;
+  if (length >= 10) return 1;
   return 0;
 }
 

@@ -1,6 +1,26 @@
 import { describe, expect, it } from "vitest";
 
-import { getPasswordStrength, hasRepetition, hasSimpleSequence } from "./passwordStrength";
+import { getPasswordStrength, hasRepetition, hasSimpleSequence, lengthPoints } from "./passwordStrength";
+
+// Points: length (lengthPoints) + one per kind of character beyond the first (lowercase,
+// uppercase, digits, symbols), minus 2 for repeats and 1 for a simple sequence.
+// Strong from 5 points, Fair from 3. The comments below show each example's sum.
+
+describe("lengthPoints", () => {
+  it.each([
+    [9, 0],
+    [10, 1],
+    [11, 1],
+    [12, 2],
+    [13, 2],
+    [14, 3],
+    [15, 3],
+    [16, 4],
+    [40, 4],
+  ])("%i characters → %i points", (length, points) => {
+    expect(lengthPoints(length)).toBe(points);
+  });
+});
 
 describe("getPasswordStrength", () => {
   it.each([
@@ -8,26 +28,29 @@ describe("getPasswordStrength", () => {
     ["short!", "too short"],
     ["longenoughbutnosymbol", "no special character"],
     ["has<angle>brackets!", "an angle bracket"],
-    ["password1!", "short, two kinds of character"],
-    ["abcdef123!!", "sequences"],
-    ["aaaaaaaaaaaa!", "repeats"],
-    ["qwerty-qwerty", "a keyboard row"],
+    ["plumtree!!", "10 characters, two kinds: 1 + 1"],
+    ["abcdef123!!", "a sequence: 1 + 2 − 1"],
+    ["aaaaaaaaaaaa!", "repeats: 2 + 1 − 2"],
+    ["qwerty-qwerty", "a keyboard row: 2 + 1 − 1"],
   ])("Weak: %j (%s)", (password) => {
     expect(getPasswordStrength(password)).toBe("weak");
   });
 
   it.each([
-    ["Tr0ub4dor&3x", "12 characters, all four kinds"],
-    ["Blue#Kettle9", "12 characters, mixed"],
-    ["lantern moss river", "a long phrase, lowercase and spaces"],
+    ["password1!", "10 characters, three kinds: 1 + 2"],
+    ["Lagos2024!", "10 characters, all four kinds: 1 + 3"],
+    ["Abcdefgh1!", "all four kinds but a sequence: 1 + 3 − 1"],
   ])("Fair: %j (%s)", (password) => {
     expect(getPasswordStrength(password)).toBe("fair");
   });
 
   it.each([
-    ["Sunset-Harbor-47", "16 characters, all four kinds"],
-    ["correct horse battery staple", "a long passphrase"],
-    ["Mango!Violin+Tide 82", "long and mixed"],
+    ["Tr0ub4dor&3x", "12 characters, all four kinds: 2 + 3"],
+    ["Blue#Kettle9", "12 characters, all four kinds: 2 + 3"],
+    ["lantern moss river", "a long phrase, lowercase and spaces: 4 + 1"],
+    ["Sunset-Harbor-47", "16 characters, all four kinds: 4 + 3"],
+    ["correct horse battery staple", "a long passphrase: 4 + 1"],
+    ["Mango!Violin+Tide 82", "long and mixed: 4 + 3"],
   ])("Strong: %j (%s)", (password) => {
     expect(getPasswordStrength(password)).toBe("strong");
   });
