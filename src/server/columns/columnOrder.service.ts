@@ -3,7 +3,7 @@
 // order; the owner's drags change the team order (moveColumn).
 import { Prisma } from "@/lib/generated/prisma";
 import { ApiError } from "@/server/lib/errors";
-import { prisma } from "@/server/lib/prisma";
+import { transaction } from "@/server/lib/transaction";
 import { requireMember } from "@/server/projects/projectAccess";
 
 export type ColumnOrderResponse = { projectId: string; columnOrder: string[] | null };
@@ -17,7 +17,7 @@ export async function setColumnOrder(
   projectId: string,
   columnIds: string[]
 ): Promise<ColumnOrderResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const membership = await requireMember(tx, userId, projectId);
     if (membership.role === "OWNER") throw ownerUsesTeamOrder();
     const known = await tx.column.count({ where: { projectId, id: { in: columnIds } } });
@@ -42,7 +42,7 @@ export async function setColumnOrder(
 
 /** Back to the team order. */
 export async function resetColumnOrder(userId: string, projectId: string): Promise<ColumnOrderResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     await requireMember(tx, userId, projectId);
     await tx.projectMember.update({
       where: { userId_projectId: { userId, projectId } },

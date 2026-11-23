@@ -4,6 +4,7 @@ import type { RemoveMemberResponse } from "@/models/responses/memberResponses";
 import type { ProjectMemberResponse } from "@/models/responses/projectResponses";
 import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
+import { transaction } from "@/server/lib/transaction";
 import { requireMember, requireOwner } from "@/server/projects/projectAccess";
 import { ActivityAction } from "@/utilities/enums/activityActions";
 
@@ -12,7 +13,7 @@ import { ActivityAction } from "@/utilities/enums/activityActions";
  * goes, and a member.removed row is written, all in one transaction. Never the owner.
  */
 export async function removeMember(userId: string, projectId: string, memberId: string): Promise<RemoveMemberResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     await requireOwner(tx, userId, projectId);
     const member = await tx.projectMember.findUnique({
       where: { userId_projectId: { userId: memberId, projectId } },

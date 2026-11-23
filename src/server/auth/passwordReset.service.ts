@@ -15,6 +15,7 @@ import { assertPasswordAllowed } from "@/server/auth/passwordRules";
 import { sendEmail } from "@/server/lib/email";
 import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
+import { transaction } from "@/server/lib/transaction";
 import { normaliseEmail } from "@/utilities/helpers/normaliseEmail";
 
 export const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
@@ -110,7 +111,7 @@ export async function resetPassword(token: string, newPassword: string): Promise
   const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
   const now = new Date();
 
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     // Claim the token: only one request can turn usedAt from null to now, so two clicks
     // at the same moment can't both reset the password.
     const claimed = await tx.passwordResetToken.updateMany({

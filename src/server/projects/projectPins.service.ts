@@ -1,7 +1,7 @@
 // Per-user preferences on a project: pins and "last opened". They change nothing anyone else
 // sees, so unlike every other write they record no Activity row (docs/plan/03-data-model.md).
 import type { ProjectMembershipResponse } from "@/models/responses/projectResponses";
-import { prisma } from "@/server/lib/prisma";
+import { transaction } from "@/server/lib/transaction";
 import { membershipSelect, requireMember, toMyMembership, type Db } from "./projectAccess";
 
 /** Opening a project writes lastOpenedAt at most this often per user and project. */
@@ -31,7 +31,7 @@ export async function pinProject(
   projectId: string,
   now = new Date()
 ): Promise<ProjectMembershipResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const membership = await requireMember(tx, userId, projectId);
     const pinned = membership.pinnedAt
       ? membership
@@ -45,7 +45,7 @@ export async function pinProject(
 }
 
 export async function unpinProject(userId: string, projectId: string): Promise<ProjectMembershipResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     await requireMember(tx, userId, projectId);
     const unpinned = await tx.projectMember.update({
       where: { userId_projectId: { userId, projectId } },

@@ -27,6 +27,26 @@ const sha256 = (value: string) => createHash("sha256").update(value).digest("hex
 const passwordUser = { id: "user-1", email: "ada@example.com", name: "Ada Okafor", passwordHash: "bcrypt-hash" };
 const githubUser = { ...passwordUser, id: "user-2", passwordHash: null };
 
+/**
+ * Holds the next prisma.$transaction open until release() is called, so a test can check what
+ * happened while it was still running (the callback itself has run; the commit hasn't).
+ */
+function holdTransaction() {
+  let release = () => {};
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  prismaMock.$transaction.mockImplementationOnce((async (arg: unknown) => {
+    const result = typeof arg === "function" ? await arg(prismaMock) : await Promise.all(arg as Promise<unknown>[]);
+    await gate;
+    return result;
+  }) as never);
+  return { release: () => release() };
+}
+
+/** Lets every already-settled promise run its callbacks (fake timers don't affect this). */
+const flush = async () => {
+  for (let i = 0; i < 20; i++) await Promise.resolve();
+};
+
 /** The token in the link of the last email sent. */
 function tokenFromLastEmail(): string {
   const { text } = vi.mocked(sendEmail).mock.calls.at(-1)![0];
@@ -75,6 +95,21 @@ describe("requestPasswordReset", () => {
     await expect(requestPasswordReset("nobody@example.com", BASE_URL)).resolves.toBe("unknown-email");
     expect(prismaMock.passwordResetToken.create).not.toHaveBeenCalled();
     expect(sendEmail).not.toHaveBeenCalled();
+  });
+
+  it("sends the email only after the token's transaction has committed", async () => {
+    prismaMock.user.findUnique.mockResolvedValue(passwordUser as never);
+    prismaMock.passwordResetToken.count.mockResolvedValue(0);
+    const held = holdTransaction();
+
+    const result = requestPasswordReset(passwordUser.email, BASE_URL);
+    await flush();
+
+    expect(prismaMock.$transaction).toHaveBeenCalled();
+    expect(sendEmail).not.toHaveBeenCalled();
+    held.release();
+    await expect(result).resolves.toBe("sent");
+    expect(sendEmail).toHaveBeenCalledOnce();
   });
 
   it("emails a link whose token is stored only as its hash, expiring in 1 hour", async () => {

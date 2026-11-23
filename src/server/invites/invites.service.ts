@@ -3,6 +3,8 @@
 // - Tokens: 32 random bytes, only the SHA-256 hash stored, 7 days.
 // - The row is written first, then the email is sent; a failed send is reported, and the invite
 //   stays listed so Resend works.
+// - Transactions hold only the writes (the invite and its Activity row). Checks and the email's
+//   details are read before, and the email goes out after the commit (src/server/lib/transaction.ts).
 import type {
   AcceptInviteResponse,
   CancelInviteResponse,
@@ -15,6 +17,7 @@ import { appUrl } from "@/server/lib/appUrl";
 import { sendEmail } from "@/server/lib/email";
 import { ApiError } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
+import { transaction } from "@/server/lib/transaction";
 import { createToken, hashToken } from "@/server/lib/secureToken";
 import { requireOwner, type Db } from "@/server/projects/projectAccess";
 import { ActivityAction } from "@/utilities/enums/activityActions";
@@ -75,23 +78,25 @@ export async function createInvite(userId: string, projectId: string, emailInput
   const { token, tokenHash } = createToken();
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
 
-  const { invite, resent, details } = await prisma.$transaction(async (tx) => {
-    await requireOwner(tx, userId, projectId);
-
-    const member = await tx.projectMember.findFirst({
+  await requireOwner(prisma, userId, projectId);
+  const [member, pending, details] = await Promise.all([
+    prisma.projectMember.findFirst({
       where: { projectId, user: { email } },
       select: { user: { select: { name: true, email: true } } },
-    });
-    if (member) {
-      const message = `${displayName(member.user)} is already a member.`;
-      throw new ApiError(409, "ALREADY_MEMBER", message, { email: message });
-    }
-
-    const pending = await tx.invite.findFirst({
+    }),
+    prisma.invite.findFirst({
       where: { projectId, email, acceptedAt: null, cancelledAt: null },
       orderBy: { expiresAt: "desc" },
       select: { id: true },
-    });
+    }),
+    emailDetails(prisma, projectId, userId),
+  ]);
+  if (member) {
+    const message = `${displayName(member.user)} is already a member.`;
+    throw new ApiError(409, "ALREADY_MEMBER", message, { email: message });
+  }
+
+  const invite = await transaction(async (tx) => {
     const saved = pending
       ? await tx.invite.update({
           where: { id: pending.id },
@@ -110,11 +115,12 @@ export async function createInvite(userId: string, projectId: string, emailInput
         meta: pending ? { email, resent: true } : { email },
       },
     });
-    return { invite: saved, resent: Boolean(pending), details: await emailDetails(tx, projectId, userId) };
+    return saved;
   });
 
+  // Committed: now the email (never inside the transaction, where a slow send would hold it open).
   await sendInvite(email, token, details);
-  return { ...toInviteResponse(invite), resent };
+  return { ...toInviteResponse(invite), resent: Boolean(pending) };
 }
 
 /** The project's pending invites, newest first. Expired ones are included; the page marks them. */
@@ -145,8 +151,10 @@ export async function resendInvite(userId: string, inviteId: string): Promise<Se
   const { token, tokenHash } = createToken();
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
 
-  const { invite, details } = await prisma.$transaction(async (tx) => {
-    const pending = await requirePendingInviteAsOwner(tx, userId, inviteId);
+  const pending = await requirePendingInviteAsOwner(prisma, userId, inviteId);
+  const details = await emailDetails(prisma, pending.projectId, userId);
+
+  const invite = await transaction(async (tx) => {
     const saved = await tx.invite.update({
       where: { id: pending.id },
       data: { tokenHash, expiresAt, invitedById: userId },
@@ -160,16 +168,17 @@ export async function resendInvite(userId: string, inviteId: string): Promise<Se
         meta: { email: pending.email, resent: true },
       },
     });
-    return { invite: saved, details: await emailDetails(tx, pending.projectId, userId) };
+    return saved;
   });
 
+  // Committed: now the email.
   await sendInvite(invite.email, token, details);
   return { ...toInviteResponse(invite), resent: true };
 }
 
 /** Cancel a pending invite. The row stays (stamped), so its link can say it was cancelled. */
 export async function cancelInvite(userId: string, inviteId: string): Promise<CancelInviteResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const pending = await requirePendingInviteAsOwner(tx, userId, inviteId);
     await tx.invite.update({ where: { id: pending.id }, data: { cancelledAt: new Date() } });
     await tx.activity.create({
@@ -209,7 +218,7 @@ export async function previewInvite(token: string): Promise<InvitePreview> {
 
 /** Join the project the link is for. Only the invited email may use it. */
 export async function acceptInvite(userId: string, token: string): Promise<AcceptInviteResponse> {
-  return prisma.$transaction(async (tx) => {
+  return transaction(async (tx) => {
     const [user, invite] = await Promise.all([
       tx.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true } }),
       tx.invite.findUnique({
