@@ -123,7 +123,9 @@ export function TeamActivity({ meId }: { meId: string | null }) {
       }
     >
       {!data?.length ? (
-        <p className="text-sm text-fg-muted">Nothing has happened yet.</p>
+        <p className="py-6 text-center text-sm text-fg-secondary">
+          When you or your teammates change something, it shows up here.
+        </p>
       ) : (
         <ol aria-live="polite" className="flex flex-col gap-3.5">
           {data.map((item) => {

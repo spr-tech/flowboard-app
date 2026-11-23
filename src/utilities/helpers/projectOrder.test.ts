@@ -4,6 +4,7 @@ import type { MyMembership } from "@/models/responses/projectResponses";
 import {
   countPinned,
   filterProjects,
+  mostRecentlyOpened,
   selectSidebarProjects,
   sortForProjectsPage,
   toProjectFilter,
@@ -36,6 +37,21 @@ function row(
 }
 
 const ids = (rows: Row[]) => rows.map((r) => r.id);
+
+describe("mostRecentlyOpened", () => {
+  it("is the project I opened last, pinned or not", () => {
+    const projects = [row("a", { opened: 10 }), row("b", { pinned: 1, opened: 30 }), row("c", { opened: 20 })];
+    expect(mostRecentlyOpened(projects)?.id).toBe("b");
+  });
+
+  it("counts a project I've never opened from when I joined", () => {
+    expect(mostRecentlyOpened([row("old", { opened: 5 }), row("joined", { joined: 40 })])?.id).toBe("joined");
+  });
+
+  it("is null when I have no projects", () => {
+    expect(mostRecentlyOpened([])).toBeNull();
+  });
+});
 
 describe("selectSidebarProjects", () => {
   it("shows only pins when there are 3 or more, oldest pin first", () => {

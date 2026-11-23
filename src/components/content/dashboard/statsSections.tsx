@@ -28,6 +28,7 @@ function useStatsCard(day: DashboardQuery) {
 /** Seven days from today, one dot per task of mine due that day; today is dark. */
 export function NextSevenDays({ day }: { day: DashboardQuery }) {
   const { data, ...state } = useStatsCard(day);
+  const nothingDue = data ? data.next7Days.every(({ count }) => count === 0) : false;
   return (
     <DashboardCard
       id="dashboard-next-7"
@@ -67,6 +68,7 @@ export function NextSevenDays({ day }: { day: DashboardQuery }) {
           );
         })}
       </ol>
+      {nothingDue && <p className="text-sm text-fg-secondary">Nothing due this week.</p>}
     </DashboardCard>
   );
 }
@@ -98,7 +100,9 @@ export function OpenWorkByPriority({ day }: { day: DashboardQuery }) {
         </div>
       }
     >
-      <p className="text-sm text-fg-secondary">{plural(total, "open task")} assigned to you</p>
+      <p className="text-sm text-fg-secondary">
+        {total > 0 ? `${plural(total, "open task")} assigned to you` : "No open work."}
+      </p>
       {total > 0 && counts && (
         <>
           <div aria-hidden className="flex h-3 gap-0.5 overflow-hidden rounded-full">
@@ -143,6 +147,25 @@ export function CompletedChart({ day }: { day: DashboardQuery }) {
       <p className="text-sm text-fg-secondary">
         <strong className="font-heading text-2xl text-fg-primary">{total}</strong> {total === 1 ? "task" : "tasks"} done
       </p>
+      {total === 0 ? (
+        // Fourteen empty bars say nothing; the same space says how to fill them.
+        <p
+          className="flex items-center justify-center rounded-2xl bg-surface-page px-6 text-center text-sm text-fg-secondary"
+          style={{ minHeight: CHART_HEIGHT_PX + 24 }}
+        >
+          Tick a task when it&apos;s done, and your progress shows up here.
+        </p>
+      ) : (
+        <CompletedBars days={days} max={max} />
+      )}
+    </DashboardCard>
+  );
+}
+
+/** The 14 bars, the first day and "Today" under them, and the numbers for screen readers. */
+function CompletedBars({ days, max }: { days: { date: string; count: number }[]; max: number }) {
+  return (
+    <>
       <div
         aria-hidden
         className="flex items-end gap-0.5 border-b border-line-subtle"
@@ -172,6 +195,6 @@ export function CompletedChart({ day }: { day: DashboardQuery }) {
           </li>
         ))}
       </ol>
-    </DashboardCard>
+    </>
   );
 }
