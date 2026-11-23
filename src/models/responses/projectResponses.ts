@@ -1,4 +1,4 @@
-import type { BoardMember, BoardTask } from "@/models/responses/boardResponses";
+import type { BoardMember, BoardTask, CardOrder } from "@/models/responses/boardResponses";
 import type { ManagerPermissions } from "@/utilities/helpers/permissions";
 import type { ProjectColour } from "@/utilities/enums/projectColours";
 
@@ -63,8 +63,15 @@ export type ColumnPermissions = {
   memberColumnCount: number;
 };
 
-/** My membership, plus my own column order (null = the team order; the owner never has one). */
-export type MyBoardMembership = MyMembership & { columnOrder: string[] | null };
+/**
+ * My membership, plus my own column and card orders (null = the team order; always null for
+ * whoever changes the team order) and how many open tasks I took from the pool.
+ */
+export type MyBoardMembership = MyMembership & {
+  columnOrder: string[] | null;
+  cardOrder: CardOrder | null;
+  takenOpenCount: number;
+};
 
 /** GET /api/projects/:projectId: the whole board. Also what project writes return. */
 export type ProjectDetail = {

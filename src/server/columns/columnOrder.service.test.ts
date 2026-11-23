@@ -43,7 +43,7 @@ describe("setColumnOrder", () => {
 
   it("refuses the owner, whose moves change the team order instead", async () => {
     prismaMock.projectMember.findUnique.mockResolvedValue({ ...member, role: "OWNER" } as never);
-    await expect(setColumnOrder("demo", "p1", ["todo"])).rejects.toMatchObject({ code: "OWNER_USES_TEAM_ORDER" });
+    await expect(setColumnOrder("demo", "p1", ["todo"])).rejects.toMatchObject({ code: "USES_TEAM_ORDER" });
   });
 
   it("answers 404 to a non-member", async () => {
@@ -57,6 +57,6 @@ describe("resetColumnOrder", () => {
     prismaMock.projectMember.findUnique.mockResolvedValue(member as never);
 
     expect(await resetColumnOrder("sam", "p1")).toEqual({ projectId: "p1", columnOrder: null });
-    expect(prismaMock.projectMember.update.mock.calls[0][0].data).toEqual({ columnOrder: Prisma.DbNull });
+    expect(prismaMock.projectMember.update.mock.calls[0][0].data).toEqual({ columnOrder: Prisma.DbNull, cardOrder: Prisma.DbNull });
   });
 });

@@ -21,9 +21,14 @@ export type BoardTask = {
   /** Set while the task is in the done column. */
   completedAt: string | null;
   createdAt: string;
+  /** Who created it: members may edit and delete the tasks they created. */
+  createdById: string;
+  /** The assignee took it from the unassigned pool ("Assign to me"). */
+  takenFromPool: boolean;
+  /** Created by a member and not yet opened by the owner: the owner sees a "New" badge. */
+  newForOwner: boolean;
 };
 
-/** A project member, for the assignee select and the header avatars. Owner first. */
 /** Someone on the project, with a manager's switches (null for the owner and members). */
 export type BoardMember = BoardPerson & { role: ProjectRole; permissions: ManagerPermissions | null };
 
@@ -40,3 +45,16 @@ export type BoardColumn = {
 
 /** DELETE /api/tasks/:taskId and DELETE /api/columns/:columnId. */
 export type DeletedResponse = { id: string };
+
+/** A note under a task's description. Never edited; the author or the owner may delete it. */
+export type TaskNoteResponse = {
+  id: string;
+  taskId: string;
+  body: string;
+  createdAt: string;
+  author: BoardPerson;
+};
+
+/** PUT and DELETE (reset) of my personal orders. Null = the team order. */
+export type CardOrder = Record<string, string[]>;
+export type CardOrderResponse = { projectId: string; cardOrder: CardOrder | null };

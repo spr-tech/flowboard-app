@@ -24,7 +24,9 @@ import {
   toMyMembership,
   type Db,
 } from "./projectAccess";
-import { taskSelect, toBoardTask } from "@/server/tasks/taskShape";
+import { countTakenOpen, taskSelect, toBoardTask } from "@/server/tasks/taskShape";
+import { toCardOrder } from "@/utilities/helpers/cardOrder";
+import { usesTeamCardOrder, usesTeamColumnOrder } from "@/utilities/helpers/permissions";
 import { recordVisit } from "./projectPins.service";
 
 /** Every new board starts with these, Done last and marked as the done column. */
@@ -157,18 +159,27 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
       },
       // Everyone (sorted by role below); mine is picked out below.
       members: {
-        select: { ...membershipSelect, columnOrder: true, user: { select: { id: true, name: true, image: true } } },
+        select: {
+          ...membershipSelect,
+          columnOrder: true,
+          cardOrder: true,
+          user: { select: { id: true, name: true, image: true } },
+        },
       },
     },
   });
   const membership = project?.members.find((member) => member.user.id === userId);
   if (!project || !membership) throw projectNotFound();
   const members = sortByRole(project.members);
-  const tasks = await db.task.findMany({
-    where: { projectId },
-    orderBy: [{ columnId: "asc" }, { position: "asc" }],
-    select: taskSelect,
-  });
+  const [tasks, takenOpenCount] = await Promise.all([
+    db.task.findMany({
+      where: { projectId },
+      orderBy: [{ columnId: "asc" }, { position: "asc" }],
+      select: taskSelect,
+    }),
+    countTakenOpen(db, userId, projectId),
+  ]);
+  const myContext = permissionContext(userId, membership);
 
   const ownerId = project.members.find((member) => member.role === "OWNER")?.user.id;
   const columns = project.columns.map(({ _count, createdAt, ...column }) => ({
@@ -195,8 +206,10 @@ async function loadDetail(db: Db, userId: string, projectId: string): Promise<Pr
     },
     me: {
       ...toMyMembership(membership),
-      // The owner has no personal order: the owner's drags change the team order.
-      columnOrder: membership.role === "OWNER" ? null : toColumnOrder(membership.columnOrder),
+      // Whoever changes the team order has no personal one (owner; managers with the switch).
+      columnOrder: usesTeamColumnOrder(myContext) ? null : toColumnOrder(membership.columnOrder),
+      cardOrder: usesTeamCardOrder(myContext) ? null : toCardOrder(membership.cardOrder),
+      takenOpenCount,
     },
   };
 }

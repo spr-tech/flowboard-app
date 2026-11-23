@@ -189,6 +189,9 @@ describe("getProject", () => {
         dueDate: new Date("2026-11-25T00:00:00Z"),
         completedAt: null,
         createdAt: joinedAt,
+        createdById: "u2",
+        takenFromPoolAt: joinedAt,
+        seenByOwnerAt: null,
         assignee: { id: "u1", name: "Ada", image: null },
       },
     ] as never);
@@ -207,6 +210,9 @@ describe("getProject", () => {
         assignee: { id: "u1", name: "Ada", image: null },
         completedAt: null,
         createdAt: joinedAt.toISOString(),
+        createdById: "u2",
+        takenFromPool: true,
+        newForOwner: true,
       },
     ]);
     expect(prismaMock.task.findMany).toHaveBeenCalledWith(

@@ -14,6 +14,9 @@ const task = (id: string, overrides: Partial<BoardTask> = {}): BoardTask => ({
   assignee: null,
   completedAt: null,
   createdAt: "2026-11-01T00:00:00.000Z",
+  createdById: "me",
+  takenFromPool: false,
+  newForOwner: false,
   ...overrides,
 });
 
