@@ -8,6 +8,12 @@ import { DEFAULT_SIGNED_IN_PATH } from "@/utilities/helpers/safeCallbackUrl";
 /** Signed-out visitors are sent to /login from these, and from everything under them. */
 const PROTECTED_PATHS = ["/dashboard", "/projects", "/settings"];
 
+/**
+ * Signed-out visitors are sent to /login from this exact path only. /verify-email/link/... stays
+ * open: the emailed link works on any device, signed in or not.
+ */
+const VERIFY_EMAIL_PATH = "/verify-email";
+
 /** Signed-in users are sent to the dashboard from these. (/reset-password stays open to everyone.) */
 const SIGNED_OUT_ONLY_PATHS = ["/login", "/register", "/forgot-password"];
 
@@ -32,7 +38,7 @@ export const authConfig = {
         return isSignedIn ? Response.redirect(new URL(DEFAULT_SIGNED_IN_PATH, nextUrl)) : true;
       }
       // false sends the visitor to pages.signIn with ?callbackUrl= set to where they were going.
-      if (isUnder(nextUrl.pathname, PROTECTED_PATHS)) return isSignedIn;
+      if (isUnder(nextUrl.pathname, PROTECTED_PATHS) || nextUrl.pathname === VERIFY_EMAIL_PATH) return isSignedIn;
 
       return true;
     },

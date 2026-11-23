@@ -45,6 +45,16 @@ describe("route protection", () => {
     expect(decide("/reset-password/abc", true)).toBe(true);
   });
 
+  it("sends signed-out visitors from /verify-email to sign in (Auth.js adds the callbackUrl back to it)", () => {
+    expect(decide("/verify-email", false)).toBe(false);
+    expect(decide("/verify-email", true)).toBe(true);
+  });
+
+  it("keeps the email's confirm link open to everyone: it works on any device", () => {
+    expect(decide("/verify-email/link/abc", false)).toBe(true);
+    expect(decide("/verify-email/link/abc", true)).toBe(true);
+  });
+
   it("doesn't treat look-alike paths as protected", () => {
     expect(decide("/dashboards", false)).toBe(true);
     expect(decide("/settings-help", false)).toBe(true);

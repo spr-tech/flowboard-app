@@ -1,14 +1,15 @@
 import { Check } from "lucide-react";
 
-import { PASSWORD_MIN_LENGTH } from "@/models/validations/authValidation";
+import { hasSpecialCharacter, PASSWORD_MIN_LENGTH } from "@/models/validations/authValidation";
 import { cn } from "@/utilities/helpers/cn";
 
 export type PasswordCheck = { label: string; isMet: boolean };
 
-/** The live checks under a new-password field (sign-up and reset), worked out from the typed values. */
+/** The live checks under a new-password field (sign-up, reset and change), worked out from the typed values. */
 export function getPasswordChecks(password: string, confirmPassword: string): PasswordCheck[] {
   return [
     { label: `At least ${PASSWORD_MIN_LENGTH} characters`, isMet: password.length >= PASSWORD_MIN_LENGTH },
+    { label: "One special character", isMet: hasSpecialCharacter(password) },
     { label: "Passwords match", isMet: password.length > 0 && password === confirmPassword },
   ];
 }

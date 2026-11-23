@@ -11,6 +11,8 @@ export const ApiTag = {
   Dashboard: "Dashboard",
   Activity: "Activity",
   Me: "Me",
+  /** /verify-email's status: the address, and when "Resend code" works again. */
+  Verification: "Verification",
 } as const;
 
 export type ApiTag = (typeof ApiTag)[keyof typeof ApiTag];

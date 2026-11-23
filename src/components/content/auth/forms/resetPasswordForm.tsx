@@ -10,7 +10,9 @@ import { FormPasswordInput } from "@/components/ui/form/formPasswordInput";
 import type { ResetTokenState } from "@/models/responses/authResponses";
 import { resetPasswordFormSchema, type ResetPasswordFormValues } from "@/models/validations/authValidation";
 import { useResetPasswordMutation } from "@/services/authService";
+import { useNoAngleBrackets } from "@/utilities/hooks/useNoAngleBrackets";
 import { getPasswordChecks, PasswordChecks } from "../passwordChecks";
+import { PasswordStrengthMeter } from "../passwordStrengthMeter";
 import { applyApiError, isAppError } from "@/utilities/helpers/applyApiError";
 
 /** The server's error codes for a link that stopped working while the form was open. */
@@ -32,15 +34,17 @@ export function ResetPasswordForm({ token, onDone, onTokenRejected }: ResetPassw
   const [resetPassword] = useResetPasswordMutation();
   const [formError, setFormError] = useState<string | null>(null);
   const [isPasswordRevealed, setIsPasswordRevealed] = useState(false);
+  const form = useForm<ResetPasswordFormValues>({
+    resolver: zodResolver(resetPasswordFormSchema),
+    defaultValues: { password: "", confirmPassword: "" },
+  });
   const {
     control,
     handleSubmit,
     setError,
     formState: { isSubmitting },
-  } = useForm<ResetPasswordFormValues>({
-    resolver: zodResolver(resetPasswordFormSchema),
-    defaultValues: { password: "", confirmPassword: "" },
-  });
+  } = form;
+  useNoAngleBrackets(form, "password");
 
   const [password, confirmPassword] = useWatch({ control, name: ["password", "confirmPassword"] });
 
@@ -62,15 +66,19 @@ export function ResetPasswordForm({ token, onDone, onTokenRejected }: ResetPassw
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
       <div className="flex flex-col gap-4">
-        <FormPasswordInput
-          control={control}
-          name="password"
-          label="New password"
-          autoComplete="new-password"
-          isRevealed={isPasswordRevealed}
-          onRevealedChange={setIsPasswordRevealed}
-          toggleLabel={{ show: "Show passwords", hide: "Hide passwords" }}
-        />
+        <div>
+          <FormPasswordInput
+            control={control}
+            name="password"
+            label="New password"
+            autoComplete="new-password"
+            isRevealed={isPasswordRevealed}
+            onRevealedChange={setIsPasswordRevealed}
+            toggleLabel={{ show: "Show passwords", hide: "Hide passwords" }}
+          />
+          {/* The reset page doesn't know whose account it is; the server checks the name/email rule. */}
+          <PasswordStrengthMeter password={password} />
+        </div>
         <FormInput
           control={control}
           name="confirmPassword"

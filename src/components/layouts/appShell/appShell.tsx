@@ -11,6 +11,7 @@ import { SidebarNav } from "./sidebarNav";
 import { SignOutDialog } from "./signOutDialog";
 import { SidebarProjects } from "./sidebarProjects";
 import { TopBar } from "./topBar";
+import { VerifyEmailBanner } from "./verifyEmailBanner";
 
 export type AppShellUser = {
   name: string;
@@ -60,6 +61,7 @@ export function AppShell({ user, children }: AppShellProps) {
 
       <div className="flex min-h-dvh flex-col md:pl-60">
         <TopBar user={user} onOpenMenu={() => dispatch(mobileMenuOpened())} />
+        <VerifyEmailBanner />
         <main className="flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
 

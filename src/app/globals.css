@@ -89,6 +89,10 @@
   --action-primary-hover: var(--brand-vermilion-hover);
   --action-danger: var(--brand-danger);
   --highlight: var(--brand-lime);
+  /* Feedback that isn't an action: warnings and successes (e.g. the password strength meter).
+     Danger is --action-danger. Both are dark enough for text and bars on cream and white. */
+  --feedback-warning: var(--brand-chip-medium-text);
+  --feedback-success: var(--brand-chip-done-text);
   --focus-ring: color-mix(in srgb, var(--brand-lime) 75%, transparent);
   /* The dimmed layer behind dialogs and drawers */
   --overlay: color-mix(in srgb, var(--brand-espresso) 40%, transparent);
@@ -181,6 +185,8 @@
 
   --color-primary-hover: var(--action-primary-hover);
   --color-danger: var(--action-danger);
+  --color-warning: var(--feedback-warning);
+  --color-success: var(--feedback-success);
   --color-highlight: var(--highlight);
   --color-focus: var(--focus-ring);
 

@@ -1,11 +1,14 @@
 "use client";
 
 import { useId, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button/button";
+import { ButtonLink } from "@/components/ui/button/buttonLink";
 import { inviteSchema, type InviteFormValues } from "@/models/validations/memberValidation";
+import { useMe } from "@/services/accountService";
 import { useCreateInviteMutation } from "@/services/invitesService";
 import { applyApiError } from "@/utilities/helpers/applyApiError";
 import { cn } from "@/utilities/helpers/cn";
@@ -24,6 +27,7 @@ const tones = {
     ok: "text-highlight",
     error: "text-status-high",
     button: "bg-highlight text-fg-on-highlight hover:bg-highlight/90",
+    note: "text-fg-muted-on-inverse",
   },
   light: {
     label: "text-fg-primary",
@@ -31,15 +35,43 @@ const tones = {
     ok: "text-status-done-fg",
     error: "text-danger",
     button: "",
+    note: "text-fg-secondary",
   },
 } as const;
 
 /**
- * Invite by email (owner only). The answer shows under the field: "Invite sent to …", "There was
+ * Shown instead of the form until the owner's email is confirmed (the server would answer 403
+ * EMAIL_NOT_VERIFIED anyway): the reason, and the way to fix it.
+ */
+function ConfirmEmailFirst({ tone }: { tone: InviteFormProps["tone"] }) {
+  const pathname = usePathname();
+  const style = tones[tone];
+  return (
+    <div className="flex flex-col gap-2.5">
+      <p className={cn("text-sm font-semibold", style.label)}>Invite by email</p>
+      <p className={cn("text-sm", style.note)}>Confirm your email before inviting people.</p>
+      <ButtonLink
+        text="Enter code"
+        href={`/verify-email?callbackUrl=${encodeURIComponent(pathname)}`}
+        className={cn("h-12 self-start", style.button)}
+      />
+    </div>
+  );
+}
+
+/**
+ * Invite by email (owner only), once the owner's email is confirmed. The answer shows under the field: "Invite sent to …", "There was
  * already an invite for …, so we sent it again.", or "<name> is already a member.". A failed send
  * is a toast (the base query's), since it isn't about what was typed.
  */
 export function InviteForm({ projectId, tone }: InviteFormProps) {
+  const { data: me } = useMe();
+  // While Me loads, the form shows; the server still refuses an unconfirmed sender.
+  if (me && !me.emailVerified) return <ConfirmEmailFirst tone={tone} />;
+  return <InviteEmailForm projectId={projectId} tone={tone} />;
+}
+
+function InviteEmailForm({ projectId, tone }: InviteFormProps) {
   const id = useId();
   const style = tones[tone];
   const [createInvite] = useCreateInviteMutation();

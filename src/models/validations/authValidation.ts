@@ -23,17 +23,34 @@ export const emailField = z
   .toLowerCase()
   .pipe(z.email("Enter a valid email address").max(254, "Email must be at most 254 characters"));
 
+export const ANGLE_BRACKETS_MESSAGE = "Passwords can't contain < or >";
+export const SPECIAL_CHARACTER_MESSAGE = "Add at least one special character, like ! or #";
+
+/** "<" or ">" anywhere. The only characters a new password may not contain. */
+export const hasAngleBracket = (password: string) => /[<>]/.test(password);
+
 /**
- * The rules for a new password (sign-up, reset, change). Any characters are allowed, symbols and
- * spaces included. Signing in only needs one to be typed. The common-password list is checked on
- * the server only (src/server/auth/passwordRules.ts), so the list never ships to browsers.
+ * Anything that isn't a letter or a digit (in any alphabet), spaces included. Angle brackets
+ * don't count: they aren't allowed at all.
+ */
+export const hasSpecialCharacter = (password: string) => /[^\p{L}\p{N}<>]/u.test(password);
+
+/**
+ * The rules for a new password (sign-up, reset, change): length, one special character, and no
+ * < or >. Every other character is allowed, spaces and symbols included. These apply only when a
+ * password is set or changed: signing in only needs one to be typed, so older passwords keep
+ * working. The common-password list is checked on the server only (src/server/auth/passwordRules.ts),
+ * so the list never ships to browsers.
  */
 export const newPasswordField = z
   .string()
+  // First, so it's the message shown (forms show a field's first problem), whatever else is wrong.
+  .refine((value) => !hasAngleBracket(value), { message: ANGLE_BRACKETS_MESSAGE })
   .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
   .refine((value) => new TextEncoder().encode(value).length <= PASSWORD_MAX_BYTES, {
     message: `Password is too long: ${PASSWORD_MAX_BYTES} bytes at most (accented letters and emoji count as 2 to 4)`,
-  });
+  })
+  .refine(hasSpecialCharacter, { message: SPECIAL_CHARACTER_MESSAGE });
 
 export const PERSONAL_INFO_MESSAGE = "Don't use your name or email in your password";
 
