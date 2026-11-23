@@ -72,3 +72,8 @@ Next.js (App Router) · React · TypeScript · Redux Toolkit + RTK Query · Pris
 
 ## Git
 See `docs/plan/07-git-workflow.md`. Merge with merge commits, never squash, never force-push `master`.
+
+Every push gets a description, without exception (milestones, small fixes, chores, follow-up commits):
+- Commit messages: a short summary line, then a blank line, then a body explaining what changed and why. No commit with only a summary line.
+- After pushing a branch, always give me in the chat: the compare link (base `rebuild`), a title, and a full PR description with What, Why (when it isn't obvious), Tests, and Checked in a browser (when there's UI). For stacked branches, say which branch must be merged first.
+- When pushing follow-up commits to a branch whose PR already exists, give me the updated PR description (or the lines to add), so the PR on GitHub matches what's in the branch.
