@@ -110,6 +110,7 @@ function InviteEmailForm({ projectId, tone }: InviteFormProps) {
       <label htmlFor={inputId} className={cn("text-sm font-semibold", style.label)}>
         Invite by email
       </label>
+      {/* On phones the button wraps under the field, on the left. */}
       <div className="flex flex-wrap gap-2.5">
         <input
           id={inputId}

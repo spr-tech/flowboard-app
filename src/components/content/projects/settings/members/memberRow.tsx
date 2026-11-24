@@ -74,8 +74,12 @@ export function MemberRow({ projectId, member, isMe, canRemove, canManageRole, m
             {name}
             {isMe && <span className="font-normal text-fg-muted"> (you)</span>}
           </span>
-          <span className="block text-sm break-all text-fg-muted sm:truncate">
-            {member.email} · {plural(member.taskCount, "task")}
+          {/* The email stays on one line and ends in "…" when it doesn't fit; hover shows it all. */}
+          <span className="flex min-w-0 flex-col text-sm text-fg-muted">
+            <span className="block truncate" title={member.email}>
+              {member.email}
+            </span>
+            <span>{plural(member.taskCount, "task")}</span>
           </span>
         </span>
       </span>

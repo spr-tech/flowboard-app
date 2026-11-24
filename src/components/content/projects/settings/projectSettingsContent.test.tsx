@@ -136,15 +136,17 @@ describe("ProjectSettingsContent", () => {
 });
 
 describe("ProjectSettingsContent: Members", () => {
-  it("lists everyone with '(you)', email · tasks and role badges", async () => {
+  it("lists everyone with '(you)', the email, the task count and role badges", async () => {
     mockApi("OWNER");
     renderWithStore(<ProjectSettingsContent projectId="p1" />);
 
     const list = await within(await screen.findByRole("list", { name: "Members" })).findAllByRole("listitem");
     expect(list[0]).toHaveTextContent("Alex Morgan (you)");
-    expect(list[0]).toHaveTextContent("demo@example.com · 2 tasks");
+    expect(within(list[0]).getByTitle("demo@example.com")).toHaveClass("truncate");
+    expect(list[0]).toHaveTextContent("2 tasks");
     expect(list[0]).toHaveTextContent("Owner");
-    expect(list[1]).toHaveTextContent("ada@team.dev · 3 tasks");
+    expect(list[1]).toHaveTextContent("ada@team.dev");
+    expect(list[1]).toHaveTextContent("3 tasks");
     expect(within(list[0]).queryByRole("button", { name: /Remove/ })).not.toBeInTheDocument();
   });
 
