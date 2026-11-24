@@ -1,13 +1,15 @@
 // The one wrapper every API route handler goes through (see docs/plan/04-api.md).
 // It does the steps every handler needs, in order, so none can be forgotten:
-// read the session → 401 if required and missing → validate params, query and body with Zod →
+// read the session → 401 if required and missing → 403 if the email isn't confirmed (unless the
+// route allows that) → validate params, query and body with Zod →
 // call the handler → return its result as JSON → turn anything thrown into our error shape.
 import type { Session } from "next-auth";
 import { NextResponse } from "next/server";
 import type { z } from "zod";
 
 import { auth } from "@/auth";
-import { errorResponse, readJson, unauthenticated } from "@/server/lib/errors";
+import { ApiError, errorResponse, readJson, unauthenticated } from "@/server/lib/errors";
+import { EMAIL_NOT_VERIFIED } from "@/utilities/constants/errorCodes";
 
 export type SessionUser = Session["user"];
 
@@ -20,12 +22,22 @@ type Schemas = {
   query?: z.ZodType;
 };
 
-type RouteOptions<S extends Schemas, RequireAuth extends boolean> = S & {
-  /**
-   * true: answer 401 unless signed in. false: a public route; the session isn't read at all
-   * (no database work, and the same timing for everyone), so `user` is null.
-   * Every route says this explicitly in its first line.
-   */
+/**
+ * - true: answer 401 unless signed in, and 403 EMAIL_NOT_VERIFIED unless the email is confirmed
+ *   (the verification gate, docs/plan/04-api.md). Every signed-in route uses this unless it has a
+ *   reason not to, so a new route is gated by default.
+ * - "allowUnverified": signed in is enough. Only for what the code page needs (enter the code,
+ *   resend it, its status, who am I, start again with a different email) and accepting an invite,
+ *   which confirms the email itself.
+ * - false: a public route; the session isn't read at all (no database work, and the same timing
+ *   for everyone), so `user` is null.
+ */
+export type AuthMode = boolean | "allowUnverified";
+
+export const EMAIL_NOT_VERIFIED_MESSAGE = "Confirm your email to use Flowboard.";
+
+type RouteOptions<S extends Schemas, RequireAuth extends AuthMode> = S & {
+  /** Who may call this route (see AuthMode). Every route says this explicitly in its first line. */
   auth: RequireAuth;
   /** Status for a successful answer. Default 200; creates use 201. */
   status?: number;
@@ -34,9 +46,9 @@ type RouteOptions<S extends Schemas, RequireAuth extends boolean> = S & {
 /** The schema's parsed value, or undefined when no schema was given. */
 type Parsed<T> = T extends z.ZodType ? z.output<T> : undefined;
 
-export type RouteContext<S extends Schemas, RequireAuth extends boolean> = {
+export type RouteContext<S extends Schemas, RequireAuth extends AuthMode> = {
   request: Request;
-  user: RequireAuth extends true ? SessionUser : null;
+  user: RequireAuth extends false ? null : SessionUser;
   body: Parsed<S["body"]>;
   params: Parsed<S["params"]>;
   query: Parsed<S["query"]>;
@@ -50,7 +62,7 @@ type SegmentData = { params: Promise<Record<string, string | string[] | undefine
  *   export const GET = route({ auth: true }, ({ user }) => getMe(user.id));
  * Return a plain value (sent as JSON) or a Response (sent as is).
  */
-export function route<const S extends Schemas, const RequireAuth extends boolean>(
+export function route<const S extends Schemas, const RequireAuth extends AuthMode>(
   options: RouteOptions<S, RequireAuth>,
   handler: (context: RouteContext<S, RequireAuth>) => unknown
 ) {
@@ -65,6 +77,10 @@ export function route<const S extends Schemas, const RequireAuth extends boolean
         const session = await auth();
         user = session?.user?.id ? session.user : null;
         if (!user) throw unauthenticated();
+        // The server half of the verification gate; the browser only follows it.
+        if (options.auth === true && !user.isEmailVerified) {
+          throw new ApiError(403, EMAIL_NOT_VERIFIED, EMAIL_NOT_VERIFIED_MESSAGE);
+        }
       }
 
       const rawParams = await segment.params;

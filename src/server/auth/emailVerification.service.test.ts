@@ -394,4 +394,12 @@ describe("inviting, invites and GitHub", () => {
     await onSignIn({ user: { id: "u1" }, account: { provider: "credentials" } });
     expect(prismaMock.user.updateMany).not.toHaveBeenCalled();
   });
+
+  it("a Google sign-in (new or linked user) marks the user verified, so they skip the code", async () => {
+    await onSignIn({ user: { id: "u1" }, account: { provider: "google" } });
+    expect(prismaMock.user.updateMany).toHaveBeenCalledWith({
+      where: { id: "u1", emailVerified: null },
+      data: { emailVerified: NOW },
+    });
+  });
 });

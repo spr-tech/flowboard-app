@@ -9,7 +9,7 @@ beforeEach(() => vi.stubEnv("APP_URL", "https://flowboard.example"));
 describe("robots.txt", () => {
   it("allows the public pages and keeps crawlers out of the app, token pages and API", () => {
     const { rules } = robots();
-    expect(rules).toMatchObject({ userAgent: "*", allow: ["/", "/login", "/register"] });
+    expect(rules).toMatchObject({ userAgent: "*", allow: ["/", "/login", "/register", "/privacy", "/terms"] });
     const { disallow } = rules as { disallow: string[] };
     for (const path of [
       "/dashboard",
@@ -35,6 +35,8 @@ describe("sitemap.xml", () => {
       "https://flowboard.example/",
       "https://flowboard.example/login",
       "https://flowboard.example/register",
+      "https://flowboard.example/privacy",
+      "https://flowboard.example/terms",
     ]);
   });
 });

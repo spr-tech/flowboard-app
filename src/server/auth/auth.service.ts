@@ -77,6 +77,6 @@ export function isSessionStale(authTime: number | undefined, passwordChangedAt: 
 export async function getSessionUser(id: string) {
   return prisma.user.findUnique({
     where: { id },
-    select: { id: true, name: true, email: true, image: true, passwordChangedAt: true },
+    select: { id: true, name: true, email: true, image: true, passwordChangedAt: true, emailVerified: true },
   });
 }

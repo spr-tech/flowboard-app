@@ -61,6 +61,8 @@ export function Input({
           className={cn(
             "h-13 rounded-input border-[1.5px] border-line-strong bg-surface-card px-4 text-[15px] text-fg-primary placeholder:text-fg-muted md:text-[15px]",
             "focus-visible:border-line-focus focus-visible:ring-4 focus-visible:ring-focus",
+            // Disabled while a form submits: still readable, not faded to near-white on cream.
+            "disabled:bg-surface-sunken disabled:text-fg-secondary disabled:opacity-100",
             endAdornment && "pr-14",
             className
           )}

@@ -9,7 +9,9 @@ export function signInAs(userId: string | null) {
   // auth() is overloaded (it can also be middleware); here it's only ever "read the session".
   const mockAuth = auth as unknown as Mock<() => Promise<Session | null>>;
   mockAuth.mockResolvedValue(
-    userId ? { user: { id: userId, email: `${userId}@example.com` }, expires: "2099-01-01T00:00:00Z" } : null
+    userId
+      ? { user: { id: userId, email: `${userId}@example.com`, isEmailVerified: true }, expires: "2099-01-01T00:00:00Z" }
+      : null
   );
 }
 

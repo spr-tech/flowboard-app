@@ -3,9 +3,12 @@ import type { Session } from "next-auth";
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 
-import { authConfig } from "./auth.config";
+import { authConfig, PATH_HEADER } from "./auth.config";
 
-const session: Session = { user: { id: "u1", email: "ada@example.com" }, expires: "2099-01-01T00:00:00Z" };
+const session: Session = {
+  user: { id: "u1", email: "ada@example.com", isEmailVerified: true },
+  expires: "2099-01-01T00:00:00Z",
+};
 
 /** What middleware decides for a path: true (let through), false (to /login) or a redirect Response. */
 function decide(path: string, isSignedIn: boolean) {
@@ -23,9 +26,17 @@ describe("route protection", () => {
     }
   );
 
-  it.each(["/dashboard", "/projects/abc", "/settings"])("lets signed-in users into %s", (path) => {
-    expect(decide(path, true)).toBe(true);
-  });
+  it.each(["/dashboard", "/projects/abc", "/settings"])(
+    "lets signed-in users into %s, passing its path along",
+    (path) => {
+      const decision = decide(`${path}?task=t1`, true);
+
+      expect(decision).toBeInstanceOf(Response);
+      // NextResponse.next({ request: { headers } }) marks the header for Next to add to the request.
+      expect((decision as Response).headers.get(`x-middleware-request-${PATH_HEADER}`)).toBe(`${path}?task=t1`);
+      expect((decision as Response).headers.get("location")).toBeNull();
+    }
+  );
 
   it.each(["/login", "/register", "/forgot-password"])("sends signed-in users from %s to the dashboard", (path) => {
     const decision = decide(path, true);

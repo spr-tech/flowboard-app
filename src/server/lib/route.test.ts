@@ -11,7 +11,10 @@ vi.mock("@/auth", () => ({ auth: vi.fn() }));
 // auth() is overloaded (it can also be middleware); here it's only ever "read the session".
 const mockAuth = auth as unknown as Mock<() => Promise<Session | null>>;
 
-const session: Session = { user: { id: "u1", email: "ada@example.com" }, expires: "2099-01-01T00:00:00Z" };
+const session: Session = {
+  user: { id: "u1", email: "ada@example.com", isEmailVerified: true },
+  expires: "2099-01-01T00:00:00Z",
+};
 
 function request(path = "/api/thing", init?: RequestInit) {
   return new Request(`http://localhost${path}`, init);
@@ -37,6 +40,30 @@ describe("route()", () => {
       error: { code: "UNAUTHENTICATED", message: "Your session has ended. Please sign in again." },
     });
     expect(handler).not.toHaveBeenCalled();
+  });
+
+  it("answers 403 EMAIL_NOT_VERIFIED to an unverified user, and never calls the handler", async () => {
+    mockAuth.mockResolvedValue({ ...session, user: { ...session.user, isEmailVerified: false } });
+    const handler = vi.fn();
+
+    const response = await route({ auth: true }, handler)(request(), segment());
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({
+      error: { code: "EMAIL_NOT_VERIFIED", message: "Confirm your email to use Flowboard." },
+    });
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it("lets an unverified user through a route that allows it, but still needs a session", async () => {
+    mockAuth.mockResolvedValue({ ...session, user: { ...session.user, isEmailVerified: false } });
+    const allowed = await route({ auth: "allowUnverified" }, ({ user }) => ({ id: user.id }))(request(), segment());
+    expect(allowed.status).toBe(200);
+    expect(await allowed.json()).toEqual({ id: "u1" });
+
+    mockAuth.mockResolvedValue(null);
+    const signedOut = await route({ auth: "allowUnverified" }, vi.fn())(request(), segment());
+    expect(signedOut.status).toBe(401);
   });
 
   it("runs a public route without reading the session, with user null", async () => {

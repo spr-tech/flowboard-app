@@ -6,7 +6,7 @@ import { cn } from "@/utilities/helpers/cn";
 
 // Icons get the size's default unless they set their own size-* class (the arrow badge does).
 export const buttonVariants = cva(
-  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50 aria-busy:disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -42,8 +42,10 @@ export const buttonVariants = cva(
 
 type ButtonBaseProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> &
   Omit<VariantProps<typeof buttonVariants>, "isIconOnly"> & {
-    /** Disables the button and swaps the start icon for a spinner. */
+    /** Disables the button and swaps the start icon for a spinner. A loading button keeps full colour. */
     isLoading?: boolean;
+    /** Replaces the text while loading, such as "Signing in…". Keeps the text when unset. */
+    loadingText?: string;
     startIcon?: ReactNode;
     endIcon?: ReactNode;
   };
@@ -60,6 +62,7 @@ export function Button({
   variant,
   size,
   isLoading = false,
+  loadingText,
   startIcon,
   endIcon,
   // Default to "button": inside a form the browser default is "submit", which submits by accident.
@@ -79,7 +82,7 @@ export function Button({
       {...rest}
     >
       {isLoading ? <Loader2 className="animate-spin" aria-hidden /> : startIcon}
-      {text}
+      {isLoading && loadingText ? loadingText : text}
       {!isIconOnly && endIcon}
     </button>
   );

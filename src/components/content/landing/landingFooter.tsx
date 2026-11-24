@@ -7,9 +7,9 @@ const linkGroups = [
   {
     title: "Product",
     links: [
-      { label: "How it works", href: "#how" },
-      { label: "Features", href: "#features" },
-      { label: "FAQ", href: "#faq" },
+      { label: "How it works", href: "/#how" },
+      { label: "Features", href: "/#features" },
+      { label: "FAQ", href: "/#faq" },
     ],
   },
   {
@@ -17,6 +17,13 @@ const linkGroups = [
     links: [
       { label: "Sign in", href: "/login" },
       { label: "Create an account", href: "/register" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy policy", href: "/privacy" },
+      { label: "Terms of use", href: "/terms" },
     ],
   },
 ];

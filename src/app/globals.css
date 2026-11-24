@@ -163,6 +163,15 @@
   --radius: 14px;
 }
 
+/* Google's sign-in button guidelines (developers.google.com/identity/branding-guidelines), light
+ * theme: white fill, #747775 border, #1F1F1F text. Fixed by Google, not our brand; used only by
+ * the "Continue with Google" button. */
+:root {
+  --google-button-surface: #ffffff;
+  --google-button-border: #747775;
+  --google-button-fg: #1f1f1f;
+}
+
 /* ─── 4. Tailwind wiring ─────────────────────────────────────────────────────────
  * Each --color-x here becomes bg-x, text-x, border-x, ring-x… in Tailwind v4.
  * `inline` makes the class use the variable itself, so section 2 stays the source.
@@ -172,6 +181,9 @@
   --color-surface-page: var(--surface-page);
   --color-surface-sunken: var(--surface-sunken);
   --color-surface-card: var(--surface-card);
+  --color-google-button-surface: var(--google-button-surface);
+  --color-google-button-border: var(--google-button-border);
+  --color-google-button-fg: var(--google-button-fg);
   --color-surface-inverse: var(--surface-inverse);
   --color-surface-inverse-raised: var(--surface-inverse-raised);
   --color-surface-brand-deep: var(--surface-brand-deep);

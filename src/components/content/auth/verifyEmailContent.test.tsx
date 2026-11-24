@@ -2,6 +2,8 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { signIn, signOut } from "next-auth/react";
+
 import { toast } from "@/components/ui/toast/toast";
 import type { VerificationStatusResponse } from "@/models/responses/emailVerificationResponses";
 import { jsonResponse, mockFetch, renderWithStore } from "@/test/renderWithStore";
@@ -43,7 +45,7 @@ beforeEach(() => {
 });
 
 describe("VerifyEmailContent", () => {
-  it("says where the code went, with the spam hint, Resend and Do this later", async () => {
+  it("says where the code went, with the spam hint, Resend, and the ways out that need no code", async () => {
     serve(() => jsonResponse(200, me));
     renderWithStore(<VerifyEmailContent />);
 
@@ -51,7 +53,12 @@ describe("VerifyEmailContent", () => {
     expect(screen.getByText(/We sent a 6-digit code to/)).toBeInTheDocument();
     expect(screen.getByText("Can't find it? Check your spam folder.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Resend code" })).toBeEnabled();
-    expect(screen.getByRole("link", { name: "Do this later" })).toHaveAttribute("href", "/dashboard");
+    // The verification gate: no "Do this later" any more.
+    expect(screen.queryByRole("link", { name: "Do this later" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Use a different email" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
+    // Google isn't set up in this render.
+    expect(screen.queryByRole("button", { name: "Continue with Google instead" })).not.toBeInTheDocument();
     expect(boxes()).toHaveLength(6);
   });
 
@@ -109,5 +116,62 @@ describe("VerifyEmailContent", () => {
     await userEvent.paste("123456");
 
     await waitFor(() => expect(router.push).toHaveBeenCalledWith("/dashboard"));
+  });
+});
+
+describe("VerifyEmailContent: the ways out", () => {
+  /** Answers the status (with `overrides`) and records every other request's path. */
+  function serveAll(overrides: Partial<VerificationStatusResponse> = {}) {
+    const posted: string[] = [];
+    mockFetch(async (request) => {
+      const path = new URL(request.url).pathname;
+      if (request.method === "GET") return jsonResponse(200, { ...status, ...overrides });
+      posted.push(path);
+      if (path.endsWith("/send")) return jsonResponse(200, { ...status, sendsLeftThisHour: 2 });
+      if (path.endsWith("/start-over")) return jsonResponse(200, { deleted: true });
+      return jsonResponse(404, {});
+    });
+    return posted;
+  }
+
+  it("sends a code by itself, once, when none was sent in the last hour", async () => {
+    const posted = serveAll({ sendsLeftThisHour: 3 });
+    renderWithStore(<VerifyEmailContent />);
+
+    await waitFor(() => expect(posted).toEqual(["/api/auth/verify-email/send"]));
+  });
+
+  it("doesn't send another when a code went out recently", async () => {
+    const posted = serveAll({ sendsLeftThisHour: 2 });
+    renderWithStore(<VerifyEmailContent />);
+    await screen.findByText("ada@team.dev");
+
+    expect(posted).toEqual([]);
+  });
+
+  it("'Use a different email' asks first, then removes the account and signs out to sign-up", async () => {
+    const posted = serveAll();
+    renderWithStore(<VerifyEmailContent />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Use a different email" }));
+    expect(screen.getByText(/This removes the account for/)).toBeInTheDocument();
+    expect(posted).toEqual([]);
+
+    await userEvent.click(screen.getByRole("button", { name: "Yes, start again" }));
+
+    await waitFor(() => expect(signOut).toHaveBeenCalledWith({ redirectTo: "/register" }));
+    expect(posted).toEqual(["/api/auth/verify-email/start-over"]);
+  });
+
+  it("'Continue with Google instead' signs out first, then starts Google", async () => {
+    serveAll();
+    vi.mocked(signOut).mockResolvedValue(undefined as never);
+    renderWithStore(<VerifyEmailContent isGoogleEnabled callbackUrl="/projects/p1" />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Continue with Google instead" }));
+
+    await waitFor(() => expect(signIn).toHaveBeenCalledWith("google", { redirectTo: "/projects/p1" }));
+    expect(signOut).toHaveBeenCalledWith({ redirect: false });
+    expect(vi.mocked(signOut).mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(signIn).mock.invocationCallOrder[0]);
   });
 });

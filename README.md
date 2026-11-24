@@ -63,6 +63,7 @@ Every variable is listed, with comments, in [`.env.example`](.env.example).
 | `AUTH_SECRET`                          | Signs session tokens. Generate one with `pnpm dlx auth secret`.                                                                 |
 | `AUTH_TRUST_HOST`                      | `true` for `pnpm start` locally (Vercel sets it automatically).                                                                 |
 | `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET` | A GitHub OAuth app with the callback `http://localhost:3000/api/auth/callback/github`.                                          |
+| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Optional. A Google Web OAuth client (see [docs/google-signin-setup.md](docs/google-signin-setup.md)). Without them, "Continue with Google" is hidden. |
 | `EMAIL_USER`, `EMAIL_PASS`             | A Gmail address and a Google App Password. Leave both empty locally and emails are printed in the terminal instead of sent.    |
 | `APP_URL`                              | The public address, used in email links and metadata. Optional with `pnpm dev`; set it to `http://localhost:3000` for `pnpm start`. |
 | `ALLOW_DB_RESET`                       | Local only. `db:seed` and `db:reset` refuse to run unless it is `true`.                                                         |

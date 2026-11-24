@@ -15,3 +15,8 @@ export type VerificationStatusResponse = {
 export type VerifyLinkResponse = {
   email: string;
 };
+
+/** POST /api/auth/verify-email/start-over: whether the unconfirmed account was deleted (kept if not empty). */
+export type StartOverResponse = {
+  deleted: boolean;
+};

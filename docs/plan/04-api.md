@@ -10,7 +10,8 @@ export const GET = route({ auth: true }, ({ user }) => getMe(user.id));
 export const PATCH = route({ auth: true, body: updateMeSchema }, ({ user, body }) => updateMe(user.id, body));
 ```
 
-- `auth: true` → 401 `UNAUTHENTICATED` ("Your session has ended. Please sign in again.") without a signed-in user. `auth()` runs our jwt callback, which also ends sessions older than `passwordChangedAt`, so one check covers both. Every route states `auth` explicitly in its first line.
+- `auth: true` → 401 `UNAUTHENTICATED` ("Your session has ended. Please sign in again.") without a signed-in user, and 403 `EMAIL_NOT_VERIFIED` ("Confirm your email to use Flowboard.") when the email isn't confirmed: the verification gate. `auth()` runs our jwt callback, which also ends sessions older than `passwordChangedAt` and reloads `emailVerified`, so one check covers all of it. Every route states `auth` explicitly in its first line, so new routes are gated by default.
+- `auth: "allowUnverified"` → signed in is enough. Only `GET /api/me`, the four `verify-email` routes for signed-in users (status, send, code, start-over) and accepting an invite; a test lists them. The browser's error wrapper sends `EMAIL_NOT_VERIFIED` to `/verify-email?callbackUrl=<this page>` instead of a toast.
 - `params`, `query` and `body` schemas (Zod) → typed values for the handler, or 400 `VALIDATION_FAILED` with `fields`. Next 15's `params` Promise is awaited by the wrapper. The body is only read when a `body` schema is given.
 - The handler returns a plain value (sent as JSON, status 200 or `status`) or a `Response`. Anything thrown goes through `errorResponse`: an `ApiError` keeps its status and code; anything else is a logged 500 with no details sent.
 - Membership checks (404 for non-members) stay in the services; the wrapper never knows about projects.
@@ -40,6 +41,7 @@ Auth notes:
 | GET | /api/auth/verify-email/status | Signed in | `{ email, isVerified, resendAvailableAt, sendsLeftThisHour }`, so `/verify-email` can show the resend countdown and the hourly limit after a reload |
 | POST | /api/auth/verify-email/send | Signed in | Send a new code and link (older ones stop working). 200 with the status after sending; 429 `SEND_TOO_SOON` within a minute of the last send, 429 `SEND_LIMIT` after 3 in an hour; 400 `ALREADY_VERIFIED`; 502 `EMAIL_NOT_SENT` |
 | POST | /api/auth/verify-email/code | Signed in | `{ code }` (6 digits). 200 with the user (`GET /api/me`'s shape), now verified. 400 `CODE_WRONG` ("Wrong code. N attempts left."), `CODE_EXPIRED` ("This code has expired. Send a new one."), `TOO_MANY_ATTEMPTS` ("Too many attempts. Send a new code.") |
+| POST | /api/auth/verify-email/start-over | Signed in (unverified) | "Use a different email". 200 `{ deleted }`: the account was deleted if it was unverified and empty, kept otherwise. 400 `ALREADY_VERIFIED`. The browser then signs out to `/register` |
 | POST | /api/auth/verify-email/link | Anyone | `{ token }` from the email's link. 200 with `{ email }`. 400 `TOKEN_EXPIRED`, `TOKEN_USED` (also when a newer email replaced it), `TOKEN_INVALID` |
 
 Email verification notes:
@@ -139,7 +141,7 @@ Task notes: a task in a project I'm not in is 404 `TASK_NOT_FOUND`, like the pro
 | POST | /api/invites/token/:token/accept | Signed in | Join the project |
 
 Members and invites notes (milestone 7):
-- Invites and resends need a confirmed email: otherwise 403 `EMAIL_NOT_VERIFIED` ("Confirm your email before inviting people."), checked after the membership check, so a project you're not in still answers 404. Cancelling stays allowed (it sends no email). Accepting an invite confirms the accepter's email.
+- Invites and resends need a confirmed email: otherwise 403 `EMAIL_NOT_VERIFIED` ("Confirm your email before inviting people."), checked after the membership check, so a project you're not in still answers 404. Cancelling stays allowed (it sends no email). Accepting an invite confirms the accepter's email, and stays open to unverified users. That's sound only because the token is never returned to the inviter: responses carry `{ id, email, sentAt, expiresAt }`, the database select never reads `tokenHash`, and the link goes in one email to the invitee (a test checks all of this).
 - Invites: the owner and managers with inviteMembers (others 403 `FORBIDDEN`); the email is lowercased. Already a member → 409 `ALREADY_MEMBER` ("<name> is already a member.", as a field error on `email`). A pending invite (not accepted, not cancelled; expired ones too) for the same email is sent again on the same row with a new token and expiry, and the answer says `resent: true`. Tokens are 32 random bytes; only the SHA-256 hash is stored; they last 7 days.
 - The invite row is written first, then the email is sent. If sending fails, 502 `EMAIL_NOT_SENT`; the invite stays listed so Resend works.
 - POST /invites and resend return the invite `{ id, email, createdAt, expiresAt, resent }`; GET /invites lists pending ones, newest first, expired ones included (the page marks them). Cancel stamps `cancelledAt` and returns `{ id }`.

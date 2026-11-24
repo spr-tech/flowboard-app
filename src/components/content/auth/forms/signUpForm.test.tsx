@@ -122,3 +122,36 @@ describe("SignUpForm from an invite link", () => {
     expect(screen.getByLabelText("Email")).toHaveValue("");
   });
 });
+
+describe("SignUpForm while submitting", () => {
+  it("links the Terms and the Privacy Policy under the form", () => {
+    mockFetch(() => jsonResponse(500, {}));
+    renderWithStore(<SignUpForm />);
+
+    expect(screen.getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
+    expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute("href", "/privacy");
+  });
+
+  it("locks the fields while creating the account, then unlocks with everything kept when it fails", async () => {
+    let answer: (response: Response) => void = () => {};
+    mockFetch(() => new Promise<Response>((resolve) => (answer = resolve)));
+    renderWithStore(<SignUpForm />);
+    await userEvent.type(screen.getByLabelText("Full name"), "Ada Okafor");
+    await userEvent.type(screen.getByLabelText("Email"), "ada@team.dev");
+    await typePasswords();
+    await userEvent.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(await screen.findByRole("button", { name: "Creating account…" })).toBeDisabled();
+    expect(screen.getByLabelText("Full name")).toBeDisabled();
+
+    answer(
+      jsonResponse(409, { error: { code: "EMAIL_TAKEN", message: "An account with this email already exists." } })
+    );
+
+    expect(await screen.findByText("An account with this email already exists.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Full name")).toBeEnabled();
+    expect(screen.getByLabelText("Full name")).toHaveValue("Ada Okafor");
+    expect(screen.getByLabelText("Password", { exact: true })).toHaveValue(PASSWORD);
+    await waitFor(() => expect(screen.getByLabelText("Email")).toHaveFocus());
+  });
+});

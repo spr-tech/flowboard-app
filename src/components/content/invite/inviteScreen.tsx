@@ -4,6 +4,10 @@ import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 
+import { AuthDivider } from "@/components/content/auth/authDivider";
+import { GithubButton } from "@/components/content/auth/githubButton";
+import { GoogleButton } from "@/components/content/auth/googleButton";
+import { SignInProgressProvider } from "@/components/content/auth/signInProgress";
 import { SignInPanel } from "@/components/content/auth/signInPanel";
 import { AuthShell } from "@/components/layouts/authShell/authShell";
 import { Button } from "@/components/ui/button/button";
@@ -19,6 +23,8 @@ type InviteScreenProps = {
   token: string;
   /** The signed-in user's email, or null when signed out (read on the server). */
   signedInEmail: string | null;
+  /** Show "Continue with Google" (only where Google sign-in is set up). */
+  isGoogleEnabled?: boolean;
 };
 
 const headingClass = "text-5xl leading-none font-extrabold tracking-[-0.045em]";
@@ -71,7 +77,7 @@ function ProjectsLink({ isSignedIn }: { isSignedIn: boolean }) {
  * Join. Signed in as someone else: sign out and continue. Expired, used, cancelled or broken
  * links say so.
  */
-export function InviteScreen({ token, signedInEmail }: InviteScreenProps) {
+export function InviteScreen({ token, signedInEmail, isGoogleEnabled = false }: InviteScreenProps) {
   const router = useRouter();
   const preview = useInvitePreview(token);
   const [acceptInvite, { isLoading: isJoining }] = useAcceptInviteMutation();
@@ -160,12 +166,20 @@ export function InviteScreen({ token, signedInEmail }: InviteScreenProps) {
           }
         >
           {intro}
+          {/* Google or GitHub with the invited address works like signing in with it: back here to join. */}
+          <SignInProgressProvider>
+            <div className="mt-2 flex flex-col gap-3">
+              {isGoogleEnabled && <GoogleButton callbackUrl={here} />}
+              <GithubButton callbackUrl={here} />
+            </div>
+          </SignInProgressProvider>
+          <AuthDivider label="or use your email" />
           <ButtonLink
             href={`/register?invite=${encodeURIComponent(token)}&callbackUrl=${encodeURIComponent(here)}`}
             text="Create an account"
             variant="inverse"
             size="xl"
-            className="mt-2 w-full"
+            className="w-full"
           />
           <ButtonLink
             href={`/login?callbackUrl=${encodeURIComponent(here)}`}

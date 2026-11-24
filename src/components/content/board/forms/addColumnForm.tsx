@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button/button";
+import { FormFieldset } from "@/components/ui/form/formFieldset";
 import { toast } from "@/components/ui/toast/toast";
 import { COLUMN_NAME_MAX, createColumnSchema } from "@/models/validations/boardValidation";
 import { useCreateColumnMutation } from "@/services/columnsService";
@@ -75,29 +76,31 @@ export function AddColumnForm({ projectId, layout = "board" }: AddColumnFormProp
         layout === "board" && "w-full shrink-0 self-start md:w-[300px] rounded-card bg-surface-sunken p-3"
       )}
     >
-      <div className="flex gap-2">
-        <input
-          {...register("name")}
-          autoFocus={layout === "board"}
-          maxLength={COLUMN_NAME_MAX}
-          onKeyDown={onKeyDown}
-          aria-label="New column name"
-          aria-invalid={errors.name ? true : undefined}
-          placeholder="Column name"
-          className="h-11 min-w-0 flex-1 rounded-input border-[1.5px] border-line-strong bg-surface-card px-3 text-[15px] outline-none focus-visible:border-fg-primary"
-        />
-        <Button text="Add column" type="submit" isLoading={isSubmitting} />
-      </div>
-      {errors.name && (
-        <p role="alert" className="text-xs text-danger">
-          {errors.name.message}
-        </p>
-      )}
-      {layout === "board" ? (
-        <Button text="Cancel" variant="ghost" size="sm" className="self-start" onClick={close} />
-      ) : (
-        <p className="text-xs text-fg-muted">New columns go just before the done column.</p>
-      )}
+      <FormFieldset disabled={isSubmitting} className="contents">
+        <div className="flex gap-2">
+          <input
+            {...register("name")}
+            autoFocus={layout === "board"}
+            maxLength={COLUMN_NAME_MAX}
+            onKeyDown={onKeyDown}
+            aria-label="New column name"
+            aria-invalid={errors.name ? true : undefined}
+            placeholder="Column name"
+            className="h-11 min-w-0 flex-1 rounded-input border-[1.5px] border-line-strong bg-surface-card px-3 text-[15px] outline-none focus-visible:border-fg-primary"
+          />
+          <Button text="Add column" loadingText="Adding…" type="submit" isLoading={isSubmitting} />
+        </div>
+        {errors.name && (
+          <p role="alert" className="text-xs text-danger">
+            {errors.name.message}
+          </p>
+        )}
+        {layout === "board" ? (
+          <Button text="Cancel" variant="ghost" size="sm" className="self-start" onClick={close} />
+        ) : (
+          <p className="text-xs text-fg-muted">New columns go just before the done column.</p>
+        )}
+      </FormFieldset>
     </form>
   );
 }
