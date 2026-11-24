@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button/button";
+import { FormFieldset } from "@/components/ui/form/formFieldset";
 import { ButtonLink } from "@/components/ui/button/buttonLink";
 import { inviteSchema, type InviteFormValues } from "@/models/validations/memberValidation";
 import { useMe } from "@/services/accountService";
@@ -107,33 +108,41 @@ function InviteEmailForm({ projectId, tone }: InviteFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-2.5">
-      <label htmlFor={inputId} className={cn("text-sm font-semibold", style.label)}>
-        Invite by email
-      </label>
-      <div className="flex flex-wrap gap-2.5">
-        <input
-          id={inputId}
-          type="email"
-          autoComplete="off"
-          placeholder="teammate@company.com"
-          aria-invalid={errors.email ? true : undefined}
-          aria-describedby={messageId}
-          {...register("email", { onChange: () => setSentMessage(null) })}
-          className={cn(
-            "h-12 min-w-0 flex-[1_1_220px] rounded-input border-[1.5px] px-3.5 text-[15px] outline-none",
-            "focus-visible:ring-4 focus-visible:ring-focus",
-            style.input
-          )}
-        />
-        <Button text="Send invite" type="submit" isLoading={isSubmitting} className={cn("h-12", style.button)} />
-      </div>
-      <p
-        id={messageId}
-        role="status"
-        className={cn("min-h-5 text-sm", errors.email ? style.error : style.ok, !message && "sr-only")}
-      >
-        {message}
-      </p>
+      <FormFieldset disabled={isSubmitting} className="contents">
+        <label htmlFor={inputId} className={cn("text-sm font-semibold", style.label)}>
+          Invite by email
+        </label>
+        <div className="flex flex-wrap gap-2.5">
+          <input
+            id={inputId}
+            type="email"
+            autoComplete="off"
+            placeholder="teammate@company.com"
+            aria-invalid={errors.email ? true : undefined}
+            aria-describedby={messageId}
+            {...register("email", { onChange: () => setSentMessage(null) })}
+            className={cn(
+              "h-12 min-w-0 flex-[1_1_220px] rounded-input border-[1.5px] px-3.5 text-[15px] outline-none",
+              "focus-visible:ring-4 focus-visible:ring-focus",
+              style.input
+            )}
+          />
+          <Button
+            text="Send invite"
+            loadingText="Sending…"
+            type="submit"
+            isLoading={isSubmitting}
+            className={cn("h-12", style.button)}
+          />
+        </div>
+        <p
+          id={messageId}
+          role="status"
+          className={cn("min-h-5 text-sm", errors.email ? style.error : style.ok, !message && "sr-only")}
+        >
+          {message}
+        </p>
+      </FormFieldset>
     </form>
   );
 }

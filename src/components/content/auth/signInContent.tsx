@@ -5,6 +5,7 @@ import { AuthDivider } from "./authDivider";
 import { AuthNotice } from "./authNotice";
 import { SignInForm } from "./forms/signInForm";
 import { GithubButton } from "./githubButton";
+import { SignInProgressProvider } from "./signInProgress";
 import { SignInPanel } from "./signInPanel";
 
 export type SignInContentProps = {
@@ -42,9 +43,11 @@ export default function SignInContent({ callbackUrl, error, reason }: SignInCont
       {errorMessage && <AuthNotice tone="error">{errorMessage}</AuthNotice>}
       {!errorMessage && reasonMessage && <AuthNotice tone="info">{reasonMessage}</AuthNotice>}
 
-      <GithubButton callbackUrl={callbackUrl} />
-      <AuthDivider label="or use your email" />
-      <SignInForm callbackUrl={callbackUrl} />
+      <SignInProgressProvider>
+        <GithubButton callbackUrl={callbackUrl} />
+        <AuthDivider label="or use your email" />
+        <SignInForm callbackUrl={callbackUrl} />
+      </SignInProgressProvider>
 
       <p className="mt-6 text-center text-[15px] text-fg-secondary">
         New to Flowboard? <TextLink href={registerHref}>Create an account</TextLink>

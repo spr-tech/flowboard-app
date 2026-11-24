@@ -5,6 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button/button";
+import { FormFieldset } from "@/components/ui/form/formFieldset";
 import { FormInput } from "@/components/ui/form/formInput";
 import { FormPasswordInput } from "@/components/ui/form/formPasswordInput";
 import type { ResetTokenState } from "@/models/responses/authResponses";
@@ -65,38 +66,47 @@ export function ResetPasswordForm({ token, onDone, onTokenRejected }: ResetPassw
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <div className="flex flex-col gap-4">
-        <div>
-          <FormPasswordInput
+      <FormFieldset disabled={isSubmitting} className="contents">
+        <div className="flex flex-col gap-4">
+          <div>
+            <FormPasswordInput
+              control={control}
+              name="password"
+              label="New password"
+              autoComplete="new-password"
+              isRevealed={isPasswordRevealed}
+              onRevealedChange={setIsPasswordRevealed}
+              toggleLabel={{ show: "Show passwords", hide: "Hide passwords" }}
+            />
+            {/* The reset page doesn't know whose account it is; the server checks the name/email rule. */}
+            <PasswordStrengthMeter password={password} />
+          </div>
+          <FormInput
             control={control}
-            name="password"
-            label="New password"
+            name="confirmPassword"
+            label="Confirm new password"
+            type={isPasswordRevealed ? "text" : "password"}
             autoComplete="new-password"
-            isRevealed={isPasswordRevealed}
-            onRevealedChange={setIsPasswordRevealed}
-            toggleLabel={{ show: "Show passwords", hide: "Hide passwords" }}
           />
-          {/* The reset page doesn't know whose account it is; the server checks the name/email rule. */}
-          <PasswordStrengthMeter password={password} />
         </div>
-        <FormInput
-          control={control}
-          name="confirmPassword"
-          label="Confirm new password"
-          type={isPasswordRevealed ? "text" : "password"}
-          autoComplete="new-password"
+
+        <PasswordChecks checks={getPasswordChecks(password, confirmPassword)} />
+
+        {formError && (
+          <p role="alert" className="mt-5 text-center text-sm font-medium text-danger">
+            {formError}
+          </p>
+        )}
+
+        <Button
+          text="Save new password"
+          loadingText="Saving…"
+          type="submit"
+          size="xl"
+          className="mt-6 w-full"
+          isLoading={isSubmitting}
         />
-      </div>
-
-      <PasswordChecks checks={getPasswordChecks(password, confirmPassword)} />
-
-      {formError && (
-        <p role="alert" className="mt-5 text-center text-sm font-medium text-danger">
-          {formError}
-        </p>
-      )}
-
-      <Button text="Save new password" type="submit" size="xl" className="mt-6 w-full" isLoading={isSubmitting} />
+      </FormFieldset>
     </form>
   );
 }

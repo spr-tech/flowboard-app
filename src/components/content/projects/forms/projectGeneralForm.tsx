@@ -4,6 +4,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button/button";
+import { FormFieldset } from "@/components/ui/form/formFieldset";
 import { FormInput } from "@/components/ui/form/formInput";
 import { FormTextarea } from "@/components/ui/form/formTextarea";
 import { toast } from "@/components/ui/toast/toast";
@@ -71,31 +72,39 @@ export function ProjectGeneralForm({ project, canEdit }: ProjectGeneralFormProps
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-      <FormInput
-        control={control}
-        name="name"
-        label="Project name"
-        maxLength={PROJECT_NAME_MAX}
-        autoComplete="off"
-        disabled={!canEdit}
-      />
-      <FormTextarea
-        control={control}
-        name="description"
-        label="Description"
-        rows={3}
-        maxLength={PROJECT_DESCRIPTION_MAX}
-        showCount={canEdit}
-        placeholder={canEdit ? DESCRIPTION_PLACEHOLDER : "No description"}
-        disabled={!canEdit}
-      />
-      <ColourPicker control={control} name="colour" disabled={!canEdit} />
-      {canEdit && (
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <Button text="Cancel" variant="ghost" onClick={() => reset(saved)} disabled={!canSave || isSubmitting} />
-          <Button text="Save changes" type="submit" disabled={!canSave} isLoading={isSubmitting} />
-        </div>
-      )}
+      <FormFieldset disabled={isSubmitting} className="contents">
+        <FormInput
+          control={control}
+          name="name"
+          label="Project name"
+          maxLength={PROJECT_NAME_MAX}
+          autoComplete="off"
+          disabled={!canEdit}
+        />
+        <FormTextarea
+          control={control}
+          name="description"
+          label="Description"
+          rows={3}
+          maxLength={PROJECT_DESCRIPTION_MAX}
+          showCount={canEdit}
+          placeholder={canEdit ? DESCRIPTION_PLACEHOLDER : "No description"}
+          disabled={!canEdit}
+        />
+        <ColourPicker control={control} name="colour" disabled={!canEdit} />
+        {canEdit && (
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button text="Cancel" variant="ghost" onClick={() => reset(saved)} disabled={!canSave || isSubmitting} />
+            <Button
+              text="Save changes"
+              loadingText="Saving…"
+              type="submit"
+              disabled={!canSave}
+              isLoading={isSubmitting}
+            />
+          </div>
+        )}
+      </FormFieldset>
     </form>
   );
 }

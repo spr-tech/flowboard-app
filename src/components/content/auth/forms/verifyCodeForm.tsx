@@ -5,6 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button/button";
+import { FormFieldset } from "@/components/ui/form/formFieldset";
 import { CodeInput } from "@/components/ui/codeInput/codeInput";
 import {
   VERIFICATION_CODE_LENGTH,
@@ -58,41 +59,44 @@ export function VerifyCodeForm({ onVerified }: VerifyCodeFormProps) {
 
   return (
     <form onSubmit={submit} noValidate>
-      <p id={labelId} className="mb-2.5 text-sm font-semibold text-fg-primary">
-        Your {VERIFICATION_CODE_LENGTH}-digit code
-      </p>
-      <CodeInput
-        key={boxesKey}
-        length={VERIFICATION_CODE_LENGTH}
-        labelledBy={labelId}
-        describedBy={messageId}
-        isInvalid={Boolean(message)}
-        isDisabled={isSubmitting}
-        autoFocus
-        onChange={(code) => setValue("code", code)}
-        onComplete={(code) => {
-          setValue("code", code);
-          void submit();
-        }}
-      />
-      <p
-        id={messageId}
-        role={message ? "alert" : "status"}
-        className={cn("mt-2.5 min-h-5 text-sm", message ? "font-medium text-danger" : "text-fg-secondary")}
-      >
-        {message ?? (isSubmitting ? "Checking your code…" : "")}
-      </p>
-      <p className="mt-1 text-sm text-fg-secondary">Can&apos;t find it? Check your spam folder.</p>
+      <FormFieldset disabled={isSubmitting} className="contents">
+        <p id={labelId} className="mb-2.5 text-sm font-semibold text-fg-primary">
+          Your {VERIFICATION_CODE_LENGTH}-digit code
+        </p>
+        <CodeInput
+          key={boxesKey}
+          length={VERIFICATION_CODE_LENGTH}
+          labelledBy={labelId}
+          describedBy={messageId}
+          isInvalid={Boolean(message)}
+          isDisabled={isSubmitting}
+          autoFocus
+          onChange={(code) => setValue("code", code)}
+          onComplete={(code) => {
+            setValue("code", code);
+            void submit();
+          }}
+        />
+        <p
+          id={messageId}
+          role={message ? "alert" : "status"}
+          className={cn("mt-2.5 min-h-5 text-sm", message ? "font-medium text-danger" : "text-fg-secondary")}
+        >
+          {message ?? (isSubmitting ? "Checking your code…" : "")}
+        </p>
+        <p className="mt-1 text-sm text-fg-secondary">Can&apos;t find it? Check your spam folder.</p>
 
-      <Button
-        text="Confirm email"
-        type="submit"
-        variant="inverse"
-        size="xl"
-        className="mt-6 w-full"
-        isLoading={isSubmitting}
-        disabled={!isComplete}
-      />
+        <Button
+          text="Confirm email"
+          loadingText="Checking…"
+          type="submit"
+          variant="inverse"
+          size="xl"
+          className="mt-6 w-full"
+          isLoading={isSubmitting}
+          disabled={!isComplete}
+        />
+      </FormFieldset>
     </form>
   );
 }

@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button/button";
+import { FormFieldset } from "@/components/ui/form/formFieldset";
 import { taskTitleField, TASK_TITLE_MAX } from "@/models/validations/boardValidation";
 import { useCreateTaskMutation } from "@/services/tasksService";
 import { applyApiError } from "@/utilities/helpers/applyApiError";
@@ -70,25 +71,27 @@ export function QuickAddForm({ projectId, columnId, columnName }: QuickAddFormPr
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-2">
-      <input
-        {...register("title")}
-        autoFocus
-        maxLength={TASK_TITLE_MAX}
-        onKeyDown={onKeyDown}
-        aria-label={`New task in ${columnName}`}
-        aria-invalid={errors.title ? true : undefined}
-        placeholder="What needs doing?"
-        className="h-11 rounded-input border-[1.5px] border-line-strong bg-surface-card px-3 text-[15px] outline-none focus-visible:border-fg-primary"
-      />
-      {errors.title && (
-        <p role="alert" className="text-xs text-danger">
-          {errors.title.message}
-        </p>
-      )}
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-fg-muted">Enter to add · Esc to close</span>
-        <Button text="Add" type="submit" size="sm" isLoading={isSubmitting} />
-      </div>
+      <FormFieldset disabled={isSubmitting} className="contents">
+        <input
+          {...register("title")}
+          autoFocus
+          maxLength={TASK_TITLE_MAX}
+          onKeyDown={onKeyDown}
+          aria-label={`New task in ${columnName}`}
+          aria-invalid={errors.title ? true : undefined}
+          placeholder="What needs doing?"
+          className="h-11 rounded-input border-[1.5px] border-line-strong bg-surface-card px-3 text-[15px] outline-none focus-visible:border-fg-primary"
+        />
+        {errors.title && (
+          <p role="alert" className="text-xs text-danger">
+            {errors.title.message}
+          </p>
+        )}
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs text-fg-muted">Enter to add · Esc to close</span>
+          <Button text="Add" loadingText="Adding…" type="submit" size="sm" isLoading={isSubmitting} />
+        </div>
+      </FormFieldset>
     </form>
   );
 }

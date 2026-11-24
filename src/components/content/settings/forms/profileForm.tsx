@@ -5,6 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Avatar } from "@/components/ui/avatar/avatar";
+import { FormFieldset } from "@/components/ui/form/formFieldset";
 import { Button } from "@/components/ui/button/button";
 import { FormInput } from "@/components/ui/form/formInput";
 import { Input } from "@/components/ui/input/input";
@@ -43,25 +44,33 @@ export function ProfileForm({ me }: { me: MeResponse }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-      <div className="flex items-center gap-4">
-        <Avatar name={savedName || me.email} imageUrl={me.image} size="lg" />
-        <span className="min-w-0">
-          <span className="block truncate font-semibold">{savedName || "No name yet"}</span>
-          <span className="block truncate text-sm text-fg-muted">{me.email}</span>
-        </span>
-      </div>
-      <FormInput control={control} name="name" label="Full name" autoComplete="name" />
-      <Input
-        label="Email"
-        value={me.email}
-        readOnly
-        helperText="Your email is used for sign-in and invites, so it can't be changed here."
-        className="bg-surface-sunken text-fg-secondary"
-      />
-      <div className="flex justify-end gap-2">
-        <Button text="Cancel" variant="ghost" disabled={!isChanged} onClick={() => reset({ name: savedName })} />
-        <Button text="Save changes" type="submit" disabled={!isChanged} isLoading={isSubmitting} />
-      </div>
+      <FormFieldset disabled={isSubmitting} className="contents">
+        <div className="flex items-center gap-4">
+          <Avatar name={savedName || me.email} imageUrl={me.image} size="lg" />
+          <span className="min-w-0">
+            <span className="block truncate font-semibold">{savedName || "No name yet"}</span>
+            <span className="block truncate text-sm text-fg-muted">{me.email}</span>
+          </span>
+        </div>
+        <FormInput control={control} name="name" label="Full name" autoComplete="name" />
+        <Input
+          label="Email"
+          value={me.email}
+          readOnly
+          helperText="Your email is used for sign-in and invites, so it can't be changed here."
+          className="bg-surface-sunken text-fg-secondary"
+        />
+        <div className="flex justify-end gap-2">
+          <Button text="Cancel" variant="ghost" disabled={!isChanged} onClick={() => reset({ name: savedName })} />
+          <Button
+            text="Save changes"
+            loadingText="Saving…"
+            type="submit"
+            disabled={!isChanged}
+            isLoading={isSubmitting}
+          />
+        </div>
+      </FormFieldset>
     </form>
   );
 }

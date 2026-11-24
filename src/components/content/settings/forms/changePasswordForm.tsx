@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { getPasswordChecks, PasswordChecks } from "@/components/content/auth/passwordChecks";
 import { PasswordStrengthMeter } from "@/components/content/auth/passwordStrengthMeter";
 import { Button } from "@/components/ui/button/button";
+import { FormFieldset } from "@/components/ui/form/formFieldset";
 import { FormInput } from "@/components/ui/form/formInput";
 import { FormPasswordInput } from "@/components/ui/form/formPasswordInput";
 import { toast } from "@/components/ui/toast/toast";
@@ -55,30 +56,32 @@ export function ChangePasswordForm({ me }: { me: MeResponse }) {
   const type = isRevealed ? "text" : "password";
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
-      <FormPasswordInput
-        control={control}
-        name="currentPassword"
-        label="Current password"
-        autoComplete="current-password"
-        isRevealed={isRevealed}
-        onRevealedChange={setIsRevealed}
-        toggleLabel={{ show: "Show passwords", hide: "Hide passwords" }}
-      />
-      <div>
-        <FormInput control={control} name="password" label="New password" type={type} autoComplete="new-password" />
-        <PasswordStrengthMeter password={password} who={me} />
-      </div>
-      <FormInput
-        control={control}
-        name="confirmPassword"
-        label="Confirm new password"
-        type={type}
-        autoComplete="new-password"
-      />
-      <PasswordChecks checks={getPasswordChecks(password, confirmPassword)} />
-      <div className="flex justify-end">
-        <Button text="Update password" type="submit" isLoading={isSubmitting} />
-      </div>
+      <FormFieldset disabled={isSubmitting} className="contents">
+        <FormPasswordInput
+          control={control}
+          name="currentPassword"
+          label="Current password"
+          autoComplete="current-password"
+          isRevealed={isRevealed}
+          onRevealedChange={setIsRevealed}
+          toggleLabel={{ show: "Show passwords", hide: "Hide passwords" }}
+        />
+        <div>
+          <FormInput control={control} name="password" label="New password" type={type} autoComplete="new-password" />
+          <PasswordStrengthMeter password={password} who={me} />
+        </div>
+        <FormInput
+          control={control}
+          name="confirmPassword"
+          label="Confirm new password"
+          type={type}
+          autoComplete="new-password"
+        />
+        <PasswordChecks checks={getPasswordChecks(password, confirmPassword)} />
+        <div className="flex justify-end">
+          <Button text="Update password" loadingText="Updating…" type="submit" isLoading={isSubmitting} />
+        </div>
+      </FormFieldset>
     </form>
   );
 }

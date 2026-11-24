@@ -4,6 +4,7 @@ import { Highlight } from "@/components/ui/typography/highlight";
 import { AuthDivider } from "./authDivider";
 import { SignUpForm } from "./forms/signUpForm";
 import { GithubButton } from "./githubButton";
+import { SignInProgressProvider } from "./signInProgress";
 import { SignUpPanel } from "./signUpPanel";
 
 export type SignUpContentProps = {
@@ -23,9 +24,11 @@ export default function SignUpContent({ callbackUrl, inviteToken }: SignUpConten
       </h1>
       <p className="mt-3.5 mb-7 text-fg-secondary">Free to use. No card needed.</p>
 
-      <GithubButton callbackUrl={callbackUrl} />
-      <AuthDivider label="or sign up with email" />
-      <SignUpForm callbackUrl={callbackUrl} inviteToken={inviteToken} />
+      <SignInProgressProvider>
+        <GithubButton callbackUrl={callbackUrl} />
+        <AuthDivider label="or sign up with email" />
+        <SignUpForm callbackUrl={callbackUrl} inviteToken={inviteToken} />
+      </SignInProgressProvider>
 
       {/* Plain text until there are Terms and Privacy pages to link to. */}
       <p className="mt-4 text-center text-[13px] leading-relaxed text-fg-muted">

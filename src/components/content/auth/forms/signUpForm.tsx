@@ -8,6 +8,7 @@ import { signIn } from "next-auth/react";
 
 import { ArrowBadge } from "@/components/ui/button/arrowBadge";
 import { Button } from "@/components/ui/button/button";
+import { FormFieldset } from "@/components/ui/form/formFieldset";
 import { FormInput } from "@/components/ui/form/formInput";
 import { FormPasswordInput } from "@/components/ui/form/formPasswordInput";
 import { registerSchema, type RegisterFormValues } from "@/models/validations/authValidation";
@@ -15,6 +16,8 @@ import { useRegisterMutation } from "@/services/authService";
 import { useInvitePreview } from "@/services/invitesService";
 import { safeCallbackUrl } from "@/utilities/helpers/safeCallbackUrl";
 import { useNoAngleBrackets } from "@/utilities/hooks/useNoAngleBrackets";
+import { TextLink } from "@/components/ui/link/textLink";
+import { useSignInProgress } from "../signInProgress";
 import { getPasswordChecks, PasswordChecks } from "../passwordChecks";
 import { PasswordStrengthMeter } from "../passwordStrengthMeter";
 import { applyApiError, isAppError } from "@/utilities/helpers/applyApiError";
@@ -49,6 +52,9 @@ export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
     formState: { isSubmitting },
   } = form;
   useNoAngleBrackets(form, "password");
+  // Shared with the GitHub button. Stays set after success, while the next page loads.
+  const progress = useSignInProgress();
+  const isLocked = isSubmitting || progress.pending !== null;
 
   // The invite's email arrives after the first render; put it in the (locked) field.
   useEffect(() => {
@@ -64,6 +70,7 @@ export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
   const onSubmit = async (values: RegisterFormValues) => {
     setFormError(null);
     let needsEmailCode = true;
+    progress.start("password");
     try {
       // unwrap() turns RTK Query's { data } / { error } result into a value or a thrown AppError.
       // The invite's token goes along only when its email is the one locked in the field: then the
@@ -73,9 +80,11 @@ export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
     } catch (error) {
       if (isAppError(error) && error.code === "EMAIL_TAKEN") {
         setError("email", { message: error.message }, { shouldFocus: true });
+        progress.finish();
         return;
       }
       setFormError(applyApiError(error, FIELDS, setError));
+      progress.finish();
       return;
     }
 
@@ -94,7 +103,7 @@ export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <div className="flex flex-col gap-4">
+      <FormFieldset disabled={isLocked} className="flex flex-col gap-4">
         <FormInput control={control} name="name" label="Full name" autoComplete="name" placeholder="Ada Okafor" />
         <FormInput
           control={control}
@@ -126,7 +135,7 @@ export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
           type={isPasswordRevealed ? "text" : "password"}
           autoComplete="new-password"
         />
-      </div>
+      </FormFieldset>
 
       <PasswordChecks checks={getPasswordChecks(password, confirmPassword)} />
 
@@ -138,13 +147,20 @@ export function SignUpForm({ callbackUrl, inviteToken }: SignUpFormProps) {
 
       <Button
         text="Create account"
+        loadingText="Creating account…"
         type="submit"
         variant="inverse"
         size="xl"
         className="mt-6 w-full"
         endIcon={<ArrowBadge />}
-        isLoading={isSubmitting}
+        isLoading={progress.pending === "password"}
+        disabled={isLocked}
       />
+
+      <p className="mt-4 text-center text-sm text-fg-secondary">
+        By creating an account, you agree to the <TextLink href="/terms">Terms</TextLink> and{" "}
+        <TextLink href="/privacy">Privacy Policy</TextLink>.
+      </p>
     </form>
   );
 }
