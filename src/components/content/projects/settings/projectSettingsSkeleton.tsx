@@ -37,7 +37,7 @@ export function ProjectSettingsSkeleton({ projectId, showShapes }: ProjectSettin
         <div className="flex items-center gap-4">
           <span className="size-14 shrink-0">{shape("size-14 rounded-[18px]")}</span>
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">Project settings</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Project settings</h1>
             <span className="flex h-6 items-center">{shape("h-4 w-52")}</span>
           </div>
         </div>

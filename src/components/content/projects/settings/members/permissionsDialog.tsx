@@ -37,6 +37,7 @@ export function PermissionsDialog({ projectId, userId, name, permissions, isOpen
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
+      layout="sheet"
       title={`${name}'s permissions`}
       description="What this manager can do. Project settings, roles and the done column stay yours."
       footer={<Button text="Done" variant="outline" onClick={onClose} />}
@@ -46,7 +47,7 @@ export function PermissionsDialog({ projectId, userId, name, permissions, isOpen
           const on = permissions[key];
           return (
             <li key={key} className="flex items-center justify-between gap-4 py-3">
-              <span>
+              <span className="min-w-0">
                 <span className="block font-semibold">{label}</span>
                 <span className="block text-sm text-fg-secondary">{hint}</span>
               </span>

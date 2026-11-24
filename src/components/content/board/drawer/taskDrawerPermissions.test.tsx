@@ -7,7 +7,7 @@ import type { MyBoardMembership, ProjectDetail } from "@/models/responses/projec
 import { projectsService } from "@/services/projectsService";
 import { boardMembership, boardTask, projectDetail } from "@/test/projectFixtures";
 import { jsonResponse, mockFetch, renderWithStore } from "@/test/renderWithStore";
-import { DEFAULT_MANAGER_PERMISSIONS, PermissionReason } from "@/utilities/helpers/permissions";
+import { DEFAULT_MANAGER_PERMISSIONS } from "@/utilities/helpers/permissions";
 import { TaskDrawer } from "./taskDrawer";
 
 const nav = vi.hoisted(() => ({ params: new URLSearchParams(), push: vi.fn(), replace: vi.fn() }));
@@ -49,36 +49,47 @@ async function openDrawer(task: Partial<BoardTask>, me: Partial<MyBoardMembershi
 describe("TaskDrawer: what I may change", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("a member's assigned task is read-only with one reason; move and notes still work, no Delete", async () => {
+  it("a member's assigned task shows its fields as text with one note; move and notes still work, no Delete", async () => {
     await openDrawer({ assignee: sam, createdById: "demo" }, { role: "MEMBER" });
 
-    expect(screen.getByLabelText("Title")).toHaveAttribute("readonly");
-    expect(screen.getByLabelText("Description")).toHaveAttribute("readonly");
-    expect(screen.getByLabelText("Due date")).toHaveAttribute("readonly");
-    expect(screen.getByLabelText("Priority")).toBeDisabled();
-    expect(screen.getByText(PermissionReason.editLocked)).toBeInTheDocument();
+    expect(screen.queryByLabelText("Title")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Description")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Due date")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Priority")).not.toBeInTheDocument();
+    expect(screen.getByText("Fix pay")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "You can move the task and add notes. Only its creator, the owner or a manager can change the details and the due date."
+      )
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("Column")).toBeEnabled();
-    expect(screen.getByLabelText("Assignee")).toHaveValue("Sam Rivera (you)");
+    expect(screen.getByText("Sam Rivera (you)")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Delete task" })).not.toBeInTheDocument();
     expect(await screen.findByText("Tried Safari 17")).toBeInTheDocument();
   });
 
-  it("a member's own task: title and description editable, the due date locked with its reason, Delete shown", async () => {
+  it("a member's own task: title and description editable, the due date as text with the note, Delete shown", async () => {
     await openDrawer(
       { assignee: sam, createdById: "sam", description: "A description long enough" },
       { role: "MEMBER" }
     );
 
     expect(screen.getByLabelText("Title")).not.toHaveAttribute("readonly");
-    expect(screen.getByLabelText("Due date")).toHaveAttribute("readonly");
-    expect(screen.getByText(PermissionReason.dueDateLocked)).toBeInTheDocument();
+    expect(screen.queryByLabelText("Due date")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "You can edit the details, move the task and add notes. Only the owner or a manager can change the due date."
+      )
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Delete task" })).toBeInTheDocument();
   });
 
-  it("someone else's task can't be moved by a member, with the reason", async () => {
+  it("someone else's task can't be changed by a member: one note, the column as text", async () => {
     await openDrawer({ assignee: alex }, { role: "MEMBER" });
-    expect(screen.getByLabelText("Column")).toBeDisabled();
-    expect(screen.getByText("You can only move tasks assigned to you.")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Column")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("You can view this task and add notes. Only its creator, the owner or a manager can change it.")
+    ).toBeInTheDocument();
   });
 
   it("an unassigned task offers a member Assign to me, disabled with the reason at the limit", async () => {
@@ -110,7 +121,8 @@ describe("TaskDrawer: what I may change", () => {
     manager.unmount();
 
     await openDrawer({}, { role: "MANAGER", permissions: { ...DEFAULT_MANAGER_PERMISSIONS, createAndAssign: false } });
-    expect(screen.getByLabelText("Assignee").tagName).toBe("INPUT");
+    expect(screen.queryByLabelText("Assignee")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Assign to me" })).toBeInTheDocument();
   });
 
   it("the owner opening a member's new task clears the New badge", async () => {

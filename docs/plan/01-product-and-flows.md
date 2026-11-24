@@ -80,6 +80,7 @@ Three roles per project. One pure helper, `can(action, context)` in `src/utiliti
 | Delete a note | Any note | Their own | Their own |
 
 - **Take limit.** Only open tasks a member took from the pool count: not tasks they created, not tasks the owner or a manager assigned to them, not tasks in the done column. At the limit, "Assign to me" is disabled with "You've taken N open tasks. Finish one first, or ask the owner to assign more." (409 `TAKE_LIMIT_REACHED`). Members see "You've taken N of M open tasks." on the board.
+- **Assign to me** shows only on unassigned tasks outside the done column; taking a done task is refused (409 `TASK_DONE`).
 - **Locked tasks.** A task assigned to a member, or taken from the pool, is locked for them except moving and notes.
 - **"New" badge.** Tasks created by members show a lime "New" badge to the owner until the owner opens the task.
 - **Notes.** Anyone who can see the task adds a note (1 to 1000 characters). Authors delete their own; the owner deletes any. Notes are never edited.
