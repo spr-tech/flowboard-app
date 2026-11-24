@@ -74,6 +74,17 @@ Reference files (open in a browser for layout only; they run inside the design t
 - **Strength meter** under the new-password field (sign-up, reset, change): a 3-part bar plus "Password strength: Weak / Fair / Strong", announced politely (`aria-live`). Weak fills one part in danger red, Fair two in warning amber, Strong three in success green (`--feedback-warning`, `--feedback-success`); the word is always shown, so colour is never the only signal. It guides but never blocks submitting.
 - Scoring (`src/utilities/helpers/passwordStrength.ts`): length points (10–11: 1, 12–13: 2, 14–15: 3, 16–19: 4, 20+: 5), plus one per kind of character beyond the first (lowercase, uppercase, digits, symbols), minus 2 for repeats (aaa, or 4 or fewer different characters) and 1 for a simple sequence (abc, 123, qwerty, forwards or backwards). Strong from 6, Fair from 4. Always Weak while a rule fails, including containing your name or email.
 
+## Forms while submitting
+- `FormFieldset` (`src/components/ui/form/formFieldset.tsx`) wraps each form's fields; `className="contents"` keeps the form's own layout. When it unlocks with nothing focused, focus goes to the first invalid field, or back to the field that had it (quick add keeps the cursor for the next task).
+- Disabled inputs stay readable: sunken background and secondary text, never faded to near-white on cream.
+- `Button` takes `loadingText`; a loading button keeps full colour, with a spinner in place of its icon. Other disabled buttons fade as before.
+- Sign-in and sign-up share one "sign-in in progress" state (`signInProgress.tsx`), reset when the browser restores the page from its back-forward cache.
+
+## Privacy and terms pages
+- `/privacy` and `/terms` use the landing page's colours and footer around one readable column (max 48rem), with a "Last updated" date (`LEGAL_LAST_UPDATED` in `legalPage.tsx`).
+- The footer gains a "Legal" group; its section links are now `/#how`, `/#features`, `/#faq`, so they work from these pages too.
+- Both are in the sitemap and allowed in robots.txt.
+
 ## Decisions that change the plan docs
 1. **Project colour is stored as a key, not hex**: `vermilion | espresso | lime | blue | teal | plum | amber | rose`. The frontend maps keys to tokens and to a readable text colour. (Amends `docs/plan/03-data-model.md`: Project.colour is an enum.)
 2. **New columns are inserted just before the done column**, so Done stays last.
