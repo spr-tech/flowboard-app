@@ -30,10 +30,6 @@ export default function SignUpContent({ callbackUrl, inviteToken }: SignUpConten
         <SignUpForm callbackUrl={callbackUrl} inviteToken={inviteToken} />
       </SignInProgressProvider>
 
-      {/* Plain text until there are Terms and Privacy pages to link to. */}
-      <p className="mt-4 text-center text-[13px] leading-relaxed text-fg-muted">
-        By creating an account you agree to our Terms of Service and Privacy Policy.
-      </p>
       <p className="mt-5 text-center text-[15px] text-fg-secondary">
         Already have an account? <TextLink href={loginHref}>Sign in</TextLink>
       </p>
