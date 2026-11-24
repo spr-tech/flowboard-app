@@ -16,6 +16,9 @@ Each milestone is a branch off `rebuild` (for example `rebuild-m3-auth`) and end
 | 9 | Account settings | Name and password changes work |
 | 10 | Polish + ship: skeletons, errors, phone pass, accessibility pass, landing/sign-in/sign-up from the designs, cutover | Live on `master` |
 
+Queued follow-ups (each its own branch):
+- Set a password for accounts without one (Google and GitHub), plus the forgot-password email wording for them.
+
 Throughout:
 - Write Activity rows inside each service from milestone 5 onward.
 - Unit-test the position calculation (between, top, bottom, empty, re-space) with Vitest.

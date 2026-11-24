@@ -11,7 +11,7 @@ A Kanban workspace where a small team (about 2–10 people) plans a project and 
 5. Move work forward by dragging cards.
 
 ## In the first version
-- Accounts: email + password, GitHub. Forgot password. Email verification with a 6-digit code (or the email's link).
+- Accounts: email + password, Google, GitHub. Forgot password. Email verification with a 6-digit code (or the email's link).
 - Projects: create, rename, recolour, delete. Roles: OWNER and MEMBER.
 - Board: starts with To do, In progress, Done. The owner can add, rename, reorder (the team order) and delete columns, and choose the done column. The owner can let members add columns, up to a shared limit; every member can also reorder columns for their own view only.
 - Projects have an optional description (up to 200 characters), shown on the project card and under the board's name.
@@ -21,10 +21,10 @@ A Kanban workspace where a small team (about 2–10 people) plans a project and 
 - Account settings: name, password.
 
 ## Not in the first version
-Google sign-in, a workspace layer above projects, notifications, global search, comments, attachments, real-time updates, viewer role, transferring ownership.
+A workspace layer above projects, notifications, global search, comments, attachments, real-time updates, viewer role, transferring ownership.
 
 ## Flows
-1. **First visit:** landing → sign up → `/verify-email` (enter the emailed code, or "Do this later") → empty dashboard → "Create your first project" → name + colour → board with 3 columns → invite prompt (skippable) → first task.
+1. **First visit:** landing → sign up → `/verify-email` (enter the emailed code; nothing else in the app opens until it's confirmed) → empty dashboard → "Create your first project" → name + colour → board with 3 columns → invite prompt (skippable) → first task.
 2. **Accept invite:** email link → `/invite/[token]` → no account: sign up with the email pre-filled; has account: sign in → joins as MEMBER → lands on the board.
 3. **Daily use:** sign in → dashboard → open a project → drag tasks, or open one to update it.
 4. **Create/edit a task:** "+ Add task" at the bottom of a column → type a title, Enter → card appears → click the card → side drawer with details.
@@ -45,12 +45,20 @@ Google sign-in, a workspace layer above projects, notifications, global search, 
 - Task changes are open to every member.
 - Forgot password: never reveal whether an email has an account; links expire after 1 hour and work once; requesting a new link cancels older ones; GitHub-only users get an email telling them to sign in with GitHub; at most 3 reset emails per address per hour.
 - After a password reset, other devices are signed out using `passwordChangedAt` (see the data model).
-- **Email verification.** Email-and-password users confirm their email with a 6-digit code, or the email's backup link. Until then they can use Flowboard normally except inviting people ("Confirm your email before inviting people."), so fake accounts can't use our Gmail to send invites.
-  - Who counts as verified: GitHub users (GitHub verifies primary emails), and anyone who accepts an invite sent to their email (the link proves they received it). Password accounts made before this feature start unverified.
+- **Email verification.** Email-and-password users confirm their email with a 6-digit code, or the email's backup link.
+  - **Hard gate:** until then they can't reach the dashboard, projects, boards, settings or their APIs. After sign-up or sign-in they land on `/verify-email`, where they can only: enter the code, resend it, use the email's link, continue with Google instead, use a different email, or sign out. Enforced on the server (`route()` answers 403 `EMAIL_NOT_VERIFIED`; the app layout redirects), not by hiding things. Existing unverified accounts meet it on their next visit; if no code was sent in the last hour, the page sends one by itself.
+  - Who counts as verified: Google users (Google reports `email_verified`), GitHub users (GitHub verifies primary emails), and anyone who accepts an invite sent to their email (the link proves they received it; accepting stays open to unverified users, and the token only ever goes to the invitee's inbox). Password accounts made before this feature start unverified.
   - The code lasts 15 minutes and allows 5 wrong tries; the link lasts 24 hours. Both work once. Sending a new code cancels older ones. At most 3 sends an hour, one a minute.
   - Sign-up sends the code and goes to `/verify-email`, except when signing up from a live invite for the same email (accepting it confirms the email).
-  - A banner on every signed-in page ("Confirm your email to invite people.") until verified, dismissible for the browser tab's session.
+  - **Use a different email** (after a confirm): deletes the account if it's still unverified and empty (no memberships, nothing that blocks the delete), then signs out to `/register`. A verified account is never deleted this way; a non-empty one is only signed out.
   - The link page only confirms when its button is clicked, so email scanners that open links can't use it up.
 - **New passwords** (sign-up, reset, change) need at least 10 characters and one special character (anything but a letter or a digit, spaces included), and can't contain `<` or `>`. Existing passwords keep working. A strength meter (Weak, Fair, Strong) guides but never blocks.
+- **Google sign-in.** "Continue with Google" above "Continue with GitHub" on sign in, sign up and the invite page, and "Continue with Google instead" on the code page; shown only where `AUTH_GOOGLE_ID` is set. Default scopes only (openid, email, profile).
+  - Google must report the email verified, or the sign-in is refused ("Google hasn't verified this email address yet…").
+  - A verified Google email that matches an existing user links to it automatically and confirms it. If that user had never confirmed their email, the link first removes its password, ends its other sessions and cancels its reset links and codes, all in one transaction that stops the sign-in if it fails (someone could have registered the address to hijack it later). Verified accounts keep their password. Setting a password again is a queued follow-up.
+  - New Google users count as verified and skip the code.
+  - GitHub is unchanged: no automatic linking (the `OAuthAccountNotLinked` message).
+  - Google or GitHub sign-in is refused while a valid session exists (Auth.js would link the new account to whoever is signed in); "Continue with Google instead" signs out first. A leftover cookie from an expired or ended session doesn't count.
+  - Settings → Session says how this session signed in: "Signed in with Google", "GitHub" or "email and password".
 - **Forms while submitting.** Every form locks while it sends: the fields sit in a disabled `<fieldset>` (values are kept, unlike React Hook Form's per-field `disabled`), the submit button shows a spinner and a progress label ("Signing in…", "Creating account…", "Saving…") and can't be pressed twice. On failure everything unlocks with the typed values kept, except a failed sign-in, which clears and focuses the password. On sign-in and sign-up, the GitHub button and the form lock each other: while either is under way, the other is disabled, and only the one clicked shows a spinner. The task drawer autosaves as you type, so it never locks.
 - **Privacy and terms.** `/privacy` and `/terms` are public, plain-English pages (a starting point, not legal advice), linked from the landing footer and from "By creating an account, you agree to the Terms and Privacy Policy" under the sign-up form. The support address on them is `EMAIL_USER`, read when the page is built.

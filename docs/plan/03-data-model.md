@@ -1,8 +1,8 @@
 # 3. Data model (`prisma/schema.prisma`)
 
 ## Tables
-- **User**: name, email (unique, stored lowercase), emailVerified (required by the Auth.js adapter; set when the email is confirmed by a code, the email's link, an accepted invite, or a GitHub sign-in; null = unverified), passwordHash (null for GitHub-only users), image, passwordChangedAt, timestamps.
-- **Account**: the Auth.js adapter table linking a GitHub login to a User. Unique on (provider, providerAccountId). No Session or VerificationToken tables: sessions are JWTs (JSON Web Tokens) and there are no magic links.
+- **User**: name, email (unique, stored lowercase), emailVerified (required by the Auth.js adapter; set when the email is confirmed by a code, the email's link, an accepted invite, or a Google or GitHub sign-in; null = unverified), passwordHash (null for Google- or GitHub-only users, and for an unverified account Google took over), image, passwordChangedAt, timestamps.
+- **Account**: the Auth.js adapter table linking a Google or GitHub login to a User (no migration was needed for Google). Unique on (provider, providerAccountId). No Session or VerificationToken tables: sessions are JWTs (JSON Web Tokens) and there are no magic links.
 - **Project**: name, description (optional, max 200, null when empty), colour, membersCanAddColumns (default false), memberColumnLimit (default 3; the API allows 1 to 10), timestamps. No `ownerId`. `colour` is the enum `ProjectColour`: `vermilion | espresso | lime | blue | teal | plum | amber | rose` (default `vermilion`). It stores a key, not hex; the frontend maps each key to a token and a readable text colour.
 - **ProjectMember**: userId, projectId, role (OWNER | MEMBER, default MEMBER), joinedAt, pinnedAt (nullable DateTime), lastOpenedAt (nullable DateTime), columnOrder (nullable JSON list of column ids: my own column order; null = the team order). Primary key (userId, projectId). `pinnedAt` and `lastOpenedAt` are this user's own preferences (milestone 5).
 - **Column**: projectId, name, position (spaced float: the team order), isDone (exactly one per project), createdById (User, required: who added it), createdAt.
@@ -42,6 +42,9 @@
 - Deleting a User is not a v1 feature. Their accounts, memberships and reset tokens would cascade, but the database blocks it (Restrict) while they created tasks, invites or activity, so history is never lost silently.
 - Removing a member is not a database cascade: the service sets `assigneeId = null` on that user's tasks in that project, in the same transaction.
 - On every Node-side request, a session whose `authTime` is before `passwordChangedAt` is treated as signed out (see "Sessions after a password change" above). The token's own `iat` isn't used, because Auth.js refreshes it whenever it re-issues the cookie.
+
+- **Google taking over an unverified account:** in one transaction, `passwordHash` null, `passwordChangedAt` now (every older session ends), unused PasswordResetToken and EmailVerificationToken rows marked used, `emailVerified` now. It runs in the Auth.js `signIn` callback, before the Account row is linked.
+- **Deleting an unverified account ("Use a different email"):** only with no ProjectMember rows. Cascades remove Account, PasswordResetToken, EmailVerificationToken and ProjectMember rows; Restrict relations (Invite, Column, Task, Activity, TaskNote) make the database refuse, and the account is kept. SignInAttempt rows are keyed by email and expire. A test reads `schema.prisma` so every new relation to User must be sorted into one of these.
 
 ## Changes from the old schema
 Add Account, Invite, PasswordResetToken, Activity; rename Member to ProjectMember with a role enum; drop Project.ownerId, description, status, dueDate; Project.color (hex string) becomes colour (enum); add Column.isDone; Column.order becomes position (float); add Task.projectId, createdById, completedAt; drop Task.status and label; Task.dueDate becomes date-only; switch positions to spaced floats; User.password becomes passwordHash; add User.emailVerified and passwordChangedAt.
