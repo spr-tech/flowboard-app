@@ -103,6 +103,18 @@ describe("baseQuery", () => {
     expect(toast).not.toHaveBeenCalled();
   });
 
+  it("on EMAIL_NOT_VERIFIED, goes to the code page with the current page, and doesn't toast", async () => {
+    fetchFn.mockResolvedValue(
+      json(403, { error: { code: "EMAIL_NOT_VERIFIED", message: "Confirm your email first." } })
+    );
+
+    const result = await send();
+
+    expect(result.error?.code).toBe("EMAIL_NOT_VERIFIED");
+    expect(leave).toHaveBeenCalledWith("/verify-email?callbackUrl=%2Fprojects%2Fp1%3Ftask%3Dt1");
+    expect(toast).not.toHaveBeenCalled();
+  });
+
   it("turns a network failure into NETWORK_ERROR with a friendly message, and toasts it", async () => {
     fetchFn.mockRejectedValue(new TypeError("Failed to fetch"));
 

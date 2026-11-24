@@ -46,7 +46,10 @@ describe("GET /auth/session-ended", () => {
   });
 
   it("sends a still-valid session on to the page (or the dashboard) without signing out", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "u1", email: "ada@example.com" }, expires: "2099-01-01T00:00:00Z" });
+    mockAuth.mockResolvedValue({
+      user: { id: "u1", email: "ada@example.com", isEmailVerified: true },
+      expires: "2099-01-01T00:00:00Z",
+    });
 
     await expect(get(`?callbackUrl=${encodeURIComponent("/projects")}`)).rejects.toThrow("NEXT_REDIRECT");
     await expect(get()).rejects.toThrow("NEXT_REDIRECT");

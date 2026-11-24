@@ -1,9 +1,11 @@
 import { AuthShell } from "@/components/layouts/authShell/authShell";
 import { TextLink } from "@/components/ui/link/textLink";
 import { Highlight } from "@/components/ui/typography/highlight";
+import { isGoogleSignInEnabled } from "@/server/auth/googleSignIn";
 import { AuthDivider } from "./authDivider";
 import { SignUpForm } from "./forms/signUpForm";
 import { GithubButton } from "./githubButton";
+import { GoogleButton } from "./googleButton";
 import { SignInProgressProvider } from "./signInProgress";
 import { SignUpPanel } from "./signUpPanel";
 
@@ -25,6 +27,11 @@ export default function SignUpContent({ callbackUrl, inviteToken }: SignUpConten
       <p className="mt-3.5 mb-7 text-fg-secondary">Free to use. No card needed.</p>
 
       <SignInProgressProvider>
+        {isGoogleSignInEnabled() && (
+          <div className="mb-3">
+            <GoogleButton callbackUrl={callbackUrl} />
+          </div>
+        )}
         <GithubButton callbackUrl={callbackUrl} />
         <AuthDivider label="or sign up with email" />
         <SignUpForm callbackUrl={callbackUrl} inviteToken={inviteToken} />

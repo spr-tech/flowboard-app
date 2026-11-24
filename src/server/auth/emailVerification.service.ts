@@ -6,7 +6,8 @@
 // - Using the code or the link claims the row and sets User.emailVerified in one transaction, so
 //   two clicks or a double submit can't both succeed.
 // - The email goes out after the commit, never inside the transaction.
-// - Unverified users can do everything except invite people (requireVerifiedEmail).
+// - Unverified users can only reach the code page (the verification gate in src/server/lib/route.ts
+//   and the (app) layout). requireVerifiedEmail stays on inviting as a second line of defence.
 import { createHash, randomInt, timingSafeEqual } from "node:crypto";
 
 import type { MeResponse } from "@/models/responses/meResponses";
@@ -19,12 +20,13 @@ import { ApiError, unauthenticated } from "@/server/lib/errors";
 import { prisma } from "@/server/lib/prisma";
 import { createToken, hashToken } from "@/server/lib/secureToken";
 import { transaction } from "@/server/lib/transaction";
+import { VERIFICATION_SENDS_PER_HOUR } from "@/utilities/constants/emailVerification";
 import type { Db } from "@/server/projects/projectAccess";
 
 export const CODE_TTL_MS = 15 * 60 * 1000;
 export const LINK_TTL_MS = 24 * 60 * 60 * 1000;
 export const MAX_CODE_ATTEMPTS = 5;
-export const SENDS_PER_HOUR = 3;
+export const SENDS_PER_HOUR = VERIFICATION_SENDS_PER_HOUR;
 export const RESEND_COOLDOWN_MS = 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
 
@@ -273,9 +275,10 @@ export async function verifyThroughInvite(db: Db, userId: string): Promise<void>
 }
 
 /**
- * Auth.js's signIn event (src/auth.ts). GitHub only gives us verified primary emails, so a GitHub
- * sign-in counts as confirmed. Email-and-password sign-ins change nothing.
+ * Auth.js's signIn event (src/auth.ts). GitHub only gives us verified primary emails, and unverified
+ * Google emails are refused before this (oauthSignIn.service.ts), so a Google or GitHub sign-in counts
+ * as confirmed: new Google users skip the code. Email-and-password sign-ins change nothing.
  */
 export async function onSignIn({ user, account }: { user: { id?: string }; account?: { provider: string } | null }) {
-  if (account?.provider === "github" && user.id) await markEmailVerified(user.id);
+  if ((account?.provider === "github" || account?.provider === "google") && user.id) await markEmailVerified(user.id);
 }

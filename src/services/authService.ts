@@ -10,7 +10,11 @@ import type {
   ResetPasswordRequest,
   VerifyResetTokenRequest,
 } from "@/models/requests/authRequests";
-import type { VerificationStatusResponse, VerifyLinkResponse } from "@/models/responses/emailVerificationResponses";
+import type {
+  StartOverResponse,
+  VerificationStatusResponse,
+  VerifyLinkResponse,
+} from "@/models/responses/emailVerificationResponses";
 import type { MeResponse } from "@/models/responses/meResponses";
 import type { VerifyCodeValues, VerifyLinkValues } from "@/models/validations/emailVerificationValidation";
 import type {
@@ -84,6 +88,10 @@ export const authService = baseApi.injectEndpoints({
       },
       invalidatesTags: (result) => (result ? [ApiTag.Verification] : []),
     }),
+    /** "Use a different email": the browser signs out right after, so nothing to refresh. */
+    startOver: builder.mutation<StartOverResponse, void>({
+      query: () => ({ url: `/${controller}/verify-email/start-over`, method: "POST" }),
+    }),
     /** Public: the link page may be opened signed out, so Me is refetched only if it's cached. */
     verifyEmailLink: builder.mutation<VerifyLinkResponse, VerifyLinkValues>({
       query: (body) => ({ url: `/${controller}/verify-email/link`, method: "POST", body }),
@@ -100,6 +108,7 @@ export const {
   useSendVerificationCodeMutation,
   useVerifyEmailCodeMutation,
   useVerifyEmailLinkMutation,
+  useStartOverMutation,
 } = authService;
 
 /** /verify-email's status. Fresh each time the page opens, since the cooldown moves on. */

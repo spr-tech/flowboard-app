@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { isGoogleSignInEnabled } from "@/server/auth/googleSignIn";
 import { InviteScreen } from "./inviteScreen";
 
 /**
@@ -7,5 +8,11 @@ import { InviteScreen } from "./inviteScreen";
  */
 export default async function InviteContent({ token }: { token: string }) {
   const session = await auth();
-  return <InviteScreen token={token} signedInEmail={session?.user?.email ?? null} />;
+  return (
+    <InviteScreen
+      token={token}
+      signedInEmail={session?.user?.email ?? null}
+      isGoogleEnabled={isGoogleSignInEnabled()}
+    />
+  );
 }

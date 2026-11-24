@@ -1,6 +1,6 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { toast } from "@/components/ui/toast/toast";
@@ -30,6 +30,24 @@ function renderInvite(preview: InvitePreview, signedInEmail: string | null, acce
 beforeEach(() => vi.clearAllMocks());
 
 describe("InviteScreen", () => {
+  it("signed out: Google (when set up) and GitHub come back here to join", async () => {
+    mockFetch(() => jsonResponse(200, valid));
+    vi.mocked(signIn).mockReturnValue(new Promise(() => {}));
+    renderWithStore(<InviteScreen token="tok" signedInEmail={null} isGoogleEnabled />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Continue with Google" }));
+
+    expect(signIn).toHaveBeenCalledWith("google", { redirectTo: "/invite/tok" });
+    expect(screen.getByRole("button", { name: "Continue with GitHub" })).toBeDisabled();
+  });
+
+  it("signed out without Google set up: GitHub only", async () => {
+    renderInvite(valid, null);
+
+    expect(await screen.findByRole("button", { name: "Continue with GitHub" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Continue with Google" })).not.toBeInTheDocument();
+  });
+
   it("signed out: the project, inviter and description, with Create an account and Sign in coming back here", async () => {
     renderInvite(valid, null);
 

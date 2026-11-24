@@ -14,7 +14,8 @@ const { notFound } = await import("next/navigation");
 const { findProjectName } = await import("./projectName.service");
 const { projectNameOrNotFound } = await import("./projectPage");
 
-const signedIn = (id: string) => vi.mocked(auth).mockResolvedValue({ user: { id }, expires: "" } as never);
+const signedIn = (id: string, isEmailVerified = true) =>
+  vi.mocked(auth).mockResolvedValue({ user: { id, isEmailVerified }, expires: "" } as never);
 
 beforeEach(() => {
   vi.mocked(auth).mockReset();
@@ -36,6 +37,13 @@ describe("projectNameOrNotFound", () => {
 
     await expect(projectNameOrNotFound("p2")).rejects.toThrow("NEXT_NOT_FOUND");
     expect(notFound).toHaveBeenCalled();
+  });
+
+  it("looks nothing up for an unconfirmed email (the verification gate redirects)", async () => {
+    signedIn("u1", false);
+
+    await expect(projectNameOrNotFound("p1")).resolves.toBeNull();
+    expect(findProjectName).not.toHaveBeenCalled();
   });
 
   it("looks nothing up without a session (the layout redirects)", async () => {

@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "@/components/ui/toast/toast";
 import type { MeResponse } from "@/models/responses/meResponses";
 import { jsonResponse, mockFetch, renderWithStore } from "@/test/renderWithStore";
+import type { SignInMethod } from "@/models/auth/signInMethod";
 import SettingsContent from "./settingsContent";
 
 vi.mock("@/components/ui/toast/toast", () => ({ toast: vi.fn() }));
@@ -21,9 +22,13 @@ const ada: MeResponse = {
   emailVerified: true,
 };
 
-function renderSettings(me: MeResponse, onWrite: (request: Request) => Response = () => jsonResponse(200, me)) {
+function renderSettings(
+  me: MeResponse,
+  onWrite: (request: Request) => Response = () => jsonResponse(200, me),
+  signInMethod?: SignInMethod
+) {
   const fetchMock = mockFetch((request) => (request.method === "GET" ? jsonResponse(200, me) : onWrite(request)));
-  const { store } = renderWithStore(<SettingsContent />);
+  const { store } = renderWithStore(<SettingsContent signInMethod={signInMethod} />);
   const writes = () => fetchMock.mock.calls.map(([r]) => r as Request).filter((r) => r.method !== "GET");
   return { writes, store };
 }
@@ -119,6 +124,20 @@ describe("Account settings: Password", () => {
     expect(await screen.findByText("You sign in with GitHub")).toBeInTheDocument();
     expect(screen.queryByLabelText("Current password")).not.toBeInTheDocument();
     expect(screen.getByText("Signed in with GitHub")).toBeInTheDocument();
+  });
+
+  it("Google-only accounts see 'You sign in with Google' and 'Signed in with Google'", async () => {
+    renderSettings({ ...ada, hasPassword: false }, undefined, "google");
+
+    expect(await screen.findByText("You sign in with Google")).toBeInTheDocument();
+    expect(screen.getByText("Signed in with Google")).toBeInTheDocument();
+  });
+
+  it("an account with a password that signed in with Google still says how this session signed in", async () => {
+    renderSettings(ada, undefined, "google");
+
+    expect(await screen.findByText("Signed in with Google")).toBeInTheDocument();
+    expect(screen.getByLabelText("Current password")).toBeInTheDocument();
   });
 });
 

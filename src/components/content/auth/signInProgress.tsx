@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-/** The ways to sign in from one page. Only one can be in progress at a time. */
-export type SignInMethod = "password" | "github";
+// The ways to sign in from one page (password, GitHub, Google). Only one can be in progress at a time.
+import type { SignInMethod } from "@/models/auth/signInMethod";
 
 type SignInProgress = {
   /** The sign-in under way, or null. While set, every other way to sign in is disabled. */
@@ -16,8 +16,8 @@ type SignInProgress = {
 const SignInProgressContext = createContext<SignInProgress | null>(null);
 
 /**
- * Shared by the sign-in and sign-up pages, so clicking GitHub disables the form and submitting
- * the form disables GitHub. UI state only: it never holds server data.
+ * Shared by the sign-in and sign-up pages, so clicking Google or GitHub disables the form, and
+ * submitting the form disables both buttons. UI state only: it never holds server data.
  */
 export function SignInProgressProvider({ children }: { children: ReactNode }) {
   const [pending, setPending] = useState<SignInMethod | null>(null);

@@ -1,27 +1,35 @@
 import { AuthShell } from "@/components/layouts/authShell/authShell";
 import { TextLink } from "@/components/ui/link/textLink";
 import { Highlight } from "@/components/ui/typography/highlight";
+import { isGoogleSignInEnabled } from "@/server/auth/googleSignIn";
 import { AuthDivider } from "./authDivider";
 import { AuthNotice } from "./authNotice";
 import { SignInForm } from "./forms/signInForm";
 import { GithubButton } from "./githubButton";
-import { SignInProgressProvider } from "./signInProgress";
+import { GoogleButton } from "./googleButton";
 import { SignInPanel } from "./signInPanel";
+import { SignInProgressProvider } from "./signInProgress";
 
 export type SignInContentProps = {
   /** From ?callbackUrl=: where to go after signing in. */
   callbackUrl?: string;
-  /** From ?error=: set by Auth.js when a GitHub sign-in fails. */
+  /** From ?error=: set by Auth.js (or our signIn callback) when a Google or GitHub sign-in fails. */
   error?: string;
   /** From ?reason=: why we sent them here. */
   reason?: string;
 };
 
-/** What to say for each Auth.js error code. Anything else gets the generic GitHub message. */
-const ERROR_MESSAGES: Record<string, string> = {
-  OAuthAccountNotLinked: "This email already has a Flowboard account. Sign in with your email and password.",
+/** What to say for each sign-in error code. Anything else gets the generic message. */
+export const SIGN_IN_ERROR_MESSAGES: Record<string, string> = {
+  // GitHub never links to an existing account by email (Google does, when Google verified it).
+  OAuthAccountNotLinked:
+    "This email already has a Flowboard account. Sign in the way you did before: with your email and password, or with Google.",
+  // src/server/auth/oauthSignIn.service.ts
+  GoogleEmailUnverified:
+    "Google hasn't verified this email address yet. Verify it with Google, or use your email and a password.",
+  SignOutFirst: "You're already signed in. Sign out before signing in with another account.",
 };
-const GENERIC_ERROR = "Signing in with GitHub didn't work. Please try again.";
+const GENERIC_ERROR = "Signing in didn't work. Please try again.";
 
 const REASON_MESSAGES: Record<string, string> = {
   "signed-out": "You've been signed out. Please sign in again.",
@@ -29,7 +37,7 @@ const REASON_MESSAGES: Record<string, string> = {
 };
 
 export default function SignInContent({ callbackUrl, error, reason }: SignInContentProps) {
-  const errorMessage = error ? (ERROR_MESSAGES[error] ?? GENERIC_ERROR) : null;
+  const errorMessage = error ? (SIGN_IN_ERROR_MESSAGES[error] ?? GENERIC_ERROR) : null;
   const reasonMessage = reason ? REASON_MESSAGES[reason] : undefined;
   const registerHref = callbackUrl ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/register";
 
@@ -44,6 +52,11 @@ export default function SignInContent({ callbackUrl, error, reason }: SignInCont
       {!errorMessage && reasonMessage && <AuthNotice tone="info">{reasonMessage}</AuthNotice>}
 
       <SignInProgressProvider>
+        {isGoogleSignInEnabled() && (
+          <div className="mb-3">
+            <GoogleButton callbackUrl={callbackUrl} />
+          </div>
+        )}
         <GithubButton callbackUrl={callbackUrl} />
         <AuthDivider label="or use your email" />
         <SignInForm callbackUrl={callbackUrl} />

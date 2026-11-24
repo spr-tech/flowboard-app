@@ -5,9 +5,12 @@ import NextAuth from "next-auth";
 import type { Adapter } from "next-auth/adapters";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
 
 import { loginSchema } from "@/models/validations/authValidation";
 import { onSignIn } from "@/server/auth/emailVerification.service";
+import { isGoogleSignInEnabled } from "@/server/auth/googleSignIn";
+import { checkOAuthSignIn } from "@/server/auth/oauthSignIn.service";
 import { signInWithPassword } from "@/server/auth/signInLimit.service";
 import { updateSessionToken } from "@/server/auth/sessionToken";
 import { prisma } from "@/server/lib/prisma";
@@ -31,8 +34,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   adapter: createAdapter(),
   providers: [
-    // Reads AUTH_GITHUB_ID and AUTH_GITHUB_SECRET. If the GitHub email already belongs to a
-    // password account, Auth.js refuses to link them (OAuthAccountNotLinked) and /login explains why.
+    // Reads AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET, with Google's default scopes (openid, email,
+    // profile). Left out where they aren't set (previews), so there's no half-working provider.
+    // Linking by email is safe only because checkOAuthSignIn refuses unverified Google emails
+    // first, and strips any password from an unconfirmed account it links to.
+    ...(isGoogleSignInEnabled() ? [Google({ allowDangerousEmailAccountLinking: true })] : []),
+    // Reads AUTH_GITHUB_ID and AUTH_GITHUB_SECRET. If the GitHub email already belongs to another
+    // account, Auth.js refuses to link them (OAuthAccountNotLinked) and /login explains why.
     GitHub,
     Credentials({
       credentials: {
@@ -49,15 +57,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   events: {
-    // GitHub sign-ins count as a confirmed email (GitHub verifies primary emails).
+    // Google and GitHub sign-ins count as a confirmed email (both only give us verified emails;
+    // unverified Google emails never get this far).
     signIn: onSignIn,
   },
   callbacks: {
     ...authConfig.callbacks,
-    // `user` is only set at sign-in. The passwordChangedAt check happens in updateSessionToken.
-    jwt: ({ token, user }) => updateSessionToken(token, user?.id),
+    // Runs before Auth.js links or creates an account; see oauthSignIn.service.ts.
+    signIn: ({ account, profile }) =>
+      checkOAuthSignIn({
+        account,
+        profile,
+        // auth() decodes and checks the cookie and reloads the user, so an expired or ended
+        // session's leftover cookie counts as no session.
+        hasValidSession: async () => Boolean((await auth())?.user?.id),
+      }),
+    // `user` and `account` are only set at sign-in. The passwordChangedAt check happens in updateSessionToken.
+    jwt: ({ token, user, account }) => updateSessionToken(token, user?.id, account?.provider),
     session: ({ session, token }) => {
       if (token.id) session.user.id = token.id;
+      session.user.isEmailVerified = token.emailVerified === true;
+      session.user.signInMethod = token.signInMethod;
       return session;
     },
   },

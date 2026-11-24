@@ -34,7 +34,10 @@ describe("GET /api/me", () => {
   });
 
   it("answers with the signed-in user", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "u1", email: "ada@example.com" }, expires: "2099-01-01T00:00:00Z" });
+    mockAuth.mockResolvedValue({
+      user: { id: "u1", email: "ada@example.com", isEmailVerified: true },
+      expires: "2099-01-01T00:00:00Z",
+    });
     vi.mocked(getMe).mockResolvedValue(me);
 
     const response = await get();

@@ -2,6 +2,7 @@
 
 import { LogOut, Monitor } from "lucide-react";
 
+import type { SignInMethod } from "@/models/auth/signInMethod";
 import { SettingsSection } from "@/components/content/projects/settings/settingsSection";
 import { Button } from "@/components/ui/button/button";
 import { Skeleton, SkeletonScreen } from "@/components/ui/skeleton/skeleton";
@@ -26,8 +27,14 @@ const SECTIONS = {
   session: { id: "account-session", title: "Session", description: "Sign out of Flowboard on this device." },
 } as const;
 
+const METHOD_LABELS: Record<SignInMethod, string> = {
+  password: "email and password",
+  github: "GitHub",
+  google: "Google",
+};
+
 /** /settings (docs/designs/app-screens.md, "Account settings"): Profile, Password, Session. */
-export default function SettingsContent() {
+export default function SettingsContent({ signInMethod }: { signInMethod?: SignInMethod }) {
   const dispatch = useAppDispatch();
   const { data: me, isLoading } = useMe();
   const showSkeleton = useDelayedFlag(isLoading);
@@ -50,6 +57,11 @@ export default function SettingsContent() {
     );
   }
 
+  // Sessions from before the method was recorded fall back to what the account allows.
+  const method: SignInMethod = signInMethod ?? (me.hasPassword ? "password" : "github");
+  // An account without a password signs in with Google or GitHub; name the one in use.
+  const oauthName = method === "google" ? "Google" : "GitHub";
+
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8">
       {header}
@@ -63,9 +75,9 @@ export default function SettingsContent() {
           <ChangePasswordForm me={me} />
         ) : (
           <div>
-            <p className="font-semibold">You sign in with GitHub</p>
+            <p className="font-semibold">You sign in with {oauthName}</p>
             <p className="text-sm text-fg-secondary">
-              There&apos;s no Flowboard password on this account. Manage your sign-in security on GitHub.
+              There&apos;s no Flowboard password on this account. Manage your sign-in security on {oauthName}.
             </p>
           </div>
         )}
@@ -76,9 +88,7 @@ export default function SettingsContent() {
           <span className="flex items-center gap-3">
             <Monitor aria-hidden className="size-5 text-fg-muted" />
             <span>
-              <span className="block font-semibold">
-                Signed in with {me.hasPassword ? "email and password" : "GitHub"}
-              </span>
+              <span className="block font-semibold">Signed in with {METHOD_LABELS[method]}</span>
               <span className="block text-sm text-fg-muted">This browser</span>
             </span>
           </span>

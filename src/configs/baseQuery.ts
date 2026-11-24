@@ -2,7 +2,8 @@
 // A "base query" is what RTK Query calls to actually send a request. fetchBaseQuery does the
 // fetch; this wrapper decides, in one place, what a failed request means for the user:
 //   1. normalise every kind of failure into one AppError shape,
-//   2. 401 → leave through /auth/session-ended (clears the dead cookie, then /login),
+//   2. 401 → leave through /auth/session-ended (clears the dead cookie, then /login);
+//      EMAIL_NOT_VERIFIED → the code page (the server's verification gate),
 //   3. otherwise show one toast with the server's message, unless the form shows it
 //      (errors with `fields`) or the endpoint opted out with extraOptions: { toast: false }.
 // That's why components never catch-and-toast: the reason is already on screen.
@@ -17,6 +18,7 @@ import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { toast } from "@/components/ui/toast/toast";
 import type { AppError } from "@/models/responses/apiError";
 import { NETWORK_ERROR_MESSAGE, UNKNOWN_ERROR_MESSAGE } from "@/utilities/constants/errorMessages";
+import { EMAIL_NOT_VERIFIED } from "@/utilities/constants/errorCodes";
 
 /** Per-endpoint options for this wrapper, passed as `extraOptions` on the endpoint. */
 export type AppExtraOptions = {
@@ -74,14 +76,17 @@ export function createBaseQuery(
 
     const error = toAppError(result.error);
 
-    if (error.status === 401) {
+    if (error.status === 401 || error.code === EMAIL_NOT_VERIFIED) {
       // A full page load, not a client navigation: it also empties the RTK Query cache, so no
-      // data from the ended session stays on screen. /auth/session-ended clears the cookie
-      // (or middleware would bounce /login back to /dashboard) and sends us to /login.
+      // data from the ended session stays on screen.
+      // - 401: /auth/session-ended clears the cookie (or middleware would bounce /login back to
+      //   /dashboard) and sends us to /login.
+      // - Unverified email (the server's gate, e.g. a tab left open from before): the code page,
+      //   then back here once confirmed.
       if (!isLeaving && typeof window !== "undefined") {
         isLeaving = true;
-        const here = `${window.location.pathname}${window.location.search}`;
-        leave(`/auth/session-ended?callbackUrl=${encodeURIComponent(here)}`);
+        const here = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+        leave(error.status === 401 ? `/auth/session-ended?callbackUrl=${here}` : `/verify-email?callbackUrl=${here}`);
       }
     } else if (extraOptions.toast !== false && !error.fields) {
       // Same id for the same code: three failing requests show one toast, not three.
