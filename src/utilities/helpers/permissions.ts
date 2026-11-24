@@ -74,7 +74,11 @@ export type PermissionContext = {
     takenOpenCount?: number;
   };
   project?: { memberTakeLimit: number };
-  task?: { createdById: string; assigneeId: string | null };
+  task?: {
+    createdById: string;
+    assigneeId: string | null;
+    /** In the done column (task.take). */ inDoneColumn?: boolean;
+  };
   note?: { authorId: string };
   /** The person being removed (member.remove). */
   target?: { role: ProjectRole };
@@ -91,6 +95,7 @@ export const PermissionReason = {
   move: "You can only move tasks assigned to you.",
   assignOthers: "Only the owner or a manager can assign tasks to other people.",
   alreadyAssigned: "Someone is already on this task.",
+  takeDone: "This task is done. Only open tasks can be taken.",
   reorderTeam: "Your card order changes only your own view.",
   editLocked: "Assigned to you: only the owner or a manager can change this. You can move it and add notes.",
   editNotMine: "Only the person who created this task, the owner or a manager can change it.",
@@ -142,6 +147,7 @@ const editOwnTask: Rule = (ctx) => {
 
 const take: Rule = (ctx) => {
   if (ctx.task?.assigneeId) return no(PermissionReason.alreadyAssigned);
+  if (ctx.task?.inDoneColumn) return no(PermissionReason.takeDone);
   // The take limit is for members only.
   if (ctx.membership.role !== "MEMBER") return yes;
   const count = ctx.membership.takenOpenCount ?? 0;

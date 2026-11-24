@@ -66,79 +66,84 @@ export function MemberRow({ projectId, member, isMe, canRemove, canManageRole, m
   };
 
   return (
-    <li className="flex flex-wrap items-center gap-3 rounded-2xl p-3">
-      <Avatar name={name} imageUrl={member.image} size="lg" />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold">
-          {name}
-          {isMe && <span className="font-normal text-fg-muted"> (you)</span>}
-        </span>
-        <span className="block truncate text-sm text-fg-muted">
-          {member.email} · {plural(member.taskCount, "task")}
+    <li className="flex flex-col gap-3 rounded-2xl p-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <span className="flex min-w-0 flex-1 items-center gap-3">
+        <Avatar name={name} imageUrl={member.image} size="lg" />
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold wrap-break-word">
+            {name}
+            {isMe && <span className="font-normal text-fg-muted"> (you)</span>}
+          </span>
+          <span className="block text-sm break-all text-fg-muted sm:truncate">
+            {member.email} · {plural(member.taskCount, "task")}
+          </span>
         </span>
       </span>
-      {canManageRole && member.role !== "OWNER" ? (
-        <span className="flex flex-col items-end gap-1">
-          <label htmlFor={roleId} className="sr-only">
-            Role for {name}
-          </label>
-          <select
-            id={roleId}
-            value={member.role}
-            disabled={isSavingRole}
-            aria-describedby={promoteBlocked ? `${roleId}-why` : undefined}
-            onChange={(event) => void changeRole(event.target.value as "MANAGER" | "MEMBER")}
-            className="h-9 rounded-lg border-[1.5px] border-line-strong bg-surface-card px-2 text-sm font-semibold"
-          >
-            <option value="MEMBER">Member</option>
-            <option value="MANAGER" disabled={promoteBlocked}>
-              Manager
-            </option>
-          </select>
-          {promoteBlocked && (
-            <span id={`${roleId}-why`} className="text-xs text-fg-secondary">
-              {MANAGER_LIMIT_REASON}
-            </span>
-          )}
-        </span>
-      ) : (
-        <RoleBadge role={member.role} />
-      )}
-      {canManageRole && member.role === "MANAGER" && member.permissions && (
-        <>
+      {/* On phones the role and actions sit on their own line, under the name. */}
+      <span className="flex flex-wrap items-center gap-2 max-sm:pl-14">
+        {canManageRole && member.role !== "OWNER" ? (
+          <span className="flex flex-col gap-1 sm:items-end">
+            <label htmlFor={roleId} className="sr-only">
+              Role for {name}
+            </label>
+            <select
+              id={roleId}
+              value={member.role}
+              disabled={isSavingRole}
+              aria-describedby={promoteBlocked ? `${roleId}-why` : undefined}
+              onChange={(event) => void changeRole(event.target.value as "MANAGER" | "MEMBER")}
+              className="h-11 rounded-lg border-[1.5px] border-line-strong bg-surface-card px-2 text-sm font-semibold sm:h-9"
+            >
+              <option value="MEMBER">Member</option>
+              <option value="MANAGER" disabled={promoteBlocked}>
+                Manager
+              </option>
+            </select>
+            {promoteBlocked && (
+              <span id={`${roleId}-why`} className="text-xs text-fg-secondary">
+                {MANAGER_LIMIT_REASON}
+              </span>
+            )}
+          </span>
+        ) : (
+          <RoleBadge role={member.role} />
+        )}
+        {canManageRole && member.role === "MANAGER" && member.permissions && (
+          <>
+            <Button
+              text="Permissions"
+              variant="secondary"
+              size="sm"
+              startIcon={<SlidersHorizontal aria-hidden />}
+              aria-label={`Permissions for ${name}`}
+              onClick={() => setShowPermissions(true)}
+            />
+            <PermissionsDialog
+              projectId={projectId}
+              userId={member.id}
+              name={firstName}
+              permissions={member.permissions}
+              isOpen={showPermissions}
+              onClose={() => setShowPermissions(false)}
+            />
+          </>
+        )}
+        {canRemove && !isConfirming && (
           <Button
-            text="Permissions"
+            text="Remove"
             variant="secondary"
             size="sm"
-            startIcon={<SlidersHorizontal aria-hidden />}
-            aria-label={`Permissions for ${name}`}
-            onClick={() => setShowPermissions(true)}
+            className="text-danger"
+            aria-label={`Remove ${name}`}
+            onClick={() => setIsConfirming(true)}
           />
-          <PermissionsDialog
-            projectId={projectId}
-            userId={member.id}
-            name={firstName}
-            permissions={member.permissions}
-            isOpen={showPermissions}
-            onClose={() => setShowPermissions(false)}
-          />
-        </>
-      )}
-      {canRemove && !isConfirming && (
-        <Button
-          text="Remove"
-          variant="secondary"
-          size="sm"
-          className="text-danger"
-          aria-label={`Remove ${name}`}
-          onClick={() => setIsConfirming(true)}
-        />
-      )}
+        )}
+      </span>
       {canRemove && isConfirming && (
         <div
           role="group"
           aria-label={`Confirm removing ${name}`}
-          className="flex flex-[1_1_100%] flex-wrap items-center justify-end gap-2 pt-1 text-[13px] text-fg-secondary"
+          className="flex flex-[1_1_100%] flex-wrap items-center gap-2 pt-1 text-[13px] text-fg-secondary sm:justify-end"
         >
           <span>
             Remove {firstName}?

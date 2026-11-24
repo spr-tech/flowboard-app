@@ -116,7 +116,7 @@ Column notes: refusals come from `can()` (403 `FORBIDDEN` with its reason; `OWNE
 | PATCH | /api/tasks/:taskId | Member | Any of `title`, `description`, `priority`, `assigneeId` (a project member, else 400 `ASSIGNEE_NOT_MEMBER`), `dueDate` (YYYY-MM-DD); `null` clears. Writes only what changed, and checks each changed field with `can()` (403 `TASK_FORBIDDEN`). Reassigning clears `takenFromPoolAt`. Returns the task |
 | PATCH | /api/tasks/:taskId/move | Member | `{ columnId, afterTaskId?, beforeTaskId? }`; the server computes the position. Another column needs `can("task.move")`. Within a column, only whoever changes the team task order (others use card-order). See "Moving a task". Returns the task |
 | DELETE | /api/tasks/:taskId | Member | Delete (members: tasks they created; managers need deleteAnyTask). Its activity stays. Returns `{ id }` |
-| POST | /api/tasks/:taskId/take | Member | "Assign to me": unassigned tasks only (else 409 `TASK_ALREADY_ASSIGNED`); members up to the take limit (409 `TAKE_LIMIT_REACHED` with the message). Writes `task.taken`. Returns the task |
+| POST | /api/tasks/:taskId/take | Member | "Assign to me": unassigned tasks only (else 409 `TASK_ALREADY_ASSIGNED`), not in the done column (else 409 `TASK_DONE`); members up to the take limit (409 `TAKE_LIMIT_REACHED` with the message). Writes `task.taken`. Returns the task |
 | POST | /api/tasks/:taskId/seen | Owner | Clears the "New" badge (`seenByOwnerAt`). No Activity row. Returns the task |
 | GET | /api/tasks/:taskId/notes | Member | The task's notes, oldest first: `{ id, taskId, body, createdAt, author { id, name, image } }` |
 | POST | /api/tasks/:taskId/notes | Member | `{ body }` (1–1000, trimmed). Writes `task.note_added`. 201 with the note |
