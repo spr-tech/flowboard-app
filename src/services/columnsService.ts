@@ -3,7 +3,7 @@
 // Create, rename, set done and delete wait for the server, then the board refetches (a done-column
 // switch or a delete also changes tasks). The two kinds of column move are optimistic, like card
 // moves: the owner's moveColumn changes the team order, a member's setColumnOrder only their view.
-import type { BoardColumn, DeletedResponse } from "@/models/responses/boardResponses";
+import type { BoardColumn, CardOrderResponse, DeletedResponse } from "@/models/responses/boardResponses";
 import type { ProjectDetail } from "@/models/responses/projectResponses";
 import type { DeleteColumnRequestBody } from "@/models/validations/boardValidation";
 import { baseApi } from "@/configs/serviceConfig";
@@ -18,6 +18,7 @@ export type MoveColumnArgs = { projectId: string; columnId: string; afterColumnI
 export type ColumnOrderArgs = { projectId: string; columnIds: string[] };
 export type DeleteColumnArgs = { projectId: string; columnId: string } & DeleteColumnRequestBody;
 type ColumnOrderResponse = { projectId: string; columnOrder: string[] | null };
+export type CardOrderArgs = { projectId: string; columnId: string; taskIds: string[] };
 
 /** The board itself, the project cards (counts) and the activity feed. */
 const affected = (projectId: string) => [
@@ -92,12 +93,32 @@ export const columnsService = baseApi.injectEndpoints({
       },
     }),
 
-    /** Back to the team order. Optimistic. */
+    /** My own order of one column's cards (members; managers without teamOrder). Optimistic. */
+    setCardOrder: builder.mutation<CardOrderResponse, CardOrderArgs>({
+      query: ({ projectId, columnId, taskIds }) => ({
+        url: `/projects/${projectId}/card-order`,
+        method: "PUT",
+        body: { columnId, taskIds },
+      }),
+      onQueryStarted: async ({ projectId, columnId, taskIds }, { dispatch, queryFulfilled }) => {
+        const patch = patchBoard(dispatch, projectId, (project) => {
+          project.me.cardOrder = { ...(project.me.cardOrder ?? {}), [columnId]: taskIds };
+        });
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
+    }),
+
+    /** Back to the team order, for my columns and my cards. Optimistic. */
     resetColumnOrder: builder.mutation<ColumnOrderResponse, string>({
       query: (projectId) => ({ url: `/projects/${projectId}/column-order`, method: "DELETE" }),
       onQueryStarted: async (projectId, { dispatch, queryFulfilled }) => {
         const patch = patchBoard(dispatch, projectId, (project) => {
           project.me.columnOrder = null;
+          project.me.cardOrder = null;
         });
         try {
           await queryFulfilled;
@@ -119,6 +140,7 @@ export const {
   useUpdateColumnMutation,
   useMoveColumnMutation,
   useSetColumnOrderMutation,
+  useSetCardOrderMutation,
   useResetColumnOrderMutation,
   useDeleteColumnMutation,
 } = columnsService;

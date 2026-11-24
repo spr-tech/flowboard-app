@@ -11,13 +11,13 @@ import { useAppDispatch } from "@/stores/hooks";
 import { dialogOpened } from "@/stores/uiSlice";
 import { cn } from "@/utilities/helpers/cn";
 import { ColumnMenu } from "./columnMenu";
+import type { ColumnRights } from "@/utilities/helpers/projectPermissions";
 
 type ColumnHeaderProps = {
   projectId: string;
   column: ProjectColumnSummary;
   taskCount: number;
-  isOwner: boolean;
-  canRename: boolean;
+  rights: ColumnRights;
   isLastColumn: boolean;
   /** The grip handle, built where the column's useSortable lives (BoardColumn). */
   grip: ReactNode;
@@ -36,7 +36,7 @@ type ColumnHeaderProps = {
  * Both are always rendered and CSS shows one, so the layout never waits for JavaScript.
  */
 export function ColumnHeader(props: ColumnHeaderProps) {
-  const { projectId, column, taskCount, isOwner, canRename, isLastColumn, grip } = props;
+  const { projectId, column, taskCount, rights, isLastColumn, grip } = props;
   const { isCollapsed, bodyId, onToggle, dropRef, isDropTarget } = props;
   const dispatch = useAppDispatch();
   const [updateColumn] = useUpdateColumnMutation();
@@ -128,8 +128,7 @@ export function ColumnHeader(props: ColumnHeaderProps) {
             addedAt={column.createdAt}
             isDone={column.isDone}
             isLastColumn={isLastColumn}
-            canRename={canRename}
-            isOwner={isOwner}
+            rights={rights}
             onRename={() => setRenameText(column.name)}
             onSetDone={() => void setDone()}
             onDelete={() => dispatch(dialogOpened({ kind: "deleteColumn", columnId: column.id }))}

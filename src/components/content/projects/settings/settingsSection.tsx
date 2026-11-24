@@ -13,10 +13,16 @@ export const SETTINGS_SECTIONS = {
     description:
       "The board's columns, left to right (the team order). Tasks in the done column count as finished on the dashboard.",
   },
+  tasks: {
+    id: "settings-tasks",
+    title: "Tasks",
+    description: "How members pick up work from the unassigned pool.",
+  },
   members: {
     id: "settings-members",
     title: "Members",
-    description: "Everyone on this board. Invites are sent by email and the link works for 7 days.",
+    description:
+      "Everyone on this board, and their roles. Managers get the permissions you choose. Invites are sent by email and the link works for 7 days.",
   },
   danger: { id: "settings-danger", title: "Danger zone" },
 } as const;
@@ -29,20 +35,24 @@ type SettingsSectionProps = {
   children: ReactNode;
 };
 
-/** Title and description on the left, a card on the right; stacked under 960px. */
+/**
+ * Title and description on the left, a card on the right; stacked under 960px. The one column
+ * is minmax(0, 1fr) and both cells are min-w-0, so nothing inside can make the page wider than
+ * the screen (a grid track otherwise grows to fit its widest child).
+ */
 export function SettingsSection({ id, title, description, children }: SettingsSectionProps) {
   return (
     <section
       aria-labelledby={id}
-      className="grid gap-5 border-t border-line-divider pt-8 min-[960px]:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)] min-[960px]:gap-10"
+      className="grid grid-cols-1 gap-5 border-t border-line-divider pt-8 min-[960px]:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)] min-[960px]:gap-10"
     >
-      <div>
+      <div className="min-w-0">
         <h2 id={id} className="text-xl font-bold tracking-tight">
           {title}
         </h2>
         <div className="mt-1.5 text-sm text-fg-secondary">{description}</div>
       </div>
-      <div className="rounded-card-lg border border-line-subtle bg-surface-card p-6">{children}</div>
+      <div className="min-w-0 rounded-card-lg border border-line-subtle bg-surface-card p-4 sm:p-6">{children}</div>
     </section>
   );
 }

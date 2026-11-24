@@ -69,7 +69,8 @@ describe("getMyTasks", () => {
     dueDate: due ? day(due) : null,
     completedAt: null,
     columnId: "todo",
-    project,
+    createdById: "alex",
+    project: { ...project, members: [{ role: "MEMBER", permissions: null }] },
     ...extra,
   });
 
@@ -100,7 +101,12 @@ describe("getMyTasks", () => {
       ["later", ["later"]],
       ["none", ["none"]],
     ]);
-    expect(groups[0].tasks[0].project).toEqual({ ...project, doneColumnId: "done", reopenColumnId: "todo" });
+    expect(groups[0].tasks[0].project).toEqual({
+      ...project,
+      me: { role: "MEMBER", permissions: null },
+      doneColumnId: "done",
+      reopenColumnId: "todo",
+    });
   });
 
   it("keeps tasks completed today (local) in their group, and lists the week's completions", async () => {

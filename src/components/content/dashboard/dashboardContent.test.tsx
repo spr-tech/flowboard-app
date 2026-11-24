@@ -35,6 +35,7 @@ const project = {
   id: "p1",
   name: "Website relaunch",
   colour: "vermilion" as const,
+  me: { role: "MEMBER" as const, permissions: null },
   doneColumnId: "done",
   reopenColumnId: "todo",
 };
@@ -45,6 +46,7 @@ const task = (id: string, title: string, dueDate: string | null, extra: Partial<
   dueDate,
   completedAt: null,
   columnId: "todo",
+  createdById: "demo",
   project,
   ...extra,
 });

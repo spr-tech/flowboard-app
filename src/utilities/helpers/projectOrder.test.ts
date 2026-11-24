@@ -29,6 +29,7 @@ function row(
     updatedAt: at(updated),
     me: {
       role,
+      permissions: null,
       pinnedAt: pinned === undefined ? null : at(pinned),
       lastOpenedAt: opened === undefined ? null : at(opened),
       joinedAt: at(joined),

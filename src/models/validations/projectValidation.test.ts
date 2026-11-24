@@ -25,15 +25,14 @@ describe("project description", () => {
   });
 });
 
-describe("column permission settings", () => {
-  it("accepts the switch and a whole-number limit from 1 to 10", () => {
-    expect(updateProjectSchema.parse({ membersCanAddColumns: true, memberColumnLimit: 10 })).toEqual({
-      membersCanAddColumns: true,
-      memberColumnLimit: 10,
+describe("task settings", () => {
+  it("accepts a whole-number take limit from 1 to 20", () => {
+    expect(updateProjectSchema.parse({ memberTakeLimit: 20 })).toEqual({
+      memberTakeLimit: 20,
     });
-    expect(updateProjectSchema.safeParse({ memberColumnLimit: 0 }).success).toBe(false);
-    expect(updateProjectSchema.safeParse({ memberColumnLimit: 11 }).success).toBe(false);
-    expect(updateProjectSchema.safeParse({ memberColumnLimit: 2.5 }).success).toBe(false);
+    expect(updateProjectSchema.safeParse({ memberTakeLimit: 0 }).success).toBe(false);
+    expect(updateProjectSchema.safeParse({ memberTakeLimit: 21 }).success).toBe(false);
+    expect(updateProjectSchema.safeParse({ memberTakeLimit: 2.5 }).success).toBe(false);
   });
 
   it("refuses an empty change", () => {

@@ -169,10 +169,7 @@ describe("createInvite", () => {
     expect(sendEmail).not.toHaveBeenCalled();
   });
 
-  it("is owner only: 403 for a member, 404 for a non-member", async () => {
-    prismaMock.projectMember.findUnique.mockResolvedValueOnce(member as never);
-    await expect(createInvite("sam", "p1", "ada@team.dev")).rejects.toMatchObject({ status: 403, code: "OWNER_ONLY" });
-
+  it("404s for someone who isn't in the project (who may invite: invitesPermissions.test.ts)", async () => {
     prismaMock.projectMember.findUnique.mockResolvedValueOnce(null);
     await expect(createInvite("stranger", "p1", "ada@team.dev")).rejects.toMatchObject({ status: 404 });
     expect(sendEmail).not.toHaveBeenCalled();

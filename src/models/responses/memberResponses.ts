@@ -1,5 +1,6 @@
 // Members and invites as the API returns them (docs/plan/04-api.md, "Members and invites").
 import type { ProjectColour } from "@/utilities/enums/projectColours";
+import type { ManagerPermissions } from "@/utilities/helpers/permissions";
 
 /**
  * A pending invite (expired ones included; the page marks them). Dates are ISO strings.
@@ -31,3 +32,12 @@ export type InvitePreview =
   | { state: "used" | "cancelled" | "invalid" };
 
 export type AcceptInviteResponse = { projectId: string; projectName: string };
+
+/** PATCH /members/:userId (role) and PATCH /members/:userId/permissions. */
+export type MemberRoleResponse = {
+  projectId: string;
+  userId: string;
+  role: "MANAGER" | "MEMBER";
+  /** The switches for a manager; null for a member. */
+  permissions: ManagerPermissions | null;
+};

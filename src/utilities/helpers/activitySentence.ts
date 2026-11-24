@@ -88,6 +88,24 @@ export function describeActivity(item: ActivityItem, meId: string | null, inTask
     }
     case "invite.cancelled":
       return parts("cancelled the invite for", str(meta.email));
+    case "task.taken":
+      return parts("took", title, "from the unassigned pool");
+    case "task.note_added":
+      return parts("added a note to", title);
+    case "task.note_deleted":
+      return parts("deleted a note on", title);
+    case "member.promoted":
+      return parts("made", str(meta.name), "a manager");
+    case "member.demoted":
+      return parts("made", str(meta.name), "a member");
+    case "manager.permissions_changed":
+      return parts("changed the permissions of", str(meta.name));
+    case "project.take_limit_changed":
+      return parts(
+        "set how many open tasks members can take in",
+        item.project.name,
+        typeof meta.to === "number" ? `to ${meta.to}` : null
+      );
     default:
       return parts("made a change in", item.project.name);
   }

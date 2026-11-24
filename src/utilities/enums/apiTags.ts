@@ -11,6 +11,8 @@ export const ApiTag = {
   Dashboard: "Dashboard",
   Activity: "Activity",
   Me: "Me",
+  /** A task's notes, by task id. */
+  Note: "Note",
   /** /verify-email's status: the address, and when "Resend code" works again. */
   Verification: "Verification",
 } as const;

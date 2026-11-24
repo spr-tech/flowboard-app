@@ -2,15 +2,17 @@
 // row. A project always has exactly one done column, and tasks are completed exactly while they
 // sit in it (docs/plan/03-data-model.md), so every change here keeps both true.
 //
-// Who may do what (docs/plan/01-product-and-flows.md, "Columns"):
+// Who may do what (docs/plan/01-product-and-flows.md, "Permissions"), decided by can():
 // - The owner can always add, rename, move (team order), set done and delete.
-// - Members may add columns while membersCanAddColumns is on, until the project's member-created
-//   columns reach memberColumnLimit (for all members together), and rename the ones they added.
+// - Managers add, rename and move with manageColumns, and delete with deleteColumns.
+// - Choosing the done column stays the owner's. Members can't change team columns (403); they
+//   keep their own column order instead (columnOrder.service.ts).
 import type { Prisma } from "@/lib/generated/prisma";
 import type { BoardColumn, DeletedResponse } from "@/models/responses/boardResponses";
 import { ApiError } from "@/server/lib/errors";
 import { transaction } from "@/server/lib/transaction";
-import { ownerOnly, requireMember, type Db, type Membership } from "@/server/projects/projectAccess";
+import { assertCan, permissionContext, requireMember, type Db, type Membership } from "@/server/projects/projectAccess";
+import type { PermissionAction } from "@/utilities/helpers/permissions";
 import { ActivityAction } from "@/utilities/enums/activityActions";
 import { aboveIndexFor, placeAt, positionBetween } from "@/utilities/helpers/position";
 
@@ -28,7 +30,7 @@ type ColumnRow = Prisma.ColumnGetPayload<{ select: typeof columnSelect }>;
 
 const columnNotFound = () => new ApiError(404, "COLUMN_NOT_FOUND", "We couldn't find that column.");
 
-/** The column and whether I own its project: 404 when it doesn't exist or I'm not a member. */
+/** The column and my membership: 404 when it doesn't exist or I'm not a member. */
 async function requireColumnAccess(db: Db, userId: string, columnId: string) {
   const column = await db.column.findUnique({ where: { id: columnId }, select: columnSelect });
   if (!column) throw columnNotFound();
@@ -38,7 +40,8 @@ async function requireColumnAccess(db: Db, userId: string, columnId: string) {
   } catch {
     throw columnNotFound();
   }
-  return { column, isOwner: membership.role === "OWNER" };
+  const check = (action: PermissionAction) => assertCan(action, permissionContext(userId, membership));
+  return { column, check };
 }
 
 async function toBoardColumn(db: Db, column: ColumnRow): Promise<BoardColumn> {
@@ -86,39 +89,11 @@ async function switchDoneColumn(db: Db, projectId: string, columnId: string, now
   return previous;
 }
 
-/**
- * May this member add a column? The owner always may. A member needs the switch on, and the
- * project's member-created columns (any creator other than the owner) under the shared limit.
- */
-async function assertMayAddColumn(db: Db, projectId: string, isOwner: boolean) {
-  if (isOwner) return;
-  const project = await db.project.findUniqueOrThrow({
-    where: { id: projectId },
-    select: {
-      membersCanAddColumns: true,
-      memberColumnLimit: true,
-      members: { where: { role: "OWNER" }, select: { userId: true } },
-    },
-  });
-  if (!project.membersCanAddColumns) {
-    throw new ApiError(403, "COLUMNS_LOCKED", "Only the owner can add columns to this board.");
-  }
-  const ownerId = project.members[0]?.userId;
-  const used = await db.column.count({ where: { projectId, ...(ownerId ? { createdById: { not: ownerId } } : {}) } });
-  if (used >= project.memberColumnLimit) {
-    throw new ApiError(
-      409,
-      "COLUMN_LIMIT_REACHED",
-      `Column limit reached (${used} of ${project.memberColumnLimit}). The owner can raise it.`
-    );
-  }
-}
-
 /** New columns go just before the done column in the team order. */
 export async function createColumn(userId: string, projectId: string, input: { name: string }): Promise<BoardColumn> {
   return transaction(async (tx) => {
     const membership = await requireMember(tx, userId, projectId);
-    await assertMayAddColumn(tx, projectId, membership.role === "OWNER");
+    assertCan("column.add", permissionContext(userId, membership));
 
     const columns = await columnsOf(tx, projectId);
     const doneIndex = columns.findIndex((column) => column.isDone);
@@ -140,7 +115,7 @@ export async function createColumn(userId: string, projectId: string, input: { n
 
 export type ColumnChanges = { name?: string; isDone?: true };
 
-/** Rename (the owner, or the member who added the column) and/or become the done column (owner). */
+/** Rename (the owner, managers with manageColumns) and/or become the done column (owner only). */
 export async function updateColumn(
   userId: string,
   columnId: string,
@@ -150,12 +125,9 @@ export async function updateColumn(
   return transaction(async (tx) => {
     const access = await requireColumnAccess(tx, userId, columnId);
     let { column } = access;
-    const { isOwner } = access;
     const { projectId } = column;
-    if (changes.isDone && !isOwner) throw ownerOnly();
-    if (changes.name !== undefined && !isOwner && column.createdById !== userId) {
-      throw new ApiError(403, "NOT_YOUR_COLUMN", "You can rename only the columns you added.");
-    }
+    if (changes.isDone) access.check("column.setDone");
+    if (changes.name !== undefined) access.check("column.rename");
 
     if (changes.name !== undefined && changes.name !== column.name) {
       const from = column.name;
@@ -179,13 +151,13 @@ export async function updateColumn(
 export type MoveColumnInput = { afterColumnId?: string; beforeColumnId?: string };
 
 /**
- * The owner moves a column in the team order: the midpoint of its new neighbours' current
+ * The owner (or a manager with manageColumns) moves a column in the team order: the midpoint of its new neighbours' current
  * positions, re-spacing all of the project's columns first when the gap is too small.
  */
 export async function moveColumn(userId: string, columnId: string, input: MoveColumnInput): Promise<BoardColumn> {
   return transaction(async (tx) => {
-    const { column, isOwner } = await requireColumnAccess(tx, userId, columnId);
-    if (!isOwner) throw ownerOnly();
+    const { column, check } = await requireColumnAccess(tx, userId, columnId);
+    check("column.reorderTeam");
 
     const others = (await columnsOf(tx, column.projectId)).filter((other) => other.id !== columnId);
     const aboveIndex = aboveIndexFor(
@@ -227,8 +199,10 @@ export async function deleteColumn(
   now = new Date()
 ): Promise<DeletedResponse> {
   return transaction(async (tx) => {
-    const { column, isOwner } = await requireColumnAccess(tx, userId, columnId);
-    if (!isOwner) throw ownerOnly();
+    const { column, check } = await requireColumnAccess(tx, userId, columnId);
+    check("column.delete");
+    // Deleting the done column picks a new one, and choosing the done column is the owner's.
+    if (column.isDone) check("column.setDone");
     const { projectId } = column;
     const remaining = (await columnsOf(tx, projectId)).filter((other) => other.id !== columnId);
     if (remaining.length === 0) {

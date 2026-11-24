@@ -8,6 +8,7 @@ import { useMoveTaskMutation } from "@/services/tasksService";
 import { PROJECT_COLOUR_STYLES } from "@/utilities/constants/projectColours";
 import { cn } from "@/utilities/helpers/cn";
 import { formatDueDay } from "@/utilities/helpers/dateLabels";
+import { can } from "@/utilities/helpers/permissions";
 
 const PRIORITY_CHIP = { HIGH: "high", MEDIUM: "medium", LOW: "low" } as const;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -29,8 +30,17 @@ type MyTaskRowProps = {
   isReadOnly?: boolean;
 };
 
+/** May I move this task (my own assigned task) in its project? The same can() as the board. */
+const mayMove = (task: MyTask) =>
+  can("task.move", {
+    // Every row here is assigned to me, so I am the assignee.
+    me: { id: "me" },
+    membership: task.project.me,
+    task: { createdById: task.createdById, assigneeId: "me" },
+  }).allowed;
+
 /**
- * Checkbox, title (struck through once done), project, priority, due. Ticking moves the task to
+ * Checkbox (only when can() lets me move the task), title (struck through once done), project, priority, due. Ticking moves the task to
  * its project's done column through the optimistic moveTask: the row strikes through at once and
  * comes back if the server refuses. Unticking moves it back to the project's first column.
  */
@@ -39,6 +49,7 @@ export function MyTaskRow({ task, today, isReadOnly = false }: MyTaskRowProps) {
   const isDone = task.completedAt !== null;
   const due = dueLabel(task.dueDate, today);
   const target = isDone ? task.project.reopenColumnId : task.project.doneColumnId;
+  const showCheckbox = mayMove(task);
 
   const toggle = () => {
     if (!target) return;
@@ -48,20 +59,24 @@ export function MyTaskRow({ task, today, isReadOnly = false }: MyTaskRowProps) {
 
   return (
     <li className="flex items-center gap-3 border-t border-line-subtle py-3 first:border-t-0">
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={isDone}
-        aria-label={isDone ? `Mark ${task.title} not done` : `Mark ${task.title} done`}
-        disabled={isReadOnly || isLoading || !target}
-        onClick={toggle}
-        className={cn(
-          "inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-lg border-2 transition-colors disabled:cursor-default",
-          isDone ? "border-status-done-fg bg-status-done-fg text-fg-on-inverse" : "border-line-strong bg-surface-card"
-        )}
-      >
-        {isDone && <Check aria-hidden className="size-4" />}
-      </button>
+      {showCheckbox ? (
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={isDone}
+          aria-label={isDone ? `Mark ${task.title} not done` : `Mark ${task.title} done`}
+          disabled={isReadOnly || isLoading || !target}
+          onClick={toggle}
+          className={cn(
+            "inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-lg border-2 transition-colors disabled:cursor-default",
+            isDone ? "border-status-done-fg bg-status-done-fg text-fg-on-inverse" : "border-line-strong bg-surface-card"
+          )}
+        >
+          {isDone && <Check aria-hidden className="size-4" />}
+        </button>
+      ) : (
+        <span aria-hidden className="size-6 shrink-0" />
+      )}
       <span className="min-w-0 flex-1">
         <span className={cn("block truncate font-semibold", isDone && "text-fg-muted line-through")}>{task.title}</span>
         <span className="flex items-center gap-1.5 text-[13px] text-fg-muted">

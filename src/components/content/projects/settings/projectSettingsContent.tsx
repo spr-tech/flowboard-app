@@ -17,12 +17,16 @@ import { ProjectTile } from "../projectTile";
 import { useDelayedFlag } from "@/utilities/hooks/useDelayedFlag";
 import { ColumnsSection } from "./columnsSection";
 import { MembersSection } from "./members/membersSection";
+import { TasksSection } from "./tasksSection";
 import { ProjectSettingsSkeleton } from "./projectSettingsSkeleton";
 import { SETTINGS_SECTIONS, SettingsSection } from "./settingsSection";
 
+const roleLine = { OWNER: "you're the owner", MANAGER: "you're a manager", MEMBER: "you're a member" } as const;
+
 /**
  * /projects/[projectId]/settings (docs/designs/project-settings.md).
- * General, Columns, Members (with invites) and the Danger zone.
+ * General, Columns, Tasks, Members (with roles and invites) and the Danger zone. What I may change
+ * follows can(); everything else shows as read-only.
  */
 export default function ProjectSettingsContent({ projectId }: { projectId: string }) {
   const dispatch = useAppDispatch();
@@ -41,13 +45,13 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
   const boardHref = `/projects/${project.id}`;
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-5xl min-w-0 flex-col gap-8">
       <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-fg-secondary">
         <Link href="/projects" className="hover:text-fg-primary">
           Projects
         </Link>
         <span aria-hidden>/</span>
-        <Link href={boardHref} className="hover:text-fg-primary">
+        <Link href={boardHref} className="min-w-0 wrap-break-word hover:text-fg-primary">
           {project.name}
         </Link>
         <span aria-hidden>/</span>
@@ -57,12 +61,12 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
       </nav>
 
       <header className="flex flex-wrap items-center justify-between gap-5">
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           <ProjectTile name={project.name} colour={project.colour} />
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">Project settings</h1>
-            <p className="text-fg-secondary">
-              {project.name} · {isOwner ? "you're the owner" : "you're a member"}
+          <div className="min-w-0">
+            <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Project settings</h1>
+            <p className="wrap-break-word text-fg-secondary">
+              {project.name} · {roleLine[project.me.role]}
             </p>
           </div>
         </div>
@@ -71,8 +75,9 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
 
       {!isOwner && (
         <p role="note" className="rounded-card bg-surface-sunken px-5 py-4 text-sm text-fg-secondary">
-          Only the owner can change the name, colour, columns and members. You can see them here, and leave the project
-          at the bottom.
+          {project.me.role === "MANAGER"
+            ? "The owner chooses what you can do as a manager. Settings you can't change are shown as they are, and you can leave the project at the bottom."
+            : "Only the owner (and managers, where allowed) can change the name, columns and members. You can see them here, and leave the project at the bottom."}
         </p>
       )}
 
@@ -88,8 +93,12 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
         <ColumnsSection project={project} meId={me?.id ?? null} />
       </SettingsSection>
 
+      <SettingsSection {...SETTINGS_SECTIONS.tasks}>
+        <TasksSection key={project.memberTakeLimit} project={project} />
+      </SettingsSection>
+
       <SettingsSection {...SETTINGS_SECTIONS.members}>
-        <MembersSection projectId={project.id} isOwner={isOwner} meId={me?.id ?? null} />
+        <MembersSection project={project} meId={me?.id ?? null} />
       </SettingsSection>
 
       <SettingsSection
@@ -97,7 +106,7 @@ export default function ProjectSettingsContent({ projectId }: { projectId: strin
         description={isOwner ? "Permanent actions. They affect everyone on this board." : "Leaving only affects you."}
       >
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <span>
+          <span className="min-w-0">
             <span className="block font-semibold">{isOwner ? "Delete this project" : "Leave this project"}</span>
             <span className="block text-sm text-fg-secondary">
               {isOwner
