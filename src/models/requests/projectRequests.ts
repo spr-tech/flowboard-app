@@ -12,8 +12,7 @@ export type UpdateProjectRequest = {
   name?: string;
   colour?: ProjectColour;
   description?: string | null;
-  membersCanAddColumns?: boolean;
-  memberColumnLimit?: number;
+  memberTakeLimit?: number;
 };
 
 /** DELETE /api/projects/:projectId: the typed confirmation. */

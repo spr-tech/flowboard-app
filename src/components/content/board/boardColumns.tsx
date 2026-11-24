@@ -17,10 +17,12 @@ import { horizontalListSortingStrategy, SortableContext, verticalListSortingStra
 import { toast } from "@/components/ui/toast/toast";
 import type { BoardTask } from "@/models/responses/boardResponses";
 import type { ProjectColumnSummary, ProjectDetail } from "@/models/responses/projectResponses";
-import { useMoveColumnMutation, useSetColumnOrderMutation } from "@/services/columnsService";
+import { useMoveColumnMutation, useSetCardOrderMutation, useSetColumnOrderMutation } from "@/services/columnsService";
 import { useMoveTaskMutation } from "@/services/tasksService";
-import { columnTasks, dropNeighbours, type BoardFilters } from "@/utilities/helpers/boardView";
+import { columnTasks, dropNeighbours, reorderedColumn, type BoardFilters } from "@/utilities/helpers/boardView";
 import { moveId, orderColumns } from "@/utilities/helpers/columnOrder";
+import { taskCreateRules } from "@/utilities/helpers/permissions";
+import { columnRights, myContext, projectCan } from "@/utilities/helpers/projectPermissions";
 import { useCollapsedColumns } from "@/utilities/hooks/useCollapsedColumns";
 import { cn } from "@/utilities/helpers/cn";
 import { useIsPhone } from "@/utilities/hooks/useMediaQuery";
@@ -48,9 +50,13 @@ type BoardColumnsProps = {
 /**
  * The columns inside one DndContext, for two kinds of drag:
  * - cards (mouse after 6px, so a click still opens one; touch after a 250ms press-and-hold, so a
- *   swipe still scrolls; or Space on a focused card), through the optimistic moveTask;
- * - columns, only by their grip handle: the owner's drags change the team order (moveColumn),
- *   a member's only their own view (setColumnOrder). Both optimistic.
+ *   swipe still scrolls; or Space on a focused card). Anyone may drag any card within a column:
+ *   the owner's (and managers with teamOrder) change the team order (moveTask), everyone else's
+ *   only their own view (setCardOrder). Into another column only when can("task.move") allows
+ *   (members: tasks assigned to them); otherwise the card snaps back with the reason, and nothing
+ *   is sent or changed;
+ * - columns, only by their grip handle: the owner's (and managers with manageColumns) change the
+ *   team order (moveColumn), everyone else's only their own view (setColumnOrder). All optimistic.
  * Keyboard: Space picks up, arrows move, Space drops, Esc cancels.
  * Phones (under md): the columns stack, so columns sort up and down, and a folded column's header
  * takes card drops (the card goes to the bottom of that column).
@@ -59,11 +65,15 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
   const [moveTask] = useMoveTaskMutation();
   const [moveColumn] = useMoveColumnMutation();
   const [setColumnOrder] = useSetColumnOrderMutation();
+  const [setCardOrder] = useSetCardOrderMutation();
   const [activeTask, setActiveTask] = useState<BoardTask | null>(null);
   const [activeColumn, setActiveColumn] = useState<ProjectColumnSummary | null>(null);
   // A drop is followed by a click on the card; this ignores that one click.
   const justDropped = useRef(false);
-  const isOwner = project.me.role === "OWNER";
+  const teamColumns = projectCan(project, meId, "column.reorderTeam").allowed;
+  const teamCards = projectCan(project, meId, "task.reorderTeam").allowed;
+  const mayMove = (task: BoardTask) => projectCan(project, meId, "task.move", { task });
+  const needsDescription = taskCreateRules(myContext(project, meId)).assignToSelf;
   const columns = orderColumns(project.columns, project.me.columnOrder);
   // Layout is CSS (md: classes); this is only for dnd-kit's direction and inert folds.
   const isPhone = useIsPhone();
@@ -98,8 +108,8 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
     if (from < 0 || to < 0 || from === to) return;
     const next = moveId(ids, from, to);
     try {
-      if (isOwner) {
-        // The owner sees the team order, so the new neighbours are the team neighbours.
+      if (teamColumns) {
+        // Whoever changes the team order sees it, so the new neighbours are the team neighbours.
         const neighbours = { afterColumnId: next[to - 1], beforeColumnId: next[to + 1] };
         await moveColumn({ projectId: project.id, columnId, ...neighbours }).unwrap();
       } else {
@@ -110,8 +120,44 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
     }
   };
 
+  /** Within a column, for someone with their own card order: only my view changes. */
+  const reorderMine = async (taskId: string, over: { id: string; columnId: string; kind: CardDropKind }) => {
+    const before = columnTasks(project.tasks, over.columnId, {
+      ...filters,
+      hiddenIds: [],
+      onlyMine: false,
+      priority: "all",
+    });
+    const taskIds = reorderedColumn(
+      project.tasks,
+      over.columnId,
+      project.me.cardOrder,
+      taskId,
+      over.kind === "card" ? over.id : null
+    );
+    if (taskIds.join() === before.map((task) => task.id).join()) return;
+    try {
+      await setCardOrder({ projectId: project.id, columnId: over.columnId, taskIds }).unwrap();
+    } catch {
+      // Already put back by the optimistic update; the base query showed why.
+    }
+  };
+
   const dropCard = async (taskId: string, over: { id: string; columnId: string; kind: CardDropKind }) => {
-    const fromColumn = project.tasks.find((task) => task.id === taskId)?.columnId;
+    const task = project.tasks.find((candidate) => candidate.id === taskId);
+    if (!task) return;
+    const fromColumn = task.columnId;
+    if (fromColumn !== over.columnId) {
+      // Never start an optimistic move the server would refuse: snap back with the reason.
+      const allowed = mayMove(task);
+      if (!allowed.allowed) {
+        toast({ type: "error", message: allowed.reason });
+        return;
+      }
+    } else if (!teamCards) {
+      await reorderMine(taskId, over);
+      return;
+    }
     const { others, fromIndex, index } = resolveDrop(project, filters, taskId, over);
     if (fromColumn === over.columnId && index === fromIndex) return;
     try {
@@ -120,6 +166,8 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
         taskId,
         columnId: over.columnId,
         ...dropNeighbours(others, index),
+        personal: !teamCards,
+        meId: meId ?? undefined,
       }).unwrap();
       const name = project.columns.find((column) => column.id === over.columnId)?.name;
       if (fromColumn !== over.columnId) toast({ type: "success", message: `Moved to ${name}` });
@@ -147,7 +195,7 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
       onDragEnd={onDragEnd}
       onDragCancel={endDrag}
       accessibility={{
-        announcements: boardAnnouncements(project, isOwner, isPhone),
+        announcements: boardAnnouncements(project, teamColumns, isPhone),
         screenReaderInstructions: {
           draggable:
             "To move a card or a column, press Space, use the arrow keys, then press Space again to drop it or Escape to cancel. Press Enter on a card to open it.",
@@ -174,8 +222,12 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
               projectId={project.id}
               column={column}
               tasks={columnTasks(project.tasks, column.id, filters)}
-              isOwner={isOwner}
-              canRename={isOwner || column.createdBy.id === meId}
+              rights={columnRights(project, meId, column)}
+              needsDescription={needsDescription}
+              cardFlags={(task) => ({
+                isLocked: !mayMove(task).allowed,
+                isNew: project.me.role === "OWNER" && task.newForOwner,
+              })}
               isLastColumn={project.columns.length === 1}
               today={today}
               onOpenTask={(taskId) => !justDropped.current && onOpenTask(taskId)}
@@ -185,7 +237,7 @@ export function BoardColumns({ project, filters, meId, today, onOpenTask }: Boar
             />
           ))}
         </SortableContext>
-        <AddColumnArea project={project} />
+        <AddColumnArea project={project} meId={meId} />
       </div>
 
       <DragOverlay>

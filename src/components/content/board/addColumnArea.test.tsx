@@ -1,47 +1,32 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import type { MyBoardMembership } from "@/models/responses/projectResponses";
 import { boardMembership, projectDetail } from "@/test/projectFixtures";
 import { renderWithStore } from "@/test/renderWithStore";
+import { DEFAULT_MANAGER_PERMISSIONS } from "@/utilities/helpers/permissions";
 import { AddColumnArea } from "./addColumnArea";
 
-const render = (role: "OWNER" | "MEMBER", membersCanAddColumns: boolean, memberColumnCount: number) =>
-  renderWithStore(
-    <AddColumnArea
-      project={projectDetail({
-        me: boardMembership({ role }),
-        columnPermissions: { membersCanAddColumns, memberColumnLimit: 2, memberColumnCount },
-      })}
-    />
-  );
+const render = (me: Partial<MyBoardMembership>) =>
+  renderWithStore(<AddColumnArea project={projectDetail({ me: boardMembership(me) })} meId="me" />);
 
 describe("AddColumnArea", () => {
-  it("always offers the owner Add column, whatever the switch says", () => {
-    render("OWNER", false, 2);
+  it("offers the owner Add column", () => {
+    render({ role: "OWNER" });
     expect(screen.getByRole("button", { name: "Add column" })).toBeEnabled();
   });
 
-  it("offers a member Add column with the shared usage while under the limit", () => {
-    render("MEMBER", true, 1);
+  it("offers a manager with manageColumns Add column", () => {
+    render({ role: "MANAGER", permissions: DEFAULT_MANAGER_PERMISSIONS });
     expect(screen.getByRole("button", { name: "Add column" })).toBeEnabled();
-    expect(screen.getByText("1 of 2 member columns used")).toBeInTheDocument();
   });
 
-  it("disables it with the limit message once every member slot is used", () => {
-    render("MEMBER", true, 2);
-    expect(screen.getByRole("button", { name: "+ Add column" })).toBeDisabled();
-    expect(screen.getByText("Column limit reached. The owner can raise it.")).toBeInTheDocument();
-  });
-
-  it("never shows a count over the limit after the owner lowers it", () => {
-    render("MEMBER", true, 5);
-    expect(screen.getByRole("button", { name: "+ Add column" })).toBeDisabled();
-    expect(screen.getByText("Column limit reached. The owner can raise it.")).toBeInTheDocument();
-    expect(screen.queryByText(/5 of 2/)).not.toBeInTheDocument();
-  });
-
-  it("shows members nothing while the switch is off", () => {
-    const { container } = render("MEMBER", false, 0);
+  it("shows a member, and a manager without manageColumns, nothing", () => {
+    const { container, unmount } = render({ role: "MEMBER" });
     expect(container).toBeEmptyDOMElement();
+    unmount();
+
+    const manager = render({ role: "MANAGER", permissions: { ...DEFAULT_MANAGER_PERMISSIONS, manageColumns: false } });
+    expect(manager.container).toBeEmptyDOMElement();
   });
 });

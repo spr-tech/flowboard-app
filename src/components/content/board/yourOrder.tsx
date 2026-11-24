@@ -5,7 +5,10 @@ import { ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { useResetColumnOrderMutation } from "@/services/columnsService";
 
-/** Shown to a member who has rearranged columns for themselves. Reset is optimistic. */
+/**
+ * Shown to whoever has rearranged columns or cards for themselves. Reset brings back the team
+ * order for both. Optimistic.
+ */
 export function YourOrder({ projectId }: { projectId: string }) {
   const [resetColumnOrder, { isLoading }] = useResetColumnOrderMutation();
   return (

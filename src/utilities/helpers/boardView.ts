@@ -1,7 +1,8 @@
 // Pure board logic for the browser: which cards show in which column, in what order, and what a
 // drop means. Kept out of components so it's tested without dnd-kit or a screen.
-import type { BoardTask } from "@/models/responses/boardResponses";
+import type { BoardTask, CardOrder } from "@/models/responses/boardResponses";
 import type { BoardPriorityFilter } from "@/stores/uiSlice";
+import { orderCards } from "./cardOrder";
 
 export type BoardFilters = {
   priority: BoardPriorityFilter;
@@ -10,21 +11,49 @@ export type BoardFilters = {
   meId: string | null;
   /** Tasks in their Undo window after a delete: never shown. */
   hiddenIds: readonly string[];
+  /** My own card order (members; managers without teamOrder). Null or missing: the team order. */
+  cardOrder?: CardOrder | null;
 };
 
 const byPosition = (a: BoardTask, b: BoardTask) => a.position - b.position;
 
+/** Every task in a column, top to bottom as I see it: the team order, or my own (new cards merged in). */
+export function orderedColumn(tasks: readonly BoardTask[], columnId: string, cardOrder?: CardOrder | null) {
+  const team = tasks.filter((task) => task.columnId === columnId).sort(byPosition);
+  return orderCards(team, cardOrder?.[columnId]);
+}
+
 /** The tasks a column shows, top to bottom: its own, minus pending deletes, minus filtered-out ones. */
 export function columnTasks(tasks: readonly BoardTask[], columnId: string, filters: BoardFilters): BoardTask[] {
-  return tasks
-    .filter(
-      (task) =>
-        task.columnId === columnId &&
-        !filters.hiddenIds.includes(task.id) &&
-        (filters.priority === "all" || task.priority === filters.priority) &&
-        (!filters.onlyMine || (filters.meId !== null && task.assignee?.id === filters.meId))
-    )
-    .sort(byPosition);
+  return orderedColumn(tasks, columnId, filters.cardOrder).filter(
+    (task) =>
+      !filters.hiddenIds.includes(task.id) &&
+      (filters.priority === "all" || task.priority === filters.priority) &&
+      (!filters.onlyMine || (filters.meId !== null && task.assignee?.id === filters.meId))
+  );
+}
+
+/**
+ * My new order for a whole column after I drop `activeId` on `overId` (another card in it), or at
+ * the bottom when `overId` is null. Works on every card in the column, filtered out or not, so a
+ * filter never loses cards from my saved order.
+ */
+export function reorderedColumn(
+  tasks: readonly BoardTask[],
+  columnId: string,
+  cardOrder: CardOrder | null | undefined,
+  activeId: string,
+  overId: string | null
+): string[] {
+  const ids = orderedColumn(tasks, columnId, cardOrder).map((task) => task.id);
+  const from = ids.indexOf(activeId);
+  if (from < 0) return ids;
+  const to = overId === null ? ids.length - 1 : ids.indexOf(overId);
+  if (to < 0 || to === from) return ids;
+  const next = [...ids];
+  next.splice(from, 1);
+  next.splice(to, 0, activeId);
+  return next;
 }
 
 /**

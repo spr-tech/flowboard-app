@@ -3,6 +3,8 @@
 import type { TaskPriority } from "@/models/responses/boardResponses";
 import type { ProjectMemberPreview } from "@/models/responses/projectResponses";
 import type { ProjectColour } from "@/utilities/enums/projectColours";
+import type { ManagerPermissions } from "@/utilities/helpers/permissions";
+import type { ProjectRole } from "./projectResponses";
 
 /** GET /api/dashboard/summary. */
 export type DashboardSummary = {
@@ -31,10 +33,13 @@ export type MyTask = {
   dueDate: string | null;
   completedAt: string | null;
   columnId: string;
+  createdById: string;
   project: {
     id: string;
     name: string;
     colour: ProjectColour;
+    /** My role there (and a manager's switches): the checkbox asks can("task.move"). */
+    me: { role: ProjectRole; permissions: ManagerPermissions | null };
     /** Ticking the checkbox moves the task here. */
     doneColumnId: string;
     /** Unticking moves it here: the first column (team order) that isn't the done column. */

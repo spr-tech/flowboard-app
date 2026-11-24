@@ -62,6 +62,22 @@ describe("activitySentence", () => {
     expect(say("project.created", { name: "Website relaunch" })).toBe("Ada Obi created Website relaunch");
   });
 
+  it("reads the permission events: taking, notes, roles, switches and the take limit", () => {
+    expect(say("task.taken", { title: "Fix sign-in" })).toBe("Ada Obi took Fix sign-in from the unassigned pool");
+    expect(say("task.note_added", { title: "Fix sign-in" })).toBe("Ada Obi added a note to Fix sign-in");
+    expect(say("task.note_deleted", { title: "Fix sign-in", authorId: "sam" })).toBe(
+      "Ada Obi deleted a note on Fix sign-in"
+    );
+    expect(say("member.promoted", { name: "Sam" })).toBe("Ada Obi made Sam a manager");
+    expect(say("member.demoted", { name: "Sam" })).toBe("Ada Obi made Sam a member");
+    expect(say("manager.permissions_changed", { name: "Sam", changes: { deleteAnyTask: true } })).toBe(
+      "Ada Obi changed the permissions of Sam"
+    );
+    expect(say("project.take_limit_changed", { from: 5, to: 8 })).toBe(
+      "Ada Obi set how many open tasks members can take in Website relaunch to 8"
+    );
+  });
+
   it("says You for my own events, and 'it' inside the task drawer", () => {
     const mine = item("task.moved", { to: "Done" }, { actor: { id: "me", name: "Alex", image: null } });
     expect(activitySentence(mine, "me")).toBe("You moved Fix sign-in to Done");

@@ -1,12 +1,12 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { toast } from "@/components/ui/toast/toast";
 import type { ProjectDetail } from "@/models/responses/projectResponses";
 import { projectsService } from "@/services/projectsService";
 import { boardColumn, boardMembership, projectDetail } from "@/test/projectFixtures";
 import { jsonResponse, mockFetch, renderWithStore } from "@/test/renderWithStore";
+import { DEFAULT_MANAGER_PERMISSIONS } from "@/utilities/helpers/permissions";
 import { ColumnsSection } from "./columnsSection";
 
 vi.mock("@/components/ui/toast/toast", () => ({ toast: vi.fn(), dismissToast: vi.fn() }));
@@ -28,85 +28,52 @@ async function renderSection(project: ProjectDetail, meId: string) {
   return { ...view, writes };
 }
 
-const owner = (permissions: Partial<ProjectDetail["columnPermissions"]> = {}) =>
+const owner = () => projectDetail({ columns });
+const member = () => projectDetail({ columns, me: boardMembership({ role: "MEMBER" }) });
+const manager = (switches: Partial<typeof DEFAULT_MANAGER_PERMISSIONS> = {}) =>
   projectDetail({
     columns,
-    columnPermissions: { membersCanAddColumns: false, memberColumnLimit: 3, memberColumnCount: 1, ...permissions },
+    me: boardMembership({ role: "MANAGER", permissions: { ...DEFAULT_MANAGER_PERMISSIONS, ...switches } }),
   });
-const member = (permissions: Partial<ProjectDetail["columnPermissions"]> = {}) =>
-  projectDetail({ ...owner(permissions), me: boardMembership({ role: "MEMBER" }) });
 
 describe("ColumnsSection", () => {
-  beforeEach(() => vi.mocked(toast).mockClear());
-
   it("lists the columns in the team order, each with who added it", async () => {
     await renderSection(owner(), "demo");
 
     const rows = screen.getAllByRole("listitem");
     expect(rows).toHaveLength(3);
-    expect(within(rows[0]).getByText("2 tasks · Added by Alex Morgan · 1 Nov 2026")).toBeInTheDocument();
-    expect(within(rows[1]).getByText(/Added by Sam Rivera/)).toBeInTheDocument();
+    expect(within(rows[0]).getByText("2 tasks · Alex M. · 1 Nov")).toBeInTheDocument();
+    expect(within(rows[1]).getByText(/Sam R\./)).toBeInTheDocument();
     expect(within(rows[2]).getByText("Done column")).toBeInTheDocument();
   });
 
-  it("the owner's switch saves on change with a toast", async () => {
-    const { writes } = await renderSection(owner(), "demo");
-
-    await userEvent.click(screen.getByRole("switch", { name: "Members can add columns" }));
-
-    await vi.waitFor(() => expect(writes()).toHaveLength(1));
-    expect(await writes()[0].json()).toEqual({ membersCanAddColumns: true });
-    expect(toast).toHaveBeenCalledWith({ type: "success", message: "Column settings saved" });
-  });
-
-  it("shows the count alone when the limit was lowered below it", async () => {
-    await renderSection(owner({ membersCanAddColumns: true, memberColumnLimit: 2, memberColumnCount: 4 }), "demo");
-    expect(screen.getByText("· 4 used, over the limit")).toBeInTheDocument();
-    expect(screen.queryByText(/4 of 2/)).not.toBeInTheDocument();
-  });
-
-  it("with the switch on, the limit field shows the usage and saves after a pause", async () => {
-    const { writes } = await renderSection(owner({ membersCanAddColumns: true }), "demo");
-    expect(screen.getByText("· 1 of 3 used")).toBeInTheDocument();
-
-    const limit = screen.getByRole("spinbutton", { name: "Up to" });
-    await userEvent.clear(limit);
-    await userEvent.type(limit, "5");
-
-    await vi.waitFor(() => expect(writes()).toHaveLength(1), { timeout: 1500 });
-    expect(await writes()[0].json()).toEqual({ memberColumnLimit: 5 });
-  });
-
-  it("refuses a limit outside 1 to 10 without saving", async () => {
-    const { writes } = await renderSection(owner({ membersCanAddColumns: true }), "demo");
-
-    const limit = screen.getByRole("spinbutton", { name: "Up to" });
-    await userEvent.clear(limit);
-    await userEvent.type(limit, "11");
-
-    expect(screen.getByRole("alert")).toHaveTextContent("Enter a number from 1 to 10");
-    await new Promise((resolve) => setTimeout(resolve, 700));
-    expect(writes()).toHaveLength(0);
-  });
-
-  it("members see the setting as text, whichever way it is", async () => {
-    const { unmount } = await renderSection(member({ membersCanAddColumns: true }), "sam");
-    expect(screen.getByText("Members can add up to 3 columns · 1 used")).toBeInTheDocument();
-    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
-    unmount();
-
-    await renderSection(member(), "sam");
-    expect(screen.getByText("Only the owner can add columns")).toBeInTheDocument();
-  });
-
-  it("a member can rename only the column they added, and has no move, done or delete controls", async () => {
+  it("members see the columns read-only, even ones they added earlier, with a line saying who manages them", async () => {
     await renderSection(member(), "sam");
 
-    expect(screen.getByRole("textbox", { name: "Name of column 2" })).toHaveValue("Review");
-    expect(screen.queryByRole("textbox", { name: "Name of column 1" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Team columns are managed by the owner and managers/)).toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add column" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Move .* left/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Set as done" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Delete/ })).not.toBeInTheDocument();
+  });
+
+  it("a manager with manageColumns renames, moves and adds, but can't set done or delete", async () => {
+    await renderSection(manager(), "kim");
+
+    expect(screen.getByRole("textbox", { name: "Name of column 1" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Move Review left" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add column" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Set as done" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Delete/ })).not.toBeInTheDocument();
+  });
+
+  it("a manager with deleteColumns deletes, but never the done column", async () => {
+    await renderSection(manager({ manageColumns: false, deleteColumns: true }), "kim");
+
+    expect(screen.getByRole("button", { name: "Delete To do" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Delete Done" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 
   it("move left and right change the team order through the move endpoint", async () => {

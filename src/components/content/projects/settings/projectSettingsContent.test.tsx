@@ -22,8 +22,16 @@ const me = {
 const detail = (role: "OWNER" | "MEMBER"): ProjectDetail =>
   projectDetail({ colour: "blue", taskCount: 3, me: boardMembership({ role }) });
 const members: ProjectMemberResponse[] = [
-  { id: "demo", name: "Alex Morgan", email: "demo@example.com", image: null, role: "OWNER", taskCount: 2 },
-  { id: "ada", name: "Ada Obi", email: "ada@team.dev", image: null, role: "MEMBER", taskCount: 3 },
+  {
+    id: "demo",
+    name: "Alex Morgan",
+    email: "demo@example.com",
+    image: null,
+    role: "OWNER",
+    permissions: null,
+    taskCount: 2,
+  },
+  { id: "ada", name: "Ada Obi", email: "ada@team.dev", image: null, role: "MEMBER", permissions: null, taskCount: 3 },
 ];
 const DAY = 24 * 60 * 60 * 1000;
 const invites: InviteResponse[] = [
@@ -108,7 +116,9 @@ describe("ProjectSettingsContent", () => {
     renderWithStore(<ProjectSettingsContent projectId="p1" />);
 
     expect(await screen.findByText("Website relaunch · you're a member")).toBeInTheDocument();
-    expect(screen.getByRole("note")).toHaveTextContent("Only the owner can change the name");
+    expect(screen.getByRole("note")).toHaveTextContent(
+      "Only the owner (and managers, where allowed) can change the name"
+    );
     expect(screen.getByLabelText("Project name")).toBeDisabled();
     expect(screen.getByRole("button", { name: "Leave project" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Delete project" })).not.toBeInTheDocument();
@@ -126,15 +136,17 @@ describe("ProjectSettingsContent", () => {
 });
 
 describe("ProjectSettingsContent: Members", () => {
-  it("lists everyone with '(you)', email · tasks and role badges", async () => {
+  it("lists everyone with '(you)', the email, the task count and role badges", async () => {
     mockApi("OWNER");
     renderWithStore(<ProjectSettingsContent projectId="p1" />);
 
     const list = await within(await screen.findByRole("list", { name: "Members" })).findAllByRole("listitem");
     expect(list[0]).toHaveTextContent("Alex Morgan (you)");
-    expect(list[0]).toHaveTextContent("demo@example.com · 2 tasks");
+    expect(within(list[0]).getByTitle("demo@example.com")).toHaveClass("truncate");
+    expect(list[0]).toHaveTextContent("2 tasks");
     expect(list[0]).toHaveTextContent("Owner");
-    expect(list[1]).toHaveTextContent("ada@team.dev · 3 tasks");
+    expect(list[1]).toHaveTextContent("ada@team.dev");
+    expect(list[1]).toHaveTextContent("3 tasks");
     expect(within(list[0]).queryByRole("button", { name: /Remove/ })).not.toBeInTheDocument();
   });
 

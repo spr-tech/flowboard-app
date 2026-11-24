@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { BoardTask } from "@/models/responses/boardResponses";
-import { columnTasks, dropNeighbours, dueChip, type BoardFilters } from "./boardView";
+import { columnTasks, dropNeighbours, dueChip, orderedColumn, reorderedColumn, type BoardFilters } from "./boardView";
 
 const task = (id: string, overrides: Partial<BoardTask> = {}): BoardTask => ({
   id,
@@ -14,6 +14,9 @@ const task = (id: string, overrides: Partial<BoardTask> = {}): BoardTask => ({
   assignee: null,
   completedAt: null,
   createdAt: "2026-11-01T00:00:00.000Z",
+  createdById: "me",
+  takenFromPool: false,
+  newForOwner: false,
   ...overrides,
 });
 
@@ -68,5 +71,23 @@ describe("dueChip", () => {
     ["2027-01-04", "4 Jan 2027", "later"],
   ])("%s reads %s", (due, label, tone) => {
     expect(dueChip(due, today)).toEqual({ label, tone });
+  });
+});
+
+describe("my own card order", () => {
+  const tasks = [task("a", { position: 1000 }), task("b", { position: 2000 }), task("c", { position: 3000 })];
+
+  it("shows my order, with a new card at its team position, and filters after ordering", () => {
+    const withNew = [...tasks, task("n", { position: 1500 })];
+    expect(ids(orderedColumn(withNew, "todo", { todo: ["c", "a", "b"] }))).toEqual(["c", "a", "n", "b"]);
+    expect(
+      ids(columnTasks(withNew, "todo", { ...none, cardOrder: { todo: ["c", "a", "b"] }, hiddenIds: ["a"] }))
+    ).toEqual(["c", "n", "b"]);
+  });
+
+  it("reorders the whole column for a drop on a card, or at the bottom", () => {
+    expect(reorderedColumn(tasks, "todo", null, "c", "a")).toEqual(["c", "a", "b"]);
+    expect(reorderedColumn(tasks, "todo", { todo: ["c", "a", "b"] }, "c", null)).toEqual(["a", "b", "c"]);
+    expect(reorderedColumn(tasks, "todo", null, "a", "a")).toEqual(["a", "b", "c"]);
   });
 });

@@ -13,8 +13,10 @@ datasource db {
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
+// Ownership lives only in OWNER. At most 3 MANAGERs per project (checked by the service).
 enum ProjectRole {
   OWNER
+  MANAGER
   MEMBER
 }
 
@@ -59,6 +61,7 @@ model User {
   createdTasks        Task[]                   @relation("TaskCreator")
   createdColumns      Column[]                 @relation("ColumnCreator")
   sentInvites         Invite[]
+  taskNotes           TaskNote[]
   passwordResetTokens PasswordResetToken[]
   verificationTokens  EmailVerificationToken[]
   activities          Activity[]
@@ -133,10 +136,13 @@ model Project {
   // Optional, at most 200 characters (checked by the API); null when empty.
   description          String?
   colour               ProjectColour @default(vermilion)
-  // Whether members (not just the owner) may add columns, and how many member-created columns
-  // the project may have in total (1 to 10, checked by the API).
+  // Unused since feature-task-permissions (team columns are for the owner and managers with
+  // manageColumns). Kept rather than dropped, because dropping columns is destructive.
   membersCanAddColumns Boolean       @default(false)
   memberColumnLimit    Int           @default(3)
+  // How many open tasks a MEMBER may take from the unassigned pool at once (1 to 20, checked by
+  // the API). Only tasks they took count, and not ones in the done column.
+  memberTakeLimit      Int           @default(5)
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
 
@@ -147,7 +153,7 @@ model Project {
   activities Activity[]
 }
 
-// Ownership lives only here, in role.
+// Ownership lives only here, in role (OWNER, MANAGER or MEMBER).
 model ProjectMember {
   userId       String
   projectId    String
@@ -161,6 +167,12 @@ model ProjectMember {
   // This member's own column order: a JSON list of column ids. Null = follow the team order
   // (Column.position). The owner never has one: the owner's drags change the team order.
   columnOrder  Json?
+  // This member's own card order inside columns: { [columnId]: taskId[] }. Null = team order
+  // (Task.position). Never set for the owner, or for a manager allowed to change the team order.
+  cardOrder    Json?
+  // A MANAGER's switches (ManagerPermissions in src/models/validations). Null for the owner and
+  // for members; set to the defaults on promotion, cleared on demotion.
+  permissions  Json?
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -213,32 +225,52 @@ model Column {
 }
 
 model Task {
-  id          String    @id @default(cuid())
-  projectId   String
-  columnId    String
-  title       String
-  description String?
-  priority    Priority  @default(MEDIUM)
+  id              String    @id @default(cuid())
+  projectId       String
+  columnId        String
+  title           String
+  description     String?
+  priority        Priority  @default(MEDIUM)
   // Spaced floats, computed only on the server.
-  position    Float
+  position        Float
   // A calendar day, no time.
-  dueDate     DateTime? @db.Date
-  assigneeId  String?
-  createdById String
+  dueDate         DateTime? @db.Date
+  assigneeId      String?
+  createdById     String
   // Set when the task enters the done column, cleared when it leaves.
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  completedAt     DateTime?
+  // Set when a member took it from the unassigned pool ("Assign to me"); cleared when someone
+  // else reassigns it. Counts toward the project's memberTakeLimit while not done.
+  takenFromPoolAt DateTime?
+  // When the owner first opened it. Null on a member-created task = the "New" badge for the owner.
+  seenByOwnerAt   DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   column     Column     @relation(fields: [columnId], references: [id], onDelete: Cascade)
   assignee   User?      @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   createdBy  User       @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
   activities Activity[]
+  notes      TaskNote[]
 
   @@index([columnId, position])
   @@index([projectId])
   @@index([assigneeId])
+}
+
+/// A short note on a task (1 to 1000 characters). Never edited; the author or the owner may delete it.
+model TaskNote {
+  id        String   @id @default(cuid())
+  taskId    String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([taskId, createdAt])
 }
 
 // ─── Sign-in rate limit ──────────────────────────────────────────────────────

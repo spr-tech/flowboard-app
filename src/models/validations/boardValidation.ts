@@ -1,6 +1,8 @@
 // Tasks and columns: one schema per form or request, shared by the browser and the API routes.
 import { z } from "zod";
 
+import { MEMBER_DESCRIPTION_MIN } from "@/utilities/helpers/permissions";
+
 import { isoDateField } from "./projectValidation";
 
 export const TASK_TITLE_MAX = 200;
@@ -27,19 +29,41 @@ export const taskPriorityField = z.enum(["LOW", "MEDIUM", "HIGH"], "Pick low, me
 export const taskParamsSchema = z.object({ taskId: idField });
 export const columnParamsSchema = z.object({ columnId: idField });
 
-/** Quick add and POST /api/projects/:projectId/tasks. */
-export const createTaskSchema = z.object({ title: taskTitleField, columnId: idField });
+const taskDescriptionField = z
+  .string()
+  .max(TASK_DESCRIPTION_MAX, `Keep the description to ${TASK_DESCRIPTION_MAX} characters or fewer`);
+
+/**
+ * Quick add and POST /api/projects/:projectId/tasks. The owner's and managers' quick add sends a
+ * title only; a member's form adds the description (20+ characters, checked by the service, which
+ * knows who is asking) and an optional due date. The service assigns a member's task to them.
+ */
+export const createTaskSchema = z.object({
+  title: taskTitleField,
+  columnId: idField,
+  description: taskDescriptionField.nullable().optional(),
+  dueDate: isoDateField.nullable().optional(),
+  assigneeId: idField.nullable().optional(),
+});
 export type CreateTaskFormValues = z.infer<typeof createTaskSchema>;
+
+/** A member's quick-add form: the description must say what needs doing, and why. */
+export const memberTaskFormSchema = z.object({
+  title: taskTitleField,
+  description: z
+    .string()
+    .trim()
+    .min(MEMBER_DESCRIPTION_MIN, `Write at least ${MEMBER_DESCRIPTION_MIN} characters: what needs doing, and why`)
+    .max(TASK_DESCRIPTION_MAX, `Keep the description to ${TASK_DESCRIPTION_MAX} characters or fewer`),
+  dueDate: z.union([isoDateField, z.literal("")]),
+});
+export type MemberTaskFormValues = z.infer<typeof memberTaskFormSchema>;
 
 /** The task drawer and PATCH /api/tasks/:taskId: only what changed; null clears a field. */
 export const updateTaskSchema = z
   .object({
     title: taskTitleField.optional(),
-    description: z
-      .string()
-      .max(TASK_DESCRIPTION_MAX, `Keep the description to ${TASK_DESCRIPTION_MAX} characters or fewer`)
-      .nullable()
-      .optional(),
+    description: taskDescriptionField.nullable().optional(),
     priority: taskPriorityField.optional(),
     assigneeId: idField.nullable().optional(),
     dueDate: isoDateField.nullable().optional(),
@@ -77,6 +101,32 @@ export const columnOrderSchema = z.object({
     .max(100)
     .refine((ids) => new Set(ids).size === ids.length, "Each column can appear only once"),
 });
+
+/**
+ * PUT /api/projects/:projectId/card-order: my own top-to-bottom order of one column's cards
+ * (members, and managers who can't change the team order). Only my view changes.
+ */
+export const cardOrderSchema = z.object({
+  columnId: idField,
+  taskIds: z
+    .array(idField)
+    .max(1000)
+    .refine((ids) => new Set(ids).size === ids.length, "Each card can appear only once"),
+});
+
+export const NOTE_BODY_MAX = 1000;
+
+/** POST /api/tasks/:taskId/notes and the drawer's note form. */
+export const createNoteSchema = z.object({
+  body: z
+    .string()
+    .trim()
+    .min(1, "Write a note first")
+    .max(NOTE_BODY_MAX, `Keep the note to ${NOTE_BODY_MAX} characters or fewer`),
+});
+export type CreateNoteFormValues = z.infer<typeof createNoteSchema>;
+
+export const noteParamsSchema = z.object({ noteId: idField });
 
 /** DELETE /api/columns/:columnId: move its tasks to another column, or confirm with its exact name. */
 export const deleteColumnSchema = z.union([

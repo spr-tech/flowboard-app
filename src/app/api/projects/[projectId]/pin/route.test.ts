@@ -12,6 +12,7 @@ vi.mock("@/server/projects/projectPins.service", () => ({ pinProject: vi.fn(), u
 const membership = {
   projectId: "p1",
   role: "MEMBER" as const,
+  permissions: null,
   pinnedAt: "2026-11-21T12:00:00.000Z",
   lastOpenedAt: null,
   joinedAt: "2026-11-01T09:00:00.000Z",

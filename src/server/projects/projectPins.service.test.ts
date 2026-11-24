@@ -28,6 +28,7 @@ describe("pinProject", () => {
     expect(result).toEqual({
       projectId: "p1",
       role: "MEMBER",
+      permissions: null,
       pinnedAt: now.toISOString(),
       lastOpenedAt: null,
       joinedAt: joinedAt.toISOString(),
