@@ -34,6 +34,30 @@ describe("FormFieldset", () => {
     expect(screen.getByLabelText("Name")).toHaveFocus();
   });
 
+  it("moves focus from the submit button outside the fields to the invalid field", () => {
+    const { rerender } = render(
+      <>
+        <Fields disabled={false} />
+        <button type="button">Send</button>
+      </>
+    );
+    act(() => screen.getByRole("button", { name: "Send" }).focus());
+    rerender(
+      <>
+        <Fields disabled />
+        <button type="button">Send</button>
+      </>
+    );
+    rerender(
+      <>
+        <Fields disabled={false} invalid />
+        <button type="button">Send</button>
+      </>
+    );
+
+    expect(screen.getByLabelText("Email")).toHaveFocus();
+  });
+
   it("focuses the first invalid field instead, when the submit came back with an error", () => {
     const { rerender } = render(<Fields disabled={false} />);
     act(() => screen.getByLabelText("Name").focus());

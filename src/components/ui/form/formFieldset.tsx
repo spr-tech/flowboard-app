@@ -9,8 +9,9 @@ import { cn } from "@/utilities/helpers/cn";
  * - The browser disables every input and button inside a disabled <fieldset>. React Hook Form
  *   keeps the values in its own state, so nothing typed is lost, unlike RHF's per-field
  *   `disabled` option, which leaves the field out of the submitted values.
- * - A disabled field loses focus. When the fieldset unlocks with nothing focused, focus goes to the
- *   first invalid field, or else back to the field that had it (so quick add keeps the cursor).
+ * - A disabled field loses focus. When the fieldset unlocks, focus goes to the first invalid field
+ *   (unless it is already in a field), or, with no error, back to the field that had it if the lock
+ *   took focus away (so quick add keeps the cursor).
  * - The browser's default fieldset border, padding and min-width are removed. Pass
  *   className="contents" to leave the form's own layout exactly as it was.
  */
@@ -32,11 +33,21 @@ export function FormFieldset({ disabled, className, onFocus, ...rest }: Componen
     if (!wasDisabled.current) return;
     wasDisabled.current = false;
 
+    const fieldset = ref.current;
     const active = document.activeElement;
-    if (active && active !== document.body) return;
-    const invalid = ref.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
-    const previous = lastFocused.current?.isConnected ? lastFocused.current : null;
-    (invalid ?? previous)?.focus();
+    // Already in one of the fields (React Hook Form may have focused the error itself): leave it.
+    if (fieldset && active && fieldset.contains(active)) return;
+
+    // An error wins over wherever focus is, including the submit button just pressed (which can
+    // keep focus while disabled), as React Hook Form does when it focuses an error.
+    const invalid = fieldset?.querySelector<HTMLElement>('[aria-invalid="true"]');
+    if (invalid) {
+      invalid.focus();
+      return;
+    }
+    // No error: only give focus back if the lock took it away.
+    const focusWasLost = !active || active === document.body;
+    if (focusWasLost && lastFocused.current?.isConnected) lastFocused.current.focus();
   }, [disabled]);
 
   return (
